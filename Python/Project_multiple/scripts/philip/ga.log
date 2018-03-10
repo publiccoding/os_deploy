@@ -1,0 +1,45 @@
+10/06/2015 02:49:37:INFO:Begin Getting Firmware Dictionary
+10/06/2015 02:49:37:INFO:End Getting Firmware Dictionary
+10/06/2015 02:49:37:INFO:Begin Getting Storage Firmware Inventory
+10/06/2015 02:49:38:INFO:End Getting Storage Firmware Inventory
+10/06/2015 02:49:38:INFO:Begin Getting NIC Firmware Inventory
+10/06/2015 02:49:38:INFO:End Getting NIC Firmware Inventory
+10/06/2015 02:49:38:INFO:Begin Getting Compute Node Common Firmware Inventory
+10/06/2015 02:49:39:INFO:End Getting Compute Node Common Firmware Inventory
+10/06/2015 02:49:39:INFO:Begin Getting Compute Node Specific Firmware Inventory
+10/06/2015 02:49:39:INFO:End Getting Compute Node Specific Firmware Inventory
+10/06/2015 02:49:39:INFO:Begin Getting Driver Inventory
+10/06/2015 02:49:39:INFO:End Getting Driver Inventory
+10/06/2015 02:49:39:INFO:Begin Getting Software Inventory
+10/06/2015 02:49:39:INFO:End Getting Software Inventory
+10/06/2015 02:49:39:INFO:Begin Getting Package List
+10/06/2015 02:49:39:INFO:End Getting Package List
+10/06/2015 02:49:39:INFO:Begin Updating software.
+10/06/2015 02:49:39:ERROR:error: open of /hpGA/swpackages/software/SLESSP3/hp-health-10.10-1710.29.sles11.x86_64.rpm failed: No such file or directory
+
+10/06/2015 02:49:39:ERROR:error: open of /hpGA/swpackages/software/SLESSP3/hp-snmp-agents-10.10-2732.26.sles11.x86_64.rpm failed: No such file or directory
+
+10/06/2015 02:49:39:ERROR:error: open of /hpGA/swpackages/software/SLESSP3/hp-ams-2.1.1-1594.4.sles11.x86_64.rpm failed: No such file or directory
+
+10/06/2015 02:49:39:INFO:End Updating software.
+10/06/2015 02:49:49:INFO:Begin Getting Package List
+10/06/2015 02:49:49:INFO:End Getting Package List
+10/06/2015 02:49:49:INFO:Begin Updating firmware.
+10/06/2015 02:49:49:ERROR:error: open of /hpGA/swpackages/firmware/hp-firmware-nic-intel-1.7.7-1.1.x86_64.rpm failed: No such file or directory
+
+10/06/2015 02:49:49:ERROR:error: open of /hpGA/swpackages/firmware/hp-firmware-nic-broadcom-2.14.17-1.1.x86_64.rpm failed: No such file or directory
+
+10/06/2015 02:49:49:INFO:End Updating firmware.
+10/06/2015 02:49:49:INFO:+------------------------------------------------------------------------------+
+10/06/2015 02:49:49:INFO:| System Update Date: 06, Oct 2015                                             |
+10/06/2015 02:49:49:INFO:+------------------------------------------------------------------------------+
+10/06/2015 02:49:49:INFO:|                   System update for cs500-512 (DL580Gen8)                    |
+10/06/2015 02:49:49:INFO:+------------------------------------------------------------------------------+
+10/06/2015 02:49:49:INFO:|             The following components were unsuccessfully updated             |
+10/06/2015 02:49:49:INFO:+------------------------------------------------------------------------------+
+10/06/2015 02:49:49:INFO:| Software                 | Drivers                  | Firmware               |
+10/06/2015 02:49:49:INFO:+------------------------------------------------------------------------------+
+10/06/2015 02:49:49:INFO:| hp-ams                   |                          | HP560SFP               |
+10/06/2015 02:49:49:INFO:| hp-health                |                          | HP331FLR               |
+10/06/2015 02:49:49:INFO:| hp-snmp-agents           |                          |                        |
+10/06/2015 02:49:49:INFO:+------------------------------------------------------------------------------+

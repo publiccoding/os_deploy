@@ -1,0 +1,22 @@
+01/28/2016 18:11:50:INFO:Applying security patches from repositories(kernelSecurityRPMs, OSSecurityRPMs).
+01/28/2016 18:11:51:ERROR:No provider of '*' found.
+
+01/28/2016 18:11:51:ERROR:stdout = Loading repository data...
+Reading installed packages...
+'kernelSecurityRPMs:*' not found in package names. Trying capabilities.
+Resolving package dependencies...
+
+Nothing to do.
+
+01/28/2016 18:11:51:ERROR:Repository kernelSecurityRPMs, was unsuccessfully updated.
+01/28/2016 18:11:51:ERROR:No provider of '*' found.
+
+01/28/2016 18:11:51:ERROR:stdout = Loading repository data...
+Reading installed packages...
+'OSSecurityRPMs:*' not found in package names. Trying capabilities.
+Resolving package dependencies...
+
+Nothing to do.
+
+01/28/2016 18:11:51:ERROR:Repository OSSecurityRPMs, was unsuccessfully updated.
+01/28/2016 18:11:51:INFO:Done applying security patches from repositories(kernelSecurityRPMs, OSSecurityRPMs).

@@ -1,0 +1,14 @@
+09/24/2015 17:12:24:INFO:Begin Getting Firmware Dictionary
+09/24/2015 17:12:24:INFO:End Getting Firmware Dictionary
+09/24/2015 17:12:24:INFO:Begin Getting Storage Firmware Inventory
+09/24/2015 17:12:26:INFO:End Getting Storage Firmware Inventory
+09/24/2015 17:12:26:INFO:Begin Getting NIC Firmware Inventory
+09/24/2015 17:12:27:INFO:End Getting NIC Firmware Inventory
+09/24/2015 17:12:27:INFO:Begin Getting Compute Node Common Firmware Inventory
+09/24/2015 17:12:28:INFO:End Getting Compute Node Common Firmware Inventory
+09/24/2015 17:12:28:INFO:Begin Getting Compute Node Specific Firmware Inventory
+09/24/2015 17:12:28:INFO:End Getting Compute Node Specific Firmware Inventory
+09/24/2015 17:12:28:INFO:Begin Getting Driver Inventory
+09/24/2015 17:12:28:INFO:End Getting Driver Inventory
+09/24/2015 17:12:28:INFO:Begin Getting Software Inventory
+09/24/2015 17:12:28:INFO:End Getting Software Inventory

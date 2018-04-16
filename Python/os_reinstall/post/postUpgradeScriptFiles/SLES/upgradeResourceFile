@@ -1,0 +1,31 @@
+##################################################################################################################
+# The followng are the files and directories that will be backed up.
+# Additionally, the custom global.ini files for the active databases based on /usr/sap/sapservices will be backed
+# up in the archive backup if the compute node is a SAP HANA compute node.
+##################################################################################################################
+slesOSRestorationBackup = '/root, /etc/hosts, /etc/resolv.conf, /etc/ntp.conf, /etc/sudoers, /etc/sysconfig/network/ifcfg-*, /etc/sysconfig/network/routes, /etc/sysconfig/network/ifroute-*'
+rhelOSRestorationBackup = '/root, /etc/hosts, /etc/resolv.conf, /etc/ntp.conf, /etc/sudoers, /etc/sysconfig/network, /etc/sysconfig/network-scripts/ifcfg-*, /etc/sysconfig/network-scripts/route-*'
+osArchiveBackup = '/etc, /var/spool/cron, /home, /root, /var/spool/mail'
+sapRestorationBackup = '/usr/sap, /var/lib/hdb'
+sglxRestorationBackup = '/etc/multipath.conf, /opt/cmcluster/conf/AutoPass/LicFile.txt, /opt/cmcluster/conf/hananfs/*.ascii, /opt/cmcluster/conf/hananfs/nfs/*.conf, /opt/cmcluster/conf/cmcluster.rc, /opt/cmcluster/conf/cmclnodelist'
+sglxArchiveBackup = '/opt/cmcluster/nfstoolkit, /opt/cmcluster/conf'
+##################################################################################################################
+# The following is a list of the SAP HANA related partitions in /etc/fstab that will be restored to 
+# /etc/fstab after the upgrade.
+##################################################################################################################
+fstabHANAEntries = '/hana/data, /hana/log, /hana/shared, /hana/backup, /usr/sap'
+##################################################################################################################
+# The following are the add on file archives that will be installed after the upgrade to add some additional
+# HPE provided files.
+##################################################################################################################
+haswellRHELAddOnFileArchive = 'haswellRHELAddOnFiles.tar.gz'
+haswellSLESAddOnFileArchive = 'haswellSLESAddOnFiles.tar.gz'
+ivyBridgeRHELAddOnFileArchive = 'ivyBridgeRHELAddOnFiles.tar.gz'
+ivyBridgeSLESAddOnFileArchive = 'ivyBridgeSLESAddOnFiles.tar.gz'
+cs900RHELAddOnFileArchive = 'cs900RHELAddOnFiles.tar.gz'
+cs900SLESAddOnFileArchive = 'cs900SLESAddOnFiles.tar.gz'
+##################################################################################################################
+# The following is the maximum allowed size (GB) of the backup archives.  The size also takes into account
+# the addition of the post archive ISO image.
+##################################################################################################################
+archiveSizeLimit = '3'

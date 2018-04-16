@@ -1,0 +1,2490 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <add-on>
+    <add_on_products config:type="list"/>
+  </add-on>
+
+  <scripts>
+    <pre-scripts config:type="list">
+
+<!--  START: ERROR / PART ROUTINE -->
+
+      <script>
+        <!-- To have a summary log box: feedback_config: true -->
+        <!-- <feedback config:type="boolean">true</feedback> -->
+        <feedback config:type="boolean">false</feedback>
+        <debug config:type="boolean">false</debug>
+        <interpreter>shell</interpreter>
+        <filename>remove-csx00-error-condition.sh</filename>
+          <source><![CDATA[
+#########################################
+# START: remove-csx00-error-condition.sh
+#########################################
+#!/bin/sh
+
+# Clear debug log
+> /tmp/profile/debug.log
+
+echo "START:   pre-script   : remove-csx00-error-condition.sh     : tweak menu system / error handling"               | tee -a /tmp/profile/debug.log
+
+#################################################
+# START: function 'write_os_lun_file'
+#################################################
+function write_os_lun_file {
+# Write out 'OS_INST_SAN_LUN' file for subsequent script processing
+rm -f /tmp/profile/csX00-os-lun
+echo "###############################################################" | tee -a /tmp/profile/debug.log 
+echo "OS LUN written to /tmp/profile/csX00-os-lun: "$OS_INST_SAN_LUN   | tee -a /tmp/profile/debug.log
+echo "###############################################################" | tee -a /tmp/profile/debug.log
+echo $OS_INST_SAN_LUN > /tmp/profile/csX00-os-lun 
+}
+#################################################
+# END  : function 'write_os_lun_file'
+#################################################
+
+
+function write_sa_san_disk_no_file {
+# Write out 'SA_DISK_NO'  (number of 'SmartArray' disks) file for subsequent script processing
+# Write out 'SAN_DISK_NO' (number of SAN disks/luns)     file for subsequent script processing
+rm -f /tmp/profile/sa-disk-no
+rm -f /tmp/profile/san-disk-no
+echo "####################################################################" | tee -a /tmp/profile/debug.log
+echo "No. SA  disk(s) written to /tmp/profile/sa-disk-no:  "$SA_DISK_NO     | tee -a /tmp/profile/debug.log
+echo "No. SAN disk(s) written to /tmp/profile/san-disk-no: "$SAN_DISK_NO    | tee -a /tmp/profile/debug.log
+echo ""                                                                     | tee -a /tmp/profile/debug.log
+echo "multipath -ll output:"                                                | tee -a /tmp/profile/debug.log
+multipath -ll                                                               | tee -a /tmp/profile/debug.log
+echo ""                                                                     | tee -a /tmp/profile/debug.log
+echo "lsscsi output:"                                                       | tee -a /tmp/profile/debug.log
+lsscsi                                                                      | tee -a /tmp/profile/debug.log
+echo "####################################################################" | tee -a /tmp/profile/debug.log
+echo $SA_DISK_NO  > /tmp/profile/sa-disk-no
+echo $SAN_DISK_NO > /tmp/profile/san-disk-no
+}
+
+
+#################################################
+# START: function 'remove-csx00-error-condition'
+#################################################
+function remove_csx00_error_condition {
+
+## Simulated OS LUN partition information
+#FOUND_PART_FLAG="FOUND"
+[ ! -z ${SIM_PART_FOUND} ] && \
+{
+    FOUND_PART_FLAG="FOUND"
+    echo "Simulated OS partitiom detection, ${SIM_PART_FOUND} passed to /proc/cmdline" | tee -a /tmp/profile/debug.log
+}
+# autoyast reads autoinst.xml from /tmp/profile and picks/re-reads modified /tmp/profile/modified.xml
+cp -p /tmp/profile/autoinst.xml /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+
+# Remove XML section '<ask-list> Error menue </ask-list>' from 'autoinst.xml' unless error condition is met  
+# AND OS partition information on CSX00 OS LUN is NOT found AND debug is unset
+([ -z ${FOUND_PART_FLAG} ] && [ -z ${DEBUG} ]) && \
+sed -i '/[ \t]*<ask-list config:type=\"list\">$/,/[ \t]*<\/ask-list>$/d' /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+
+# No OS partition found AND debug set
+([ -z ${FOUND_PART_FLAG} ] && [ ! -z ${DEBUG} ]) && \
+{
+sed -i 's/\([ \t]*\)<value>list-error<\/value>$/\1<value>debug<\/value>/'                                                 /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml 
+sed -i 's/\([ \t]*\)<label>List error<\/label>$/\1<label>Debug output<\/label>/'                                          /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+sed -i 's/\([ \t]*\)<title>Error listing and reboot\/halt system<\/title>$/\1<title>DEBUG enabled for analysis<\/title>/' /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+sed -i 's/\([ \t]*\)<default>list-error<\/default>$/\1<default>debug<\/default>/'                                         /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+}
+
+# OS partition found AND debug is unset
+([ ! -z ${FOUND_PART_FLAG} ] && [ -z ${DEBUG} ]) && \
+{
+echo "=================================================" | tee -a /tmp/profile/debug.log
+echo "FOUND_PART_FLAG: "${FOUND_PART_FLAG}               | tee -a /tmp/profile/debug.log
+echo "=================================================" | tee -a /tmp/profile/debug.log
+sed -i 's/\([ \t]*\)<value>list-error<\/value>$/\1<value>cont-overwrite-os-lun<\/value>/'                                            /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml 
+sed -i 's/\([ \t]*\)<label>List error<\/label>$/\1<label>Continue and overwrite OS LUN<\/label>/'                                    /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+sed -i 's/\([ \t]*\)<title>Error listing and reboot\/halt system<\/title>$/\1<title>OS LUN: '$OS_INST_SAN_LUN' partioned!<\/title>/' /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+sed -i 's/\([ \t]*\)<default>list-error<\/default>$/\1<default>reboot<\/default>/'                                                   /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+}
+
+# OS partition found AND debug is set
+([ ! -z ${FOUND_PART_FLAG} ] && [ ! -z ${DEBUG} ]) && \
+{
+echo "=================================================" | tee -a /tmp/profile/debug.log
+echo "FOUND_PART_FLAG: "${FOUND_PART_FLAG}               | tee -a /tmp/profile/debug.log
+echo "=================================================" | tee -a /tmp/profile/debug.log
+sed -i 's/\([ \t]*\)<value>list-error<\/value>$/\1<value>debug<\/value>/'                                                                                  /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+sed -i 's/\([ \t]*\)<label>List error<\/label>$/\1<label>DEBUG output \/ Continue and overwrite OS LUN<\/label>/'                                          /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+sed -i 's/\([ \t]*\)<title>Error listing and reboot\/halt system<\/title>$/\1<title>OS LUN: '$OS_INST_SAN_LUN' partioned! \/ DEBUG for analysis<\/title>/' /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+sed -i 's/\([ \t]*\)<default>list-error<\/default>$/\1<default>debug<\/default>/'                                                                          /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+}
+
+# OS partition found, change timeout to '0' (unlimited)
+# CAVEAT: timeout value in below sed line AND value chosen in 'ask-list' menu MUST MATCH
+# CAVEAT: The TO value MUST BE UNIQUE to make sed replacement mechanism work
+[ ! -z ${FOUND_PART_FLAG} ] && \
+{
+TO_MENU_CHOICE=0
+echo "=================================================" | tee -a /tmp/profile/debug.log
+echo "TO_MENU_CHOICE:  "${TO_MENU_CHOICE}                | tee -a /tmp/profile/debug.log
+echo "=================================================" | tee -a /tmp/profile/debug.log
+sed -i 's/\([ \t]*\)\(<timeout config:type="integer">\)20\(<\/timeout>\)$/\1\2'$TO_MENU_CHOICE'\3/'                                  /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+}
+
+cat /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml
+cp -p /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml /tmp/profile/modified.xml
+}
+#################################################
+# END  : function 'remove-csx00-error-condition'
+#################################################
+
+#################################################
+# START: function 'system_env_check'
+#################################################
+function system_env_check  {
+
+# Check potential error conditions for each CSX00 (virtual machine for testing) section and set return value accordingly
+# 0: all fine, remove '<ask-list> Error menue </ask-list>' block from 'autoinst.xml'
+# 1: Error, do nothing, error menue will pop up later
+
+unset MODEL_HW
+SAN_DISK_NO=0
+SA_DISK_NO=0
+
+# Unless 'Manufacturer' contains 'qemu'      (case insensitive) use 'Product Name'
+# Unless 'Manufacturer' contains 'microsoft' (case insensitive) use 'Product Name'
+MODEL_HW=`dmidecode -t 1 | awk ' /Manufacturer/ { if (tolower($2) ~ "qemu") { print tolower($2);exit} }
+                                 /Manufacturer/ { if (tolower($2) ~ "microsoft") { print "hyper-v";exit} }
+                                 /Product Name/ {i=index($0,$3);print substr($0,i,length($0)-i+1)}
+                               '`
+
+case "${MODEL_HW}" in 
+                   *"ProLiant DL580 Gen9"*)
+                        MODEL="cs500" 
+                        ;;
+                   *"VMware"*)                  
+                        MODEL="vmware"
+                        ;;
+                   *"qemu"*)                  
+                        MODEL="qemu"
+                        ;;
+                   *"hyper-v"*)
+                        MODEL="hyper-v"
+                        ;;
+                   *)
+                        cat<<EOF > /tmp/profile/error.log
+===================================================
+Model: ${MODEL_HW}
+===================================================
+Illegal HW model found!
+Allowed HW: DL580 Gen9, VMware, qemu, Hyper-V
+===================================================
+EOF
+                        return 1
+                        ;;
+esac
+
+SIM_ERROR=""
+SIM_PART_FOUND=""
+SIM_MODEL=""
+FAKE_MODEL=""
+
+SIM_ERROR=$(grep  -i -o 'sim-error' /proc/cmdline)
+if [ ! -z $SIM_ERROR ]; then
+        cat<<EOF > /tmp/profile/error.log
+========================================
+ERROR condition test triggered
+
+$SIM_ERROR is passed to /proc/cmdline
+
+========================================
+EOF
+        return 1
+fi
+
+SIM_PART_FOUND=$(grep  -i -o 'sim-part' /proc/cmdline)
+SIM_MODEL=$(grep  -i -o 'sim-cs[59]00' /proc/cmdline | sed 's/sim-//')
+FAKE_MODEL=$(grep -i -o fake-cs[59]00 /proc/cmdline)
+
+[ ! -z $SIM_MODEL ] && MODEL=${SIM_MODEL}
+[   -z $SIM_MODEL ] && MODEL=${FAKE_MODEL:-$MODEL}
+
+DEBUG=$(grep  -i -o 'debug' /proc/cmdline)
+
+# Write out 'MODEL' file for subsequent script processing
+rm -f /tmp/profile/csX00-model
+echo #######"############################################" | tee -a /tmp/profile/debug.log
+echo "Model written to /tmp/profile/csX00-model: "$MODEL   | tee -a /tmp/profile/debug.log
+echo "###################################################" | tee -a /tmp/profile/debug.log
+echo $MODEL > /tmp/profile/csX00-model
+
+# Model query:
+#
+# ProLiant DL580 Gen9 	-> CS500 section
+# VMware		-> VMware virtual machine
+
+unset FOUND_PART_FLAG
+
+#########################################################################################################################################
+#
+# START: DL580 Gen9 / CS500 / qemu / hyper-v section
+#
+#########################################################################################################################################
+
+if ( [ "$MODEL" == "cs500" ] || [ "$MODEL" == "qemu" ] || [ "$MODEL" == "hyper-v" ] );then
+
+    [ "$MODEL" == "cs500" ] && \
+    BOOT_HOST=$(cat /proc/scsi/scsi | egrep -B1 "P830i" | grep "Host:" | awk '{print $2}')
+    [ "$MODEL" == "cs500" ] && \
+    SA_DISK_NO=$(cat /proc/scsi/scsi | egrep -B1 "LOGICAL VOLUME" | grep ${BOOT_HOST} | grep "Lun: 00" | while read x1 dev x2 chan x3 id x4 lun; \
+    do echo ${dev/scsi/}:${chan:1}:${id:1}:${lun:1}; done | while read device; \
+    do ls -1 /sys/class/scsi_device/$device/device/block; done | tr '\n' '|' | sed 's/|$/\n/g'| wc -l)
+    SAN_DISK_NO=$(multipath -l -v 2 | awk '/3PARdata/ { print $1}' | wc -l)
+
+    [ "$MODEL" == "hyper-v" ] && \
+    {
+        SA_DISK_NO=$(ls /dev/[sv]d[a-z] 2>/dev/null | wc -l)
+    }
+
+    [ "$MODEL" == "qemu" ] && \
+    {
+        SAN_DISK_NO=$(multipath -l -v 2 | awk '/QEMU,QEMU HARDDISK/ { print $1}' | wc -l)
+        if [ "${SAN_DISK_NO}" -gt "0" ];then
+            SA_DISK_NO=0
+        else
+            SA_DISK_NO=$(ls /dev/[sv]d[a-z] 2>/dev/null | wc -l)
+        fi
+    }
+
+    echo "Configuration:"                           | tee -a /tmp/profile/debug.log
+    echo "========================================" | tee -a /tmp/profile/debug.log
+    echo ""                                         | tee -a /tmp/profile/debug.log
+    echo "Model			: "${MODEL}         | tee -a /tmp/profile/debug.log
+    echo "No. SAN disks		: "${SAN_DISK_NO}   | tee -a /tmp/profile/debug.log
+    echo "No. internal SA disks	: "${SA_DISK_NO}    | tee -a /tmp/profile/debug.log
+    echo ""                                         | tee -a /tmp/profile/debug.log
+    echo "========================================" | tee -a /tmp/profile/debug.log
+
+    if (( ${SA_DISK_NO} == 0 && ${SAN_DISK_NO} == 0 )); then
+        cat<<EOF > /tmp/profile/error.log
+========================================
+Model: ${MODEL}
+========================================
+NO disks (luns) found at all!
+========================================
+
+No. SA  disks: ${SA_DISK_NO}
+No. SAN disks: ${SAN_DISK_NO}
+
+========================================
+
+Output 'lsscsi':
+----------------
+$(lsscsi)
+
+Output 'multipath -l -v 1':
+---------------------------
+$(multipath -l -v 1)
+EOF
+        return 1
+    else
+        echo "========================================" | tee -a /tmp/profile/debug.log
+        echo "system_env_check:                       " | tee -a /tmp/profile/debug.log
+        echo "                                        " | tee -a /tmp/profile/debug.log
+        unset LUN_ID
+        unset LUN00_ERR
+        [ "$MODEL" == "cs500" ] && \
+        {
+        if [ $SA_DISK_NO -eq 0 ];then  #Modified by Bill 6/30/2017, since we need to set the real OS LUN.
+            # 3Par SAN lun
+            #echo "3Par SAN code block -> get OS Lun       "   | tee -a /tmp/profile/debug.log
+
+            #LUN_ID=$(cat /proc/scsi/scsi | egrep -B1 "3PARdata Model: VV" | grep "Lun: " | awk '{ FS=":"; if ($5 !~ "Id:") print $5 }' | sort | uniq)
+
+            #LUN00_ERR=$(echo $LUN_ID | grep -o -q "00" || { echo "Lun 00 not found"; echo "LUN(s) found: "$LUN_ID; })
+
+            #echo "LUN_ID          -> all LUN IDs seen           : "${LUN_ID}           | tee -a /tmp/profile/debug.log
+
+            #[ -z ${LUN00_ERR} ] && LUN00_ERR="N/A -> OK"
+            #echo "LUN00_ERR       -> LUN 00 missing             : "${LUN00_ERR}        | tee -a /tmp/profile/debug.log
+
+            #OS_INST_SAN_LUN=$(cat /proc/scsi/scsi | egrep -B1 "3PARdata Model: VV" | grep "Lun: 00" | while read x1 dev x2 chan x3 id x4 lun; \
+            #do echo ${dev/scsi/}:${chan:1}:${id:1}:${lun:1}; done | while read device; \
+            #do ls -1 /sys/class/scsi_device/$device/device/block; done | tr '\n' '|' | sed 's/|$/\n/g' | while read search; \
+            #do multipath -ll | egrep -w -B3 "$search"; done | head -n1 | cut -d" " -f1)
+
+            OS_INST_SAN_LUN=<OS_LUN>
+
+            [ ! -z ${OS_INST_SAN_LUN} ] && \
+            {
+                ls /dev/mapper/${OS_INST_SAN_LUN}* | egrep -i -q -o '[-_]part[1-9]+' && FOUND_PART_FLAG="FOUND"
+            }
+        else
+            # Internal SA disk
+            echo "Smart Array code block -> get OS Lun           " | tee -a /tmp/profile/debug.log
+            echo "BOOT_HOST -> query internal P830i controller  : "${BOOT_HOST}| tee -a /tmp/profile/debug.log
+            OS_INST_SAN_LUN=$(cat /proc/scsi/scsi | egrep -B1 "LOGICAL VOLUME" | grep ${BOOT_HOST} | grep "Lun: 00" | while read x1 dev x2 chan x3 id x4 lun; \
+            do echo ${dev/scsi/}:${chan:1}:${id:1}:${lun:1}; done | while read device; \
+            do ls -1 /sys/class/scsi_device/$device/device/block; done | tr '\n' '|' | sed 's/|$/\n/g')
+            [ ! -z ${OS_INST_SAN_LUN} ] && \
+            {
+                ls /dev/${OS_INST_SAN_LUN}* | egrep -i -q -o '[1-9]+' && FOUND_PART_FLAG="FOUND"
+            }
+        fi
+        }
+
+        [ "$MODEL" == "hyper-v" ] && \
+        {
+            echo "Hyper-V code block -> get OS Lun           " | tee -a /tmp/profile/debug.log
+            OS_INST_SAN_LUN=$(ls /dev/[sv]d[a-z] | sed 's/\/dev\///' | sort | head -n 1)
+            [ ! -z ${OS_INST_SAN_LUN} ] && \
+            {
+                ls /dev/${OS_INST_SAN_LUN}* | egrep -i -q -o '[1-9]+' && FOUND_PART_FLAG="FOUND"
+            }
+        }
+
+        [ "$MODEL" == "qemu" ] && \
+        {
+        if [ $SA_DISK_NO -eq 0 ];then
+            # QEMU (pseudo) SAN lun
+            echo "QEMU (pseudo) SAN code block -> get OS Lun     "   | tee -a /tmp/profile/debug.log
+            LUN_ID=$(cat /proc/scsi/scsi | egrep -B1 "Model: QEMU HARDDISK" | grep "Lun: " | awk '{ FS=":"; if ($5 !~ "Id:") print $5 }' | sort | uniq)
+            echo "LUN_ID          -> all LUN IDs seen           : "${LUN_ID}           | tee -a /tmp/profile/debug.log
+            [ -z ${LUN00_ERR} ] && LUN00_ERR="N/A -> OK"
+            echo "LUN00_ERR       -> LUN 00 missing             : "${LUN00_ERR}        | tee -a /tmp/profile/debug.log
+            OS_INST_SAN_LUN=$(cat /proc/scsi/scsi | egrep -B1 "Model: QEMU HARDDISK" | grep "Lun: 00" | while read x1 dev x2 chan x3 id x4 lun; \
+            do echo ${dev/scsi/}:${chan:1}:${id:1}:${lun:1}; done | while read device; \
+            do ls -1 /sys/class/scsi_device/$device/device/block; done | tr '\n' '|' | sed 's/|$/\n/g' | while read search; \
+            do multipath -ll | egrep -w -B3 "$search"; done | head -n1 | cut -d" " -f1)
+            [ ! -z ${OS_INST_SAN_LUN} ] && \
+            {
+                ls /dev/mapper/${OS_INST_SAN_LUN}* | egrep -i -q -o '[-_]part[1-9]+' && FOUND_PART_FLAG="FOUND"
+            }
+        else
+            # Internal QEMU disk
+            echo "QEMU disk code block -> get OS Lun             " | tee -a /tmp/profile/debug.log
+            if ls /dev/[sv]d[a-z] &>/dev/null; then
+                #OS_INST_SAN_LUN=$(ls /dev/[sv]d[a-z] | sed 's/\/dev\///' | sort | tail -n 1)
+                # Install on first disk ([sv]da)
+                OS_INST_SAN_LUN=$(ls /dev/[sv]d[a-z] | sed 's/\/dev\///' | sort | head -n 1)
+                ls /dev/${OS_INST_SAN_LUN}* | egrep -i -q -o '[1-9]+' && FOUND_PART_FLAG="FOUND"
+            fi
+        fi
+        }
+        echo "FOUND_PART_FLAG -> check for partionend OS Lun: "${FOUND_PART_FLAG}  | tee -a /tmp/profile/debug.log
+        echo "OS_INST_SAN_LUN -> seen OS_INST_SAN_LUN       : "${OS_INST_SAN_LUN}  | tee -a /tmp/profile/debug.log
+        echo "End system_env_check:                   "                            | tee -a /tmp/profile/debug.log
+        echo "                                        "                            | tee -a /tmp/profile/debug.log
+        echo "========================================"                            | tee -a /tmp/profile/debug.log
+
+        # LUN string empty -> NO valid WWWN
+        [ -z ${OS_INST_SAN_LUN} ] && \
+        {
+        cat<<EOF > /tmp/profile/error.log
+========================================
+Model: ${MODEL}
+========================================
+NO suitable OS disk (lun 0) found!
+========================================
+
+No. SA  disks: ${SA_DISK_NO}
+No. SAN disks: ${SAN_DISK_NO}
+
+========================================
+
+Output Status 'LUN 00':
+-----------------------
+${LUN00_ERR}
+
+Output 'lsscsi':
+----------------
+$(lsscsi)
+
+Output 'multipath -l -v 1':
+---------------------------
+$(multipath -l -v 1)
+EOF
+        return 1
+        }
+#        # Non hexadecimal digit found -> NO valid WWWN
+#        [[ ${OS_INST_SAN_LUN} =~ (^([0-9A-Fa-f])+$) ]] || \
+#        {
+#        cat<<EOF > /tmp/profile/error.log
+#========================================
+#Model: ${MODEL}
+#========================================
+#Potential LUN mismatch in presentation
+#Check for last digit(s) in output of
+#    'multipath -ll'
+#========================================
+#
+#Output 'OS_INST_SAN_LUN':
+#-------------------------
+#${OS_INST_SAN_LUN}
+#
+#Output 'lsscsi':
+#----------------
+#$(lsscsi)
+#
+#Output 'multipath -ll':
+#-----------------------
+#$(multipath -ll)
+#EOF
+#        return 1
+#        }
+	write_sa_san_disk_no_file
+	write_os_lun_file
+        return 0
+    fi
+fi
+
+#########################################################################################################################################
+#
+# END:   DL580 Gen9 / CS500 / qemu / hyper-v section
+#
+#########################################################################################################################################
+
+#########################################################################################################################################
+#
+# START: VMware section
+#
+#########################################################################################################################################
+
+if [ "$MODEL" == "vmware" ];then
+    if ls /dev/[sv]d[a-z] &>/dev/null; then 
+        OS_INST_SAN_LUN=$(ls /dev/[sv]d[a-z] | sed 's/\/dev\///' | sort | tail -n 1)
+        ls /dev/${OS_INST_SAN_LUN}* | egrep -i -q -o '[1-9]+' && FOUND_PART_FLAG="FOUND"
+        write_sa_san_disk_no_file
+	write_os_lun_file
+        return 0
+    else
+        return 1
+    fi
+fi
+
+#########################################################################################################################################
+#
+# END:   VMware section
+#
+#########################################################################################################################################
+}
+#################################################
+# END:   function 'system_env_check'
+#################################################
+
+#########################################################################################################################################
+# START: Function call: 'remove_csx00_error_condition' unless error condition met (return value:1)
+#########################################################################################################################################
+
+if system_env_check
+then
+    echo "CALLED remove_csx00_error_condition" | tee -a /tmp/profile/debug.log
+    remove_csx00_error_condition 
+
+    else
+
+    echo "remove_csx00_error_condition NOT CALLED" | tee -a /tmp/profile/debug.log
+fi
+
+#########################################################################################################################################
+# END:   Function call: 'remove_csx00_error_condition' unless error condition met (return value:1)
+#########################################################################################################################################
+
+echo "END  :   pre-script   : remove-csx00-error-condition.sh     : tweak menu system / error handling"               | tee -a /tmp/profile/debug.log
+echo "" | tee -a /tmp/profile/debug.log
+
+##########################################
+# END:   remove-csx00-error-condition.sh
+##########################################
+]]>
+        </source>
+      </script>
+
+<!--  END  : ERROR / PART ROUTINE -->
+
+      <script>
+        <!-- To have a summary log box: feedback_config: true -->
+        <!-- <feedback config:type="boolean">true</feedback> -->
+        <feedback config:type="boolean">false</feedback>
+        <filename>config-os-lun-mapper-device.sh</filename>
+        <interpreter>shell</interpreter>
+        <source><![CDATA[
+##########################################
+# START: config-os-lun-mapper-device.sh
+##########################################
+#!/bin/bash
+
+echo "START:   pre script   : config-os-lun-mapper-device.sh      : Find multipath lun/internal disk to install on"   | tee -a /tmp/profile/debug.log
+
+#################################################
+# START: function 'gen_os_lun_entry'
+#################################################
+function gen_os_lun_entry {
+
+# autoyast reads autoinst.xml from /tmp/profile and picks/re-reads modified /tmp/profile/modified.xml
+
+[ -f /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml ] && \
+cp -p /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml /tmp/profile/step-1-autoinst.xml
+
+[ ! -f /tmp/profile/tmp-remove-csx00-error-condition-autoinst.xml ] && \
+cp -p /tmp/profile/autoinst.xml /tmp/profile/step-1-autoinst.xml
+
+OS_INST_SAN_LUN_TERM=$1
+DEV_TYPE=$2
+
+echo "function gen_os_lun_entry called with ARG1: "$OS_INST_SAN_LUN_TERM | tee -a /tmp/profile/debug.log
+echo "function gen_os_lun_entry called with ARG2: "$DEV_TYPE             | tee -a /tmp/profile/debug.log
+echo ""                                                                  | tee -a /tmp/profile/debug.log
+echo "LUNs seen:"                                                        | tee -a /tmp/profile/debug.log
+echo "----------"                                                        | tee -a /tmp/profile/debug.log
+multipath -ll                                                            | tee -a /tmp/profile/debug.log
+echo ""                                                                  | tee -a /tmp/profile/debug.log
+echo "lsscsi output:"                                                    | tee -a /tmp/profile/debug.log
+echo "--------------"                                                    | tee -a /tmp/profile/debug.log
+lsscsi                                                                   | tee -a /tmp/profile/debug.log
+
+# Add '<device>/dev/mapper/${OS_INST_SAN_LUN_TERM}</device>' to autoinst file
+# e.g: -> 360002ac0000000000000000200009b8f
+# e.g: -> vv08 (currently inactive)
+# e.g: -> sda
+#
+
+# Eliminate '//' in full device name
+TRIMMED_PATH_OS_INST_SAN_LUN_TERM=`echo /dev/${DEV_TYPE}/${OS_INST_SAN_LUN_TERM} | tr -s '/'`
+
+echo "      <device>${TRIMMED_PATH_OS_INST_SAN_LUN_TERM}</device>"  | tee /tmp/tmp-device-mapper-os-lun.txt
+echo "         <linux>${TRIMMED_PATH_OS_INST_SAN_LUN_TERM}</linux>" | tee /tmp/tmp-device-mapper-os-lun-bootloader.txt
+
+sed -i '/<disklabel>gpt<\/disklabel>/r /tmp/tmp-device-mapper-os-lun.txt'          /tmp/profile/step-1-autoinst.xml
+rm -f /tmp/tmp-device-mapper-os-lun.txt
+sed -i '/<firmware>hd0<\/firmware>/r /tmp/tmp-device-mapper-os-lun-bootloader.txt' /tmp/profile/step-1-autoinst.xml
+rm -f /tmp/tmp-device-mapper-os-lun-bootloader.txt
+
+if [[ $2 == *"mapper"* ]]
+then
+  PART2_TAG="_part2"
+  else
+  PART2_TAG="2"
+  # Disable 'multipath' start on SA boot
+  sed -i '/<start_multipath config/s/true/false/' /tmp/profile/step-1-autoinst.xml
+fi
+sed -i 's/\(<append>\)/\1resume=\/dev\/'$DEV_TYPE'\/'$OS_INST_SAN_LUN_TERM''$PART2_TAG' /' /tmp/profile/step-1-autoinst.xml
+
+# Eliminate '//' in full device name
+sed -i '/\(<append>\)/s/\/\//\//'                                                          /tmp/profile/step-1-autoinst.xml
+
+if grep -q SP2 /etc/os-release
+then
+  # Add SP2 btrfs subvols in case of "SLES4SAP12 SP2":
+  #    'home'
+  #    'var/cache'
+  #    'var/lib/libvirt/images'
+  #    'var/lib/mariadb'
+  #    'var/lib/mysql'
+  #    'var/lib/machines'
+
+  echo "SP2 section"                  | tee -a /tmp/profile/debug.log
+  echo "Adding btrfs subvolumes:"     | tee -a /tmp/profile/debug.log
+  echo "  'home'"                     | tee -a /tmp/profile/debug.log
+  echo "  'var/cache'"                | tee -a /tmp/profile/debug.log
+  echo "  'var/lib/libvirt/images'"   | tee -a /tmp/profile/debug.log
+  echo "  'var/lib/mariadb'"          | tee -a /tmp/profile/debug.log
+  echo "  'var/lib/mysql'"            | tee -a /tmp/profile/debug.log
+  echo "  'var/lib/machines'"         | tee -a /tmp/profile/debug.log
+
+  sed -i "/[ \t]*<listentry>boot\/grub2\/x86_64-efi<\/listentry>/a\            <listentry>home<\/listentry>"              /tmp/profile/step-1-autoinst.xml
+  sed -i "/[ \t]*<listentry>home<\/listentry>/a\            <listentry>var/cache<\/listentry>"                            /tmp/profile/step-1-autoinst.xml
+  sed -i "/[ \t]*<listentry>var\/cache<\/listentry>/a\            <listentry>var/lib/libvirt/images<\/listentry>"         /tmp/profile/step-1-autoinst.xml
+  sed -i "/[ \t]*<listentry>var\/lib\/libvirt\/images<\/listentry>/a\            <listentry>var/lib/mariadb<\/listentry>" /tmp/profile/step-1-autoinst.xml
+  sed -i "/[ \t]*<listentry>var\/lib\/mariadb<\/listentry>/a\            <listentry>var/lib/mysql<\/listentry>"           /tmp/profile/step-1-autoinst.xml
+  sed -i "/[ \t]*<listentry>var\/lib\/mysql<\/listentry>/a\            <listentry>var/lib/machines<\/listentry>"          /tmp/profile/step-1-autoinst.xml
+else
+  # Do nothing in case of "SLES4SAP12 SP1":
+  echo "SP1 section"                  | tee -a /tmp/profile/debug.log
+  echo "No btrfs subvolumes added"    | tee -a /tmp/profile/debug.log
+fi
+
+mv /tmp/profile/step-1-autoinst.xml /tmp/profile/modified.xml
+}
+#################################################
+# END  : function 'gen_os_lun_entry'
+#################################################
+
+# Read-in variables again from their matching files when they exist
+# which have been created by the 'remove-csx00-error-condition.sh' script before
+# and print values for logging unless empty
+
+unset MODEL
+unset OS_INST_SAN_LUN
+unset SA_DISK_NO
+unset SAN_DISK_NO
+
+[ -f /tmp/profile/csX00-model  ] && read MODEL           < /tmp/profile/csX00-model
+[ -f /tmp/profile/csX00-os-lun ] && read OS_INST_SAN_LUN < /tmp/profile/csX00-os-lun
+[ -f /tmp/profile/sa-disk-no   ] && read SA_DISK_NO      < /tmp/profile/sa-disk-no
+[ -f /tmp/profile/san-disk-no  ] && read SAN_DISK_NO     < /tmp/profile/san-disk-no
+
+[ ! -z $MODEL           ] && echo "Model  found in          'config-os-lun-mapper-device.sh': "$MODEL           | tee -a /tmp/profile/debug.log
+[ ! -z $OS_INST_SAN_LUN ] && echo "No. SA  disk(s) found in 'config-os-lun-mapper-device.sh'  "$SA_DISK_NO      | tee -a /tmp/profile/debug.log
+[ ! -z $SA_DISK_NO      ] && echo "No. SAN disk(s) found in 'config-os-lun-mapper-device.sh'  "$SAN_DISK_NO     | tee -a /tmp/profile/debug.log
+[ ! -z $SAN_DISK_NO     ] && echo "OS lun found in          'config-os-lun-mapper-device.sh': "$OS_INST_SAN_LUN | tee -a /tmp/profile/debug.log
+
+#########################################################################################################################################
+#
+# START: DL580 Gen9 CS500 / qemu / hyper-v section
+#
+#########################################################################################################################################
+
+if [ "$MODEL" == "hyper-v" ];then
+    # Internal Hyper-V disk
+    gen_os_lun_entry $OS_INST_SAN_LUN ""
+fi
+
+if ( [ "$MODEL" == "cs500" ] || [ "$MODEL" == "qemu" ] );then
+    if [ $SA_DISK_NO -eq 0 ];then
+        # 3Par SAN lun
+	gen_os_lun_entry $OS_INST_SAN_LUN mapper
+    else
+        # Internal SA disk
+	gen_os_lun_entry $OS_INST_SAN_LUN ""
+    fi
+fi
+
+#########################################################################################################################################
+#
+# End:   DL580 Gen9 CS500 / qemu / hyper-v section
+#
+#########################################################################################################################################
+
+#########################################################################################################################################
+#
+# START: VMware section
+#
+#########################################################################################################################################
+
+if [ "$MODEL" == "vmware" ];then
+        echo "QEMUs boot: "${OS_INST_SAN_LUN} | tee -a /tmp/profile/debug.log
+        gen_os_lun_entry $OS_INST_SAN_LUN ""
+fi
+
+#########################################################################################################################################
+#
+# END:   VMware section
+#
+#########################################################################################################################################
+
+echo "END:     pre script   : config-os-lun-mapper-device.sh      : Find multipath lun/internal disk to install on"   | tee -a /tmp/profile/debug.log
+echo "" | tee -a /tmp/profile/debug.log
+
+########################################
+# END:   config-os-lun-mapper-device.sh
+########################################
+]]>
+        </source>
+      </script>
+
+<!--  START: KDUMP SET ROUTINE -->
+      <script>
+        <!-- To have a summary log box: feedback_config: true -->
+        <!-- <feedback config:type="boolean">true</feedback> -->
+        <feedback config:type="boolean">false</feedback>
+        <debug config:type="boolean">false</debug>
+        <interpreter>shell</interpreter>
+        <filename>kdump-crashkernel-set-and-activate.sh</filename>
+          <source><![CDATA[
+################################################
+# START: kdump-crashkernel-set-and-activate.sh
+################################################
+#!/bin/sh
+echo "START:   pre-script   : kdump-crashkernel-set-and-activate.sh     : Set crashkernel parameter / activate kdump"               | tee -a /tmp/profile/debug.log
+
+unset MODEL
+[ -f /tmp/profile/csX00-model  ] && read MODEL           < /tmp/profile/csX00-model
+
+unset KDUMP_OFF
+# Disable kdump with 'kdump_off' passed as boot option 
+KDUMP_OFF=$(grep -o -i kdump_off /proc/cmdline)
+# Disable kdump for CS500 / hyper-v
+KDUMP_OFF=$(echo $MODEL | grep -o -i -e cs500 -e hyper-v)
+
+[ -z ${KDUMP_OFF} ] && \
+{
+    cp -p /tmp/profile/modified.xml /tmp/profile/kdump-autoinst.xml
+
+    if [ "$MODEL" == "qemu" ];then
+        KDUMP_MEM_LOW="72M"
+        KDUMP_MEM_HIGH="256M"
+    fi
+
+    if [ "$MODEL" == "cs500" ];then
+        KDUMP_MEM_LOW="256M"
+        KDUMP_MEM_HIGH="512M"
+    fi
+
+    if [ "$MODEL" == "hyper-v" ];then
+        KDUMP_MEM_LOW="72M"
+        KDUMP_MEM_HIGH="256M"
+    fi
+    echo "####################################" | tee -a /tmp/profile/debug.log
+    echo "KDUMP_MEM_LOW  is: "${KDUMP_MEM_LOW}  | tee -a /tmp/profile/debug.log
+    echo "KDUMP_MEM_HIGH is: "${KDUMP_MEM_HIGH} | tee -a /tmp/profile/debug.log
+    echo "####################################" | tee -a /tmp/profile/debug.log
+
+    sed -i "/[ \t]*<add_crash_kernel config/s/false/true/"                                  /tmp/profile/kdump-autoinst.xml
+    sed -i "s/\([ \t]*\)\(<listentry>\)\(0M\)\(,low<\/listentry>\)/\1\2$KDUMP_MEM_LOW\4/"   /tmp/profile/kdump-autoinst.xml
+    sed -i "s/\([ \t]*\)\(<listentry>\)\(0M\)\(,high<\/listentry>\)/\1\2$KDUMP_MEM_HIGH\4/" /tmp/profile/kdump-autoinst.xml
+
+    mv /tmp/profile/kdump-autoinst.xml /tmp/profile/modified.xml
+}
+echo "END:     pre-script   : kdump-crashkernel-set-and-activate.sh     : Set crashkernel parameter / activate kdump"               | tee -a /tmp/profile/debug.log
+echo "" | tee -a /tmp/profile/debug.log
+
+################################################
+# END:   kdump-crashkernel-set-and-activate.sh
+################################################
+# Move back 'autoinst debug.log' to final destination '/var/log'
+[ -f /dev/debug.log ] && \
+mv /dev/debug.log /mnt/var/log/autoinst-debug.log
+]]>
+        </source>
+      </script>
+<!--  END:   KDUMP SET ROUTINE -->
+    </pre-scripts>
+
+    <chroot-scripts config:type="list">
+      <script>
+        <filename>chroot-erase-persistent-net-rules.sh</filename>
+        <interpreter>shell</interpreter>
+        <source><![CDATA[
+#!/bin/sh
+echo "START:   chroot script: chroot-erase-persistent-net-rules.sh:Erase persistent-net.rules"            | tee -a /tmp/profile/debug.log
+echo "cat < /dev/null > /mnt/etc/udev/rules.d/70-persistent-net.rules"                                    | tee -a /tmp/profile/debug.log
+cat < /dev/null > /mnt/etc/udev/rules.d/70-persistent-net.rules
+echo ""                                                                                                   | tee -a /tmp/profile/debug.log
+echo "echo 96-ilo-vfolder.rules"                                                                          | tee -a /tmp/profile/debug.log
+cat<<EOF > /mnt/etc/udev/rules.d/96-ilo-vfolder.rules
+KERNEL=="sd*", \
+ENV{ID_FS_UUID}=="0048-524A", \
+RUN+="/usr/bin/mkdir -p /media/ilo-vfolder", \
+RUN+="/usr/bin/mount /dev/disk/by-uuid/%E{ID_FS_UUID} /media/ilo-vfolder"
+EOF
+echo "END:     chroot script: chroot-erase-persistent-net-rules.sh:Erase persistent-net.rules"            | tee -a /tmp/profile/debug.log
+echo ""                                                                                                   | tee -a /tmp/profile/debug.log
+# Add new '/tmp/profile/debug.log' content to central 'autoinst debug.log'
+[ -f /tmp/profile/debug.log ] && \
+cat /tmp/profile/debug.log >> /mnt/var/log/autoinst-debug.log
+                ]]>
+        </source>
+      </script>
+      <script>
+        <filename>chroot-os-config-for-hana.sh</filename>
+        <interpreter>shell</interpreter>
+        <source><![CDATA[
+#!/bin/sh
+echo "START:   chroot script: chroot-os-config-for-hana.sh: Configure OS for HANA"                        | tee -a /tmp/profile/debug.log
+
+echo "         -> /etc/snapper/configs/root (disable monthly/yearly snapshots    "                        | tee -a /tmp/profile/debug.log
+sed -i "s/\(^TIMELINE_LIMIT_MONTHLY=\)\(.*\)/\1\"0\"/" /mnt/etc/snapper/configs/root
+sed -i "s/\(^TIMELINE_LIMIT_YEARLY=\)\(.*\)/\1\"0\"/"  /mnt/etc/snapper/configs/root
+
+### START: DISABLED sap-hpe-hana tweaking
+#echo "         -> /usr/lib/tuned/sap-hana/script.sh copy/modify                  "                        | tee -a /tmp/profile/debug.log
+#mkdir -p /mnt/usr/lib/tuned/sap-hpe-hana
+#cp -p /mnt/usr/lib/tuned/sap-hana/script.sh /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+
+## Bugzilla 971625
+## Correct vm.pagechache settings for HANA
+#sed -i 's/\([ \t]*\)\(save_value vm.pagecache_limit_mb\)\(.*\)/\1\2\ "0"/'                   /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i 's/\([ \t]*\)\(sysctl -w "vm.pagecache_limit_mb=\)\(\$PAGECACHE_LIMIT_NEW"\)/\1\20"/' /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i 's/\([ \t]*\)\(sysctl -w "vm.pagecache_limit_ignore_dirty=\)\(2\)"/\1\21"/'           /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+
+## Bugzilla 962059
+## Correct KSM and AutoNUMA settings
+#sed -i '/sysctl -w "vm.pagecache_limit_ignore_dirty=1/a\    \# SAP note 2205917 - KSM and AutoNUMA both should be off'                             /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i '/# SAP note 2205917 - KSM and AutoNUMA both should be off/a\    \save_value ksm $(cat /sys/kernel/mm/ksm/run)'                             /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i '/save_value ksm $(cat \/sys\/kernel\/mm\/ksm\/run)/a\    \echo 0 > /sys/kernel/mm/ksm/run'                                                 /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i '/echo 0 > \/sys\/kernel\/mm\/ksm\/run/a\    \save_value numa_balancing $(cat /proc/sys/kernel/numa_balancing)'                             /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i '/save_value numa_balancing $(cat \/proc\/sys\/kernel\/numa_balancing)/a\    \echo 0 > /proc/sys/kernel/numa_balancing'                     /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+
+#sed -i '/\[ "$PAGECACHE_LIMIT_IGNORE_DIRTY" \]/a\    \# Restore KSM and AutoNUMA settings'                                                         /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i '/# Restore KSM and AutoNUMA settings/a\    \KSM=$(restore_value ksm)'                                                                      /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i '/KSM=$(restore_value ksm)/a\    \[ "$KSM" ] && echo "$KSM" > /sys/kernel/mm/ksm/run'                                                       /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i '/\[ "$KSM" \] && echo "$KSM" > \/sys\/kernel\/mm\/ksm\/run/a\    \NUMA_BALANCING=$(restore_value numa_balancing)'                          /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+#sed -i '/NUMA_BALANCING=$(restore_value numa_balancing)/a\    \[ "$NUMA_BALANCING" ] && echo "$NUMA_BALANCING" > /proc/sys/kernel/numa_balancing'  /mnt/usr/lib/tuned/sap-hpe-hana/script.sh
+### END:   DISABLED sap-hpe-hana tweaking
+
+echo "         -> /etc/sysctl.conf                                               "                        | tee -a /tmp/profile/debug.log
+cat<<EOF > /mnt/etc/sysctl.d/98-sysctl.conf
+
+######################################################
+# START: KDUMP feature settings
+######################################################
+kernel.panic_on_io_nmi = 1
+kernel.sysrq = 1
+kernel.panic = 10
+kernel.panic_on_oops = 1
+kernel.unknown_nmi_panic = 1
+kernel.panic_on_unrecovered_nmi = 1
+######################################################
+# END:   KDUMP feature settings
+######################################################
+EOF
+
+echo "         -> /usr/lib/tuned/sap-hpe-hana/tuned.conf                         "                        | tee -a /tmp/profile/debug.log
+mkdir -p /mnt/usr/lib/tuned/sap-hpe-hana
+cat<<EOF > /mnt/usr/lib/tuned/sap-hpe-hana/tuned.conf
+######################################################
+# START: tuned profile sap-hpe-hana settings
+######################################################
+#
+# tuned configuration for HPE SAP HANA.
+# Inherited from SuSE/SAP 'sap-hana' profile
+#
+# Allows HPE SAP HANA specific tunings
+#
+
+[main]
+include = sap-hana 
+
+[sysctl]
+####################################################
+# Settings CS500 2016/04/12
+####################################################
+
+# Disable response to broadcasts.
+# You don't want yourself becoming a Smurf amplifier.
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+
+# enable route verification on all interfaces
+net.ipv4.conf.all.rp_filter = 1
+
+# increase the number of possible inotify(7) watches
+fs.inotify.max_user_watches = 65536
+
+# avoid deleting secondary IPs on deleting the primary IP
+net.ipv4.conf.default.promote_secondaries = 1
+net.ipv4.conf.all.promote_secondaries = 1
+
+####################################################
+# TCP optimization CS500 2016/04/12
+####################################################
+
+# from Emulex
+net.core.rmem_default = 64000000
+net.core.rmem_max = 64000000
+net.core.wmem_default = 64000000
+net.core.wmem_max = 64000000
+net.ipv4.tcp_timestamps = 1
+net.ipv4.tcp_sack = 1
+
+# HANA network
+net.ipv4.tcp_max_orphans = 562144
+net.ipv4.tcp_max_tw_buckets = 1440000
+net.ipv4.tcp_max_syn_backlog = 2048
+net.ipv4.tcp_mem = 10000000 10000000 10000000
+net.ipv4.tcp_wmem = 10000000 10000000 10000000
+net.ipv4.tcp_rmem = 10000000 10000000 10000000
+net.core.netdev_max_backlog = 600000
+net.core.somaxconn=4096
+net.core.optmem_max = 640000000
+net.ipv4.tcp_app_win = 31
+net.ipv4.tcp_adv_win_scale = 2
+net.ipv4.tcp_no_metrics_save = 1
+net.ipv4.tcp_moderate_rcvbuf = 1
+net.ipv4.udp_wmem_min=16384
+
+######################################################
+# END:   tuned profile sap-hpe-hana settings
+######################################################
+EOF
+
+echo "END:     chroot script: chroot-os-config-for-hana.sh: Configure OS for HANA"                        | tee -a /tmp/profile/debug.log
+echo ""                               
+# Add new '/tmp/profile/debug.log' content to central 'autoinst debug.log'
+[ -f /tmp/profile/debug.log ] && \
+cat /tmp/profile/debug.log >> /mnt/var/log/autoinst-debug.log
+                ]]>
+        </source>
+      </script>
+      <script>
+        <filename>chroot-swap-yast2-misc-rb-script.sh</filename>
+        <interpreter>shell</interpreter>
+        <source><![CDATA[
+#!/bin/sh
+echo "START:   chroot script: chroot-swap-yast2-misc-rb-script.sh:Set Yast2 mode autoinstallation"        | tee -a /tmp/profile/debug.log
+[ -f /mnt/usr/share/YaST2/include/installation/sles4sap12sp1-stock-misc.rb ] || \
+cp -p /mnt/usr/share/YaST2/include/installation/misc.rb /mnt/usr/share/YaST2/include/installation/sles4sap12sp1-stock-misc.rb
+# Temp fix for Bugzilla report 'installation with external profile fails in stage2'
+# https://bugzilla.suse.com/show_bug.cgi?id=969378
+#
+# Add line 'Mode.SetMode("autoinstallation")' after 'def UpdateWizardSteps'
+# in '/usr/share/YaST2/include/installation/misc.rb' to enforce 'autoinstallation' mode 
+# unless 'floppy' is passed by 'autoyast=' via cmdline
+grep -o -q 'autoyast=' /proc/cmdline || \
+{
+echo "boot option 'autoyast=' not seen, Yast2 script modification active" | tee -a /tmp/profile/debug.log
+awk '/def UpdateWizardSteps/ { print $0; getline; print "      Mode.SetMode(\"autoinstallation\")"} {print $0}' /mnt/usr/share/YaST2/include/installation/sles4sap12sp1-stock-misc.rb > /mnt/usr/share/YaST2/include/installation/misc.rb
+}
+echo "END:     chroot script: chroot-swap-yast2-misc-rb-script.sh:Set Yast2 mode autoinstallation"        | tee -a /tmp/profile/debug.log
+                ]]>
+        </source>
+      </script>
+    </chroot-scripts>
+    <post-scripts config:type="list">
+      <script>
+        <filename>post-install-re-swap-yast2-misc-rb-script.sh</filename>
+        <interpreter>shell</interpreter>
+        <source><![CDATA[
+#!/bin/sh
+echo "START:   post-install script: post-install-re-swap-yast2-misc-rb-script.sh:Restore stock Yast2 script"  
+[ -f /usr/share/YaST2/include/installation/sles4sap12sp1-stock-misc.rb ] && \
+mv /usr/share/YaST2/include/installation/sles4sap12sp1-stock-misc.rb /usr/share/YaST2/include/installation/misc.rb
+echo "END:     post-install script: post-install-re-swap-yast2-misc-rb-script.sh:Restore stock Yast2 script"
+# Add new '/tmp/profile/debug.log' content to central 'autoinst debug.log'
+[ -f /tmp/profile/debug.log ] && \
+cat /tmp/profile/debug.log >> /mnt/var/log/autoinst-debug.log
+                ]]>
+        </source>
+      </script>
+
+      <script>
+        <filename>post-install-kdump-initrd-recreation-tuned-adm-script.sh</filename>
+        <interpreter>shell</interpreter>
+        <source><![CDATA[
+#!/bin/sh
+echo "START:   post-install script: post-install-kdump-initrd-recreation-tuned-adm-script.sh:Re-create kdump initrd / set sap-hana profile"
+
+unset KDUMP_OFF
+# Disable kdump initrd creation when 'crashkernel' is not found as boot option
+KDUMP_OFF=$(grep -o -i crashkernel /proc/cmdline)
+
+[ -z ${KDUMP_OFF} ] || \
+{
+   # Align with 'CS900 kdump' configuration guide: add option 'NOSPLIT'
+   sed -i 's/\(^KDUMPTOOL_FLAGS=\).*/\1\"NOSPLIT\"/' /etc/sysconfig/kdump 
+   # Create kdump initrd
+   touch /etc/sysconfig/kdump
+   mkdumprd -q -f &> /var/log/mkdumprd.log
+}
+
+# Enable 'sap-hpe-hana' tuned profile if available otherwise use SuSE/SAP stock tuned profile 'sap-hana'
+[ -f /usr/lib/tuned/sap-hpe-hana/tuned.conf ] || tuned-adm profile sap-hana
+[ -f /usr/lib/tuned/sap-hpe-hana/tuned.conf ] && tuned-adm profile sap-hpe-hana
+
+### START: DISABLED 'Check tuned status for runtime error(s) and restart service'
+### Bugzilla 977575: "sapconf /tuned python runtime error" fixed by
+###	tuned-2.3.0-5.1.noarch
+###	sapconf-4.1.3-16.1.noarch
+###	CAVEAT: both RPMs MUST be installed!
+
+#cat<<EOF > /etc/systemd/system/after-tuned.service
+##  This file is part of systemd.
+##
+##  systemd is free software; you can redistribute it and/or modify it
+##  under the terms of the GNU General Public License as published by
+##  the Free Software Foundation; either version 2 of the License, or
+##  (at your option) any later version.
+#
+#[Unit]
+#Description=Check tuned status for runtime error(s) and restart service
+#ConditionFileIsExecutable=/etc/init.d/tuned.restart
+#After=after-local.target
+#
+#[Service]
+#Type=idle
+#ExecStart=/etc/init.d/tuned.restart
+#TimeoutSec=0
+#RemainAfterExit=yes
+#SysVStartPriority=99
+#
+#[Install]
+#WantedBy=default.target
+#EOF
+#
+#cat<<EOF > /etc/init.d/tuned.restart
+##!/bin/bash
+## Check tuned for runtime error(s) and restart service
+#
+#echo "###### Start tuned handling ######"
+##set -x
+#rm -f /tmp/start-restart-tuned-*
+#rm -f /tmp/end-restart-tuned-*
+#rm -f /tmp/tuned-restart-*.done
+#rm -f /var/log/tuned/tuned-restart-*.log
+#TUNED_FLAG=0
+#
+#touch /tmp/start-restart-tuned-\$(date +%d-%m-%Y_%H-%M-%S)
+#for run in 1 2 3 4 5
+#do
+#
+#rm -f /var/log/tuned/tuned-before*.log
+#rm -f /var/log/tuned/tuned-after*.log
+#
+#TUNELOG="/var/log/tuned/tuned-before-\$(hostname)-\$(date +%d-%m-%Y_%H-%M-%S).log"
+#systemctl status tuned > \${TUNELOG}
+#grep -i -q -o "RuntimeError: Set changed size during iteration" \${TUNELOG} && \
+#{
+#    TUNED_FLAG=1
+#    sleep 4
+#    touch /tmp/tuned-restart-loopno-\${run}-\$(date +%d-%m-%Y_%H-%M-%S).done
+#    cp -p /var/log/tuned/tuned.log /var/log/tuned/tuned-restart-\$(date +%d-%m-%Y_%H-%M-%S).log
+#    > /var/log/tuned/tuned.log
+#    systemctl restart tuned
+#} || break
+#
+#done
+#TUNELOG="/var/log/tuned/tuned-after-$(hostname)-$(date +%d-%m-%Y_%H-%M-%S).log"
+#systemctl status tuned > \${TUNELOG}
+#
+#sleep 2
+#
+#[ \${TUNED_FLAG} -eq 0 ] && rm -f /var/log/tuned/tuned-*.log
+#touch /tmp/end-restart-tuned-\$(date +%d-%m-%Y_%H-%M-%S)
+#echo "###### End   tuned handling ######"
+#exit 0
+#EOF
+#
+#chmod +x /etc/init.d/tuned.restart
+#systemctl daemon-reload
+#systemctl enable after-tuned
+#> /var/log/tuned/tuned.log
+#systemctl start tuned.restart
+##systemctl restart tuned
+#sleep 4
+### END  : DISABLED 'Check tuned status for runtime error(s) and restart service'
+
+TUNE_ADM_LOGFILE="/var/log/tuned-adm-auto-install-profile-$(hostname)-$(date +%d-%m-%Y_%H-%M).log"
+echo "CAVEAT:"                > ${TUNE_ADM_LOGFILE}
+echo "Data logged here DO"   >> ${TUNE_ADM_LOGFILE}
+echo "reflect state at time" >> ${TUNE_ADM_LOGFILE}
+echo "of OS installation!  " >> ${TUNE_ADM_LOGFILE}
+echo ""                      >> ${TUNE_ADM_LOGFILE}
+echo "After complete OS    " >> ${TUNE_ADM_LOGFILE}
+echo "setup, reboot,recheck" >> ${TUNE_ADM_LOGFILE}
+echo "values by running    " >> ${TUNE_ADM_LOGFILE}
+echo "'/sbin/tune-log.sh'  " >> ${TUNE_ADM_LOGFILE}
+echo ""                      >> ${TUNE_ADM_LOGFILE}
+echo "Available profile(s):" >> ${TUNE_ADM_LOGFILE}
+echo "=====================" >> ${TUNE_ADM_LOGFILE}
+tuned-adm list              &>> ${TUNE_ADM_LOGFILE}
+echo ""                      >> ${TUNE_ADM_LOGFILE}
+echo "Active profile      :" >> ${TUNE_ADM_LOGFILE}
+echo "=====================" >> ${TUNE_ADM_LOGFILE}
+tuned-adm active            &>> ${TUNE_ADM_LOGFILE}
+echo ""                      >> ${TUNE_ADM_LOGFILE}
+echo "kernel proc/sys     :" >> ${TUNE_ADM_LOGFILE}
+echo "=====================" >> ${TUNE_ADM_LOGFILE}
+find /proc/sys/kernel -name shmmni -print -exec cat {} \;                             >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc/sys -name sem -print -exec cat {} \;                                       >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name \*pagecache\* -print -exec cat {} \;                                 >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name numa_balancing -print -exec cat {} \;                                >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /sys/kernel/mm -name run -print -exec cat {} \;                                  >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /sys/devices/system/cpu/cpuidle -name current_driver -print -exec cat {} \;      >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /sys/kernel/mm/transparent_hugepage -name enabled -print -exec cat {} \;         >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+echo ""                                                                               >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+echo "Network/FS proc     :"                                                          >> ${TUNE_ADM_LOGFILE}
+echo "====================="                                                          >> ${TUNE_ADM_LOGFILE}
+find /proc -name tcp_slow_start_after_idle -print -exec cat {} \;                     >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name icmp_echo_ignore_broadcasts -print -exec cat {} \;                   >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc/sys/net/ipv4/conf/all -name rp_filter -print -exec cat {} \;               >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc/sys/net/ipv6/conf/all -name forwarding -print -exec cat {} \;              >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc/sys/fs/inotify -name max_user_watches -print -exec cat {} \;               >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc/sys/net/ipv4/conf/default -name promote_secondaries -print -exec cat {} \; >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc/sys/net/ipv4/conf/all -name promote_secondaries -print -exec cat {} \;     >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name rmem_default -print -exec cat {} \;                                  >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name rmem_max -print -exec cat {} \;                                      >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name wmem_default -print -exec cat {} \;                                  >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name wmem_max -print -exec cat {} \;                                      >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_timestamps -print -exec cat {} \;                                >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_sack -print -exec cat {} \;                                      >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_max_orphans -print -exec cat {} \;                               >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_max_tw_buckets -print -exec cat {} \;                            >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_max_syn_backlog -print -exec cat {} \;                           >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_mem -print -exec cat {} \;                                       >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_wmem -print -exec cat {} \;                                      >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_rmem -print -exec cat {} \;                                      >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name netdev_max_backlog -print -exec cat {} \;                            >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name somaxconn -print -exec cat {} \;                                     >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name optmem_max -print -exec cat {} \;                                    >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_app_win -print -exec cat {} \;                                   >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_adv_win_scale -print -exec cat {} \;                             >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_no_metrics_save -print -exec cat {} \;                           >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name tcp_moderate_rcvbuf -print -exec cat {} \;                           >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+find /proc -name udp_wmem_min -print -exec cat {} \;                                  >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+echo ""                                                                               >> ${TUNE_ADM_LOGFILE}
+echo "io scheduler        :"                                                          >> ${TUNE_ADM_LOGFILE}
+echo "====================="                                                          >> ${TUNE_ADM_LOGFILE}
+find /sys -name scheduler -print -exec cat {} \;                                      >> ${TUNE_ADM_LOGFILE} 2>/dev/null
+
+# START: /etc/sysconfig section
+# set NTPD_FORCE_SYNC_ON_STARTUP = "yes"
+# http://www.novell.com/support/kb/doc.php?id=7011375
+sed -i 's/\(^NTPD_FORCE_SYNC_ON_STARTUP=\).*/\1\"yes\"/' /etc/sysconfig/ntp
+# END  : /etc/sysconfig section
+
+# Create installation RPM list for patchlist processing
+rpm -qa --last > /var/log/pre-patch-list-$(hostname)-$(date +%d-%m-%Y_%H-%M).log
+echo "END:     post-install script: post-install-kdump-initrd-recreation-tuned-adm-script.sh:Re-create kdump initrd / set sap-hana profile"  
+                ]]>
+        </source>
+      </script>
+    </post-scripts>
+  </scripts>
+  <bootloader>
+    <device_map config:type="list">
+      <device_map_entry>
+        <firmware>fd0</firmware>
+      </device_map_entry>
+      <device_map_entry>
+        <firmware>hd0</firmware>
+      </device_map_entry>
+    </device_map>
+    <global>
+      <activate>false</activate>
+      <append>splash=silent quiet showopts log_buf_len=2M intel_idle.max_cstate=1 processor.max_cstate=1 elevator=noop biosdevname=1</append>
+      <append_failsafe>showopts apm=off noresume edd=off powersaved=off nohz=off highres=off processor.max_cstate=1 nomodeset x11failsafe</append_failsafe>
+      <default>0</default>
+      <distributor>SLE-12-SAP-SP1</distributor>
+      <gfxmode>auto</gfxmode>
+      <os_prober>false</os_prober>
+      <terminal>gfxterm</terminal>
+      <suse_btrfs config:type="boolean">true</suse_btrfs>
+      <timeout config:type="integer">8</timeout>
+      <vgamode/>
+    </global>
+    <loader_type>grub2-efi</loader_type>
+    <sections config:type="list"/>
+  </bootloader>
+  <suse_register>
+      <do_registration config:type="boolean">false</do_registration>
+      <install_updates config:type="boolean">false</install_updates>
+  </suse_register>
+  <ca_mgm>
+    <CAName>YaST_Default_CA</CAName>
+    <ca_commonName>YaST Default CA (site.invalid)</ca_commonName>
+    <country>US</country>
+    <locality/>
+    <organisation/>
+    <organisationUnit/>
+    <password>ENTER PASSWORD HERE</password>
+    <server_email>postmaster@site.invalid</server_email>
+    <state/>
+    <takeLocalServerName config:type="boolean">true</takeLocalServerName>
+  </ca_mgm>
+  <deploy_image>
+    <image_installation config:type="boolean">false</image_installation>
+  </deploy_image>
+  <firewall>
+    <FW_ALLOW_FW_BROADCAST_DMZ>no</FW_ALLOW_FW_BROADCAST_DMZ>
+    <FW_ALLOW_FW_BROADCAST_EXT>no</FW_ALLOW_FW_BROADCAST_EXT>
+    <FW_ALLOW_FW_BROADCAST_INT>no</FW_ALLOW_FW_BROADCAST_INT>
+    <FW_CONFIGURATIONS_DMZ/>
+    <FW_CONFIGURATIONS_EXT/>
+    <FW_CONFIGURATIONS_INT/>
+    <FW_DEV_DMZ/>
+    <FW_DEV_EXT/>
+    <FW_DEV_INT/>
+    <FW_FORWARD_ALWAYS_INOUT_DEV/>
+    <FW_FORWARD_MASQ/>
+    <FW_IGNORE_FW_BROADCAST_DMZ>no</FW_IGNORE_FW_BROADCAST_DMZ>
+    <FW_IGNORE_FW_BROADCAST_EXT>yes</FW_IGNORE_FW_BROADCAST_EXT>
+    <FW_IGNORE_FW_BROADCAST_INT>no</FW_IGNORE_FW_BROADCAST_INT>
+    <FW_IPSEC_TRUST>no</FW_IPSEC_TRUST>
+    <FW_LOAD_MODULES>nf_conntrack_netbios_ns</FW_LOAD_MODULES>
+    <FW_LOG_ACCEPT_ALL>no</FW_LOG_ACCEPT_ALL>
+    <FW_LOG_ACCEPT_CRIT>yes</FW_LOG_ACCEPT_CRIT>
+    <FW_LOG_DROP_ALL>no</FW_LOG_DROP_ALL>
+    <FW_LOG_DROP_CRIT>yes</FW_LOG_DROP_CRIT>
+    <FW_MASQUERADE>no</FW_MASQUERADE>
+    <FW_PROTECT_FROM_INT>no</FW_PROTECT_FROM_INT>
+    <FW_ROUTE>no</FW_ROUTE>
+    <FW_SERVICES_ACCEPT_DMZ/>
+    <FW_SERVICES_ACCEPT_EXT/>
+    <FW_SERVICES_ACCEPT_INT/>
+    <FW_SERVICES_ACCEPT_RELATED_DMZ/>
+    <FW_SERVICES_ACCEPT_RELATED_EXT/>
+    <FW_SERVICES_ACCEPT_RELATED_INT/>
+    <FW_SERVICES_DMZ_IP/>
+    <FW_SERVICES_DMZ_RPC/>
+    <FW_SERVICES_DMZ_TCP/>
+    <FW_SERVICES_DMZ_UDP/>
+    <FW_SERVICES_EXT_IP/>
+    <FW_SERVICES_EXT_RPC/>
+    <FW_SERVICES_EXT_TCP/>
+    <FW_SERVICES_EXT_UDP/>
+    <FW_SERVICES_INT_IP/>
+    <FW_SERVICES_INT_RPC/>
+    <FW_SERVICES_INT_TCP/>
+    <FW_SERVICES_INT_UDP/>
+    <enable_firewall config:type="boolean">false</enable_firewall>
+    <start_firewall config:type="boolean">false</start_firewall>
+  </firewall>
+
+  <files config:type="list">
+    <file>
+      <file_path>/etc/hpe-release-autoinst</file_path>
+      <file_contents>
+<![CDATA[
+Last Changed Commit ID	: d0e5f4c65abaa08289b5e3905bb2c91d958dcbac
+Last Changed Date	: Tue Jan 31 20:02:33 2017 +0100
+
+Release			: 1.0.3
+]]>
+      </file_contents>
+    </file>
+  </files>
+
+  <general>
+
+  <ask-list config:type="list">
+    <ask>
+      <selection config:type="list">
+        <entry>
+          <value>list-error</value>
+          <label>List error</label>
+        </entry>
+        <entry>
+          <value>reboot</value>
+          <label>Reboot system</label>
+        </entry>
+        <entry>
+          <value>halt</value>
+          <label>Halt system</label>
+        </entry>
+      </selection>
+
+      <title>Error listing and reboot/halt system</title>
+      <question>Choose option</question>
+      <stage>initial</stage>
+      <default>list-error</default>
+      <!-- CAVEAT: timeout value chosen HERE MUST be unique in xml file to make sed work                               -->
+      <!-- CAVEAT: If changed here it has to be changed in sed line in function 'remove_csx00_error_condition' AS WELL -->
+      <timeout config:type="integer">20</timeout>
+      <script>
+        <rerun_on_error config:type="boolean">true</rerun_on_error>
+        <filename>error-output.sh</filename>
+        <!-- DO NOT set to "false", this is VITAL to menu mechanism -->
+        <feedback config:type="boolean">true</feedback>
+        <environment config:type="boolean">true</environment>
+        <source>
+<![CDATA[
+# Save/copy 'autoinst debug.log' to tempfs directory '/dev'
+[ -f /tmp/profile/debug.log ] && \
+cp -p /tmp/profile/debug.log /dev
+case "$VAL" in
+                "reboot")
+                        echo b > /proc/sysrq-trigger
+                        ;;
+                "halt")
+                        echo o > /proc/sysrq-trigger
+                        ;;
+                "list-error")
+			echo "START: error log"
+			echo ""
+                        [ -f /tmp/profile/error.log ] && \
+			cat /tmp/profile/error.log
+			echo ""
+			echo "END:   error log"
+			exit 1
+                        ;;
+                "cont-overwrite-os-lun")
+                        exit 0
+                        ;;
+                "debug")
+                        echo "START: debug log"
+                        echo ""
+                        [ -f /tmp/profile/debug.log ] && \
+                        cat /tmp/profile/debug.log
+                        echo ""
+                        echo "END:   debug log"
+                        exit 0
+                        ;;
+esac
+
+exit 0
+]]>
+        </source>
+        <debug config:type="boolean">false</debug>
+      </script>
+    </ask>
+  </ask-list>
+  
+  <mode>
+    <confirm config:type="boolean">false</confirm>
+    <!-- If set to false, all services will not be restarted at the very end of the installation  -->
+    <!-- (when everything is installed and configured at the end of the second stage).            -->
+    <!-- <final_restart_services config:type="boolean">false</final_restart_services>             -->
+    <!-- <final_restart_services config:type="boolean">true</final_restart_services>              -->
+    <final_restart_services config:type="boolean">true</final_restart_services> 
+  </mode>
+    <proposals config:type="list"/>
+    <signature-handling>
+      <accept_file_without_checksum config:type="boolean">true</accept_file_without_checksum>
+      <accept_non_trusted_gpg_key config:type="boolean">true</accept_non_trusted_gpg_key>
+      <accept_unknown_gpg_key config:type="boolean">true</accept_unknown_gpg_key>
+      <accept_unsigned_file config:type="boolean">true</accept_unsigned_file>
+      <accept_verification_failed config:type="boolean">false</accept_verification_failed>
+      <import_gpg_key config:type="boolean">true</import_gpg_key>
+    </signature-handling>
+    <storage>
+      <partition_alignment config:type="symbol">align_optimal</partition_alignment>
+      <start_multipath config:type="boolean">true</start_multipath>
+    </storage>
+  </general>
+  <groups config:type="list">
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>100</gid>
+      <group_password>x</group_password>
+      <groupname>users</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>19</gid>
+      <group_password>x</group_password>
+      <groupname>floppy</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>13</gid>
+      <group_password>x</group_password>
+      <groupname>news</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>493</gid>
+      <group_password>x</group_password>
+      <groupname>systemd-journal</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>41</gid>
+      <group_password>x</group_password>
+      <groupname>xok</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>59</gid>
+      <group_password>x</group_password>
+      <groupname>maildrop</groupname>
+      <userlist>postfix</userlist>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>65534</gid>
+      <group_password>x</group_password>
+      <groupname>nogroup</groupname>
+      <userlist>nobody</userlist>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>0</gid>
+      <group_password>x</group_password>
+      <groupname>root</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>3</gid>
+      <group_password>x</group_password>
+      <groupname>sys</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>497</gid>
+      <group_password>x</group_password>
+      <groupname>tape</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>54</gid>
+      <group_password>x</group_password>
+      <groupname>lock</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>32</gid>
+      <group_password>x</group_password>
+      <groupname>public</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>492</gid>
+      <group_password>x</group_password>
+      <groupname>ntp</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>12</gid>
+      <group_password>x</group_password>
+      <groupname>mail</groupname>
+      <userlist>postfix</userlist>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>25</gid>
+      <group_password>x</group_password>
+      <groupname>at</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>499</gid>
+      <group_password>x</group_password>
+      <groupname>messagebus</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>496</gid>
+      <group_password>x</group_password>
+      <groupname>polkitd</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>6</gid>
+      <group_password>x</group_password>
+      <groupname>disk</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>494</gid>
+      <group_password>x</group_password>
+      <groupname>brlapi</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>2</gid>
+      <group_password>x</group_password>
+      <groupname>daemon</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>43</gid>
+      <group_password>x</group_password>
+      <groupname>modem</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>42</gid>
+      <group_password>x</group_password>
+      <groupname>trusted</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>51</gid>
+      <group_password>x</group_password>
+      <groupname>postfix</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>16</gid>
+      <group_password>x</group_password>
+      <groupname>dialout</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>498</gid>
+      <group_password>x</group_password>
+      <groupname>sshd</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>17</gid>
+      <group_password>x</group_password>
+      <groupname>audio</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>1</gid>
+      <group_password>x</group_password>
+      <groupname>bin</groupname>
+      <userlist>daemon</userlist>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>495</gid>
+      <group_password>x</group_password>
+      <groupname>nscd</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>7</gid>
+      <group_password>x</group_password>
+      <groupname>lp</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>40</gid>
+      <group_password>x</group_password>
+      <groupname>games</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>488</gid>
+      <group_password>x</group_password>
+      <groupname>scard</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>5</gid>
+      <group_password>x</group_password>
+      <groupname>tty</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>10</gid>
+      <group_password>x</group_password>
+      <groupname>wheel</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>15</gid>
+      <group_password>x</group_password>
+      <groupname>shadow</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>487</gid>
+      <group_password>x</group_password>
+      <groupname>gdm</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>14</gid>
+      <group_password>x</group_password>
+      <groupname>uucp</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>62</gid>
+      <group_password>x</group_password>
+      <groupname>man</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>9</gid>
+      <group_password>x</group_password>
+      <groupname>kmem</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>33</gid>
+      <group_password>x</group_password>
+      <groupname>video</groupname>
+      <userlist>gdm</userlist>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>491</gid>
+      <group_password>x</group_password>
+      <groupname>rtkit</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>20</gid>
+      <group_password>x</group_password>
+      <groupname>cdrom</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>21</gid>
+      <group_password>x</group_password>
+      <groupname>console</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>8</gid>
+      <group_password>x</group_password>
+      <groupname>www</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>65533</gid>
+      <group_password>x</group_password>
+      <groupname>nobody</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>22</gid>
+      <group_password>x</group_password>
+      <groupname>utmp</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>71</gid>
+      <group_password>x</group_password>
+      <groupname>ntadmin</groupname>
+      <userlist/>
+    </group>
+    <group>
+      <encrypted config:type="boolean">true</encrypted>
+      <gid>49</gid>
+      <group_password>x</group_password>
+      <groupname>ftp</groupname>
+      <userlist/>
+    </group>
+  </groups>
+  <kdump>
+    <!-- memory reservation (high and low) -->
+    <add_crash_kernel config:type="boolean">false</add_crash_kernel>
+    <crash_kernel config:type="list">
+      <listentry>0M,low</listentry>
+      <listentry>0M,high</listentry>
+    </crash_kernel>
+    <general>
+      <KDUMP_COMMANDLINE/>
+      <KDUMP_COMMANDLINE_APPEND>udev_timeout=240 rd.udev.event-timeout=240</KDUMP_COMMANDLINE_APPEND>
+      <KDUMP_COPY_KERNEL>yes</KDUMP_COPY_KERNEL>
+      <KDUMP_DUMPFORMAT>compressed</KDUMP_DUMPFORMAT>
+      <KDUMP_DUMPLEVEL>31</KDUMP_DUMPLEVEL>
+      <KDUMP_FREE_DISK_SIZE>64</KDUMP_FREE_DISK_SIZE>
+      <KDUMP_IMMEDIATE_REBOOT>yes</KDUMP_IMMEDIATE_REBOOT>
+      <KDUMP_KEEP_OLD_DUMPS>2</KDUMP_KEEP_OLD_DUMPS>
+      <KDUMP_KERNELVER/>
+      <KDUMP_NOTIFICATION_CC/>
+      <KDUMP_NOTIFICATION_TO/>
+      <KDUMP_SAVEDIR>file:///var/crash</KDUMP_SAVEDIR>
+      <KDUMP_SMTP_PASSWORD/>
+      <KDUMP_SMTP_SERVER/>
+      <KDUMP_SMTP_USER/>
+      <KDUMP_TRANSFER/>
+      <KDUMP_VERBOSE>3</KDUMP_VERBOSE>
+      <KEXEC_OPTIONS/>
+    </general>
+  </kdump>
+  <keyboard>
+    <keymap>english-us</keymap>
+  </keyboard>
+  <language>
+    <language>en_US</language>
+    <languages>en_US</languages>
+  </language>
+  <login_settings/>
+  <networking>
+    <dhcp_options>
+      <dhclient_client_id/>
+      <dhclient_hostname_option>AUTO</dhclient_hostname_option>
+    </dhcp_options>
+    <dns>
+      <dhcp_hostname config:type="boolean">false</dhcp_hostname>
+      <domain>site.invalid</domain>
+      <hostname>linux</hostname>
+      <resolv_conf_policy>auto</resolv_conf_policy>
+      <write_hostname config:type="boolean">false</write_hostname>
+    </dns>
+    <interfaces config:type="list">
+      <interface>
+        <bootproto>static</bootproto>
+        <broadcast>127.255.255.255</broadcast>
+        <device>lo</device>
+        <firewall>no</firewall>
+        <ipaddr>127.0.0.1</ipaddr>
+        <netmask>255.0.0.0</netmask>
+        <network>127.0.0.0</network>
+        <prefixlen>8</prefixlen>
+        <startmode>nfsroot</startmode>
+        <usercontrol>no</usercontrol>
+      </interface>
+    </interfaces>
+    <ipv6 config:type="boolean">true</ipv6> 
+    <keep_install_network config:type="boolean">false</keep_install_network>
+    <managed config:type="boolean">false</managed>
+  </networking>
+  <partitioning config:type="list">
+    <drive>
+      <disklabel>gpt</disklabel>
+      <enable_snapshots config:type="boolean">true</enable_snapshots>
+      <initialize config:type="boolean">true</initialize>
+      <partitions config:type="list">
+        <partition>
+          <create config:type="boolean">true</create>
+          <crypt_fs config:type="boolean">false</crypt_fs>
+          <filesystem config:type="symbol">vfat</filesystem>
+          <format config:type="boolean">true</format>
+          <fstopt>umask=0002,utf8=true</fstopt>
+          <loop_fs config:type="boolean">false</loop_fs>
+          <mount>/boot/efi</mount>
+          <mountby config:type="symbol">uuid</mountby>
+          <partition_id config:type="integer">259</partition_id>
+          <partition_nr config:type="integer">1</partition_nr>
+          <resize config:type="boolean">false</resize>
+          <size>155352576</size>
+        </partition>
+        <partition>
+          <create config:type="boolean">true</create>
+          <crypt_fs config:type="boolean">false</crypt_fs>
+          <filesystem config:type="symbol">swap</filesystem>
+          <format config:type="boolean">true</format>
+          <loop_fs config:type="boolean">false</loop_fs>
+          <mount>swap</mount>
+          <mountby config:type="symbol">uuid</mountby>
+          <partition_id config:type="integer">130</partition_id>
+          <partition_nr config:type="integer">2</partition_nr>
+          <resize config:type="boolean">false</resize>
+          <size>2048M</size>
+        </partition>
+        <partition>
+          <create config:type="boolean">true</create>
+          <crypt_fs config:type="boolean">false</crypt_fs>
+          <filesystem config:type="symbol">btrfs</filesystem>
+          <format config:type="boolean">true</format>
+          <loop_fs config:type="boolean">false</loop_fs>
+          <mount>/</mount>
+          <mountby config:type="symbol">uuid</mountby>
+          <partition_id config:type="integer">131</partition_id>
+          <partition_nr config:type="integer">3</partition_nr>
+          <resize config:type="boolean">false</resize>
+          <subvolumes config:type="list">
+            <!-- manual installation accepting file system installer defaults  -->
+            <!-- btrfs "/" file system subvolumes added in SLES4SAP12 SP2      -->
+            <!--    'home'                                                     -->
+            <!--    'var/cache'                                                -->
+            <!--    'var/lib/libvirt/images'                                   -->
+            <!--    'var/lib/mariadb'                                          -->
+            <!--    'var/lib/mysql'                                            -->
+            <!--    'var/lib/machines'                                         -->
+            <!-- handled by 'autoinst' mechanism'                              -->
+            <listentry>boot/grub2/i386-pc</listentry>
+            <listentry>boot/grub2/x86_64-efi</listentry>
+            <listentry>opt</listentry>
+            <listentry>srv</listentry>
+            <listentry>tmp</listentry>
+            <listentry>usr/local</listentry>
+            <listentry>var/crash</listentry>
+            <listentry>var/lib/mailman</listentry>
+            <listentry>var/lib/named</listentry>
+            <listentry>var/lib/pgsql</listentry>
+            <listentry>var/log</listentry>
+            <listentry>var/opt</listentry>
+            <listentry>var/spool</listentry>
+            <listentry>var/tmp</listentry>
+          </subvolumes>
+        </partition>
+      </partitions>
+      <pesize/>
+      <type config:type="symbol">CT_DISK</type>
+      <use>all</use>
+    </drive>
+  </partitioning>
+  <proxy>
+    <enabled config:type="boolean">false</enabled>
+    <ftp_proxy/>
+    <http_proxy/>
+    <https_proxy/>
+    <no_proxy>localhost, 127.0.0.1</no_proxy>
+    <proxy_password/>
+    <proxy_user/>
+  </proxy>
+  <report>
+    <errors>
+      <log config:type="boolean">true</log>
+      <show config:type="boolean">true</show>
+      <timeout config:type="integer">0</timeout>
+    </errors>
+    <messages>
+      <log config:type="boolean">true</log>
+      <show config:type="boolean">true</show>
+      <timeout config:type="integer">10</timeout>
+    </messages>
+    <warnings>
+      <log config:type="boolean">true</log>
+      <show config:type="boolean">true</show>
+      <timeout config:type="integer">10</timeout>
+    </warnings>
+    <yesno_messages>
+      <log config:type="boolean">true</log>
+      <show config:type="boolean">true</show>
+      <timeout config:type="integer">10</timeout>
+    </yesno_messages>
+  </report>
+  <services-manager>
+    <default_target>multi-user</default_target>
+    <services>
+      <disable config:type="list"/>
+      <enable config:type="list">
+        <service>btrfsmaintenance-refresh</service>
+        <service>cron</service>
+        <service>dm-event</service>
+        <service>getty@tty1</service>
+        <service>haveged</service>
+        <service>irqbalance</service>
+        <service>iscsi</service>
+        <service>mcelog</service>
+        <service>nscd</service>
+        <service>ntpd</service>
+        <service>postfix</service>
+        <service>purge-kernels</service>
+        <service>rsyslog</service>
+        <service>sshd</service>
+        <service>systemd-readahead-collect</service>
+        <service>systemd-readahead-replay</service>
+        <service>tuned</service>
+        <service>wicked</service>
+        <service>wickedd-auto4</service>
+        <service>wickedd-dhcp4</service>
+        <service>wickedd-dhcp6</service>
+        <service>wickedd-nanny</service>
+        <service>wickedd</service>
+        <service>YaST2-Firstboot</service>
+        <service>YaST2-Second-Stage</service>
+      </enable>
+    </services>
+  </services-manager>
+  <software>
+    <image/>
+    <instsource/>
+    <packages config:type="list">
+      <package>glibc</package>
+      <package>yast2-network</package>
+      <package>snapper</package>
+      <package>yast2-users</package>
+      <package>autoyast2-installation</package>
+      <package>lvm2</package>
+      <package>numactl</package>
+      <package>cpuset</package>
+      <package>yast2-security</package>
+      <package>kexec-tools</package>
+      <package>yast2-firewall</package>
+      <package>yast2-ntp-client</package>
+      <package>SLES_SAP-release</package>
+      <package>yast2-kdump</package>
+      <package>irqbalance</package>
+      <package>mokutil</package>
+      <package>perl-Bootloader-YAML</package>
+      <package>shim</package>
+      <package>grub2-x86_64-efi</package>
+      <package>git-core</package>
+      <package>perl-Error</package>
+      <package>unrar</package>
+      <package>biosdevname</package>
+      <package>tuned</package>
+      <package>open-lldp</package>
+      <package>libHBAAPI2</package>
+      <package>libpng12-0</package>
+      <!-- <package>libopenssl0_9_8</package> from Module-Legacy -->
+      <!-- sap-hana                       -->
+      <package>libopenssl0_9_8</package>
+      <package>sapconf</package>
+      <!-- sap-hana pattern with java 1.7 -->
+      <!-- OS patch dvd 21-10-2016 deps   -->
+      <package>libts-1_0-0</package>
+      <package>perl-Expect</package>
+      <package>perl-IO-Stty</package>
+      <package>perl-IO-Tty</package>
+      <!-- OS patch dvd 21-10-2016 deps   -->
+      <package>autoyast2-installation</package>
+      <package>bc</package>
+      <package>bing</package>
+      <package>bonnie</package>
+      <package>cairo</package>
+      <package>expect</package>
+      <package>findutils-locate</package>
+      <package>graphviz</package>
+      <package>gtk2</package>
+      <package>java-1_7_1-ibm-plugin</package>
+      <package>java-1_7_1-ibm</package>
+      <package>java-1_7_1-ibm-jdbc</package>
+      <package>krb5-client</package>
+      <package>libicu</package>
+      <package>libssh2-1</package>
+      <package>nfs-client</package>
+      <package>ntp</package>
+      <package>numactl</package>
+      <package>sensors</package>
+      <package>sudo</package>
+      <package>rsyslog</package>
+      <package>sysstat</package>
+      <package>tcsh</package>
+      <package>xfsprogs</package>
+      <package>xrdp</package>
+      <package>yast2-ncurses</package>
+      <!-- end sap hana -->
+      <!-- start SG     -->
+      <package>pidentd</package>
+      <package>sblim-indication_helper</package>
+      <package>sblim-sfcb</package>
+      <package>sblim-sfcc</package>
+      <package>sblim-cmpi-base</package>
+      <package>sblim-wbemcli</package>
+      <!-- end   SG     -->
+    </packages>
+    <patterns config:type="list">
+      <pattern>Minimal</pattern>
+      <pattern>base</pattern>
+      <pattern>x11</pattern>
+    </patterns>
+    <remove-packages  config:type="list">
+      <package>alsa</package>
+      <package>alsa-plugins</package>
+      <package>alsa-plugins-pulse</package>
+      <package>alsa-plugins-pulse</package>
+      <package>alsa-utils</package>
+      <package>cdrkit-cdrtools-compat</package>
+      <package>cups-client</package>
+      <package>cups-filters-ghostscript</package>
+      <package>ghostscript-fonts-other</package>
+      <package>ghostscript-fonts-std</package>
+      <package>ghostscript</package>
+      <package>ghostscript-x11</package>
+      <package>groff-full</package>
+      <package>gstreamer-lang</package>
+      <package>gstreamer-plugins-base-lang</package>
+      <package>gstreamer-plugins-base</package>
+      <package>input-utils</package>
+      <package>libcanberra0</package>
+      <package>libesd0</package>
+      <package>libgstapp-1_0-0</package>
+      <package>libgstaudio-1_0-0</package>
+      <package>libgstpbutils</package>
+      <package>libgstriff-1_0-0</package>
+      <package>libgsttag-1_0-0</package>
+      <package>libgstvideo</package>
+      <package>libpulse0</package>
+      <package>libSDL</package>
+      <package>pulseaudio-esound-compat</package>
+      <package>pulseaudio-lang</package>
+      <package>pulseaudio</package>
+      <package>xf86-input-wacom</package>
+      <package>xlockmore</package>
+    </remove-packages>
+  </software>
+  <timezone>
+    <hwclock>UTC</hwclock>
+    <timezone>UTC</timezone>
+  </timezone>
+  <user_defaults>
+    <expire/>
+    <group>100</group>
+    <groups/>
+    <home>/home</home>
+    <inactive>-1</inactive>
+    <no_groups config:type="boolean">true</no_groups>
+    <shell>/bin/bash</shell>
+    <skel>/etc/skel</skel>
+    <umask>022</umask>
+  </user_defaults>
+  <users config:type="list">
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Secure FTP User</fullname>
+      <gid>65534</gid>
+      <home>/var/lib/empty</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/false</shell>
+      <uid>489</uid>
+      <user_password>!</user_password>
+      <username>ftpsecure</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Daemon</fullname>
+      <gid>2</gid>
+      <home>/sbin</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>2</uid>
+      <user_password>*</user_password>
+      <username>daemon</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>User for polkitd</fullname>
+      <gid>496</gid>
+      <home>/var/lib/polkit</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/sbin/nologin</shell>
+      <uid>497</uid>
+      <user_password>!</user_password>
+      <username>polkitd</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>SSH daemon</fullname>
+      <gid>498</gid>
+      <home>/var/lib/sshd</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/false</shell>
+      <uid>498</uid>
+      <user_password>!</user_password>
+      <username>sshd</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Postfix Daemon</fullname>
+      <gid>51</gid>
+      <home>/var/spool/postfix</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/false</shell>
+      <uid>51</uid>
+      <user_password>!</user_password>
+      <username>postfix</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>FTP account</fullname>
+      <gid>49</gid>
+      <home>/srv/ftp</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>40</uid>
+      <user_password>*</user_password>
+      <username>ftp</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>nobody</fullname>
+      <gid>65533</gid>
+      <home>/var/lib/nobody</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>65534</uid>
+      <user_password>*</user_password>
+      <username>nobody</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Mailer daemon</fullname>
+      <gid>12</gid>
+      <home>/var/spool/clientmqueue</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/false</shell>
+      <uid>8</uid>
+      <user_password>*</user_password>
+      <username>mail</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>NFS statd daemon</fullname>
+      <gid>65534</gid>
+      <home>/var/lib/nfs</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/sbin/nologin</shell>
+      <uid>490</uid>
+      <user_password>!</user_password>
+      <username>statd</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>NTP daemon</fullname>
+      <gid>492</gid>
+      <home>/var/lib/ntp</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/false</shell>
+      <uid>74</uid>
+      <user_password>!</user_password>
+      <username>ntp</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>RealtimeKit</fullname>
+      <gid>491</gid>
+      <home>/proc</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/false</shell>
+      <uid>492</uid>
+      <user_password>!</user_password>
+      <username>rtkit</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>openslp daemon</fullname>
+      <gid>2</gid>
+      <home>/var/lib/empty</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/sbin/nologin</shell>
+      <uid>494</uid>
+      <user_password>!</user_password>
+      <username>openslp</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>User for D-Bus</fullname>
+      <gid>499</gid>
+      <home>/var/run/dbus</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/false</shell>
+      <uid>499</uid>
+      <user_password>!</user_password>
+      <username>messagebus</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Batch jobs daemon</fullname>
+      <gid>25</gid>
+      <home>/var/spool/atjobs</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>25</uid>
+      <user_password>!</user_password>
+      <username>at</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>user for rpcbind</fullname>
+      <gid>65534</gid>
+      <home>/var/lib/empty</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/sbin/nologin</shell>
+      <uid>495</uid>
+      <user_password>!</user_password>
+      <username>rpc</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Unix-to-Unix CoPy system</fullname>
+      <gid>14</gid>
+      <home>/etc/uucp</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>10</uid>
+      <user_password>*</user_password>
+      <username>uucp</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Gnome Display Manager daemon</fullname>
+      <gid>487</gid>
+      <home>/var/lib/gdm</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/false</shell>
+      <uid>487</uid>
+      <user_password>!</user_password>
+      <username>gdm</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>root</fullname>
+      <gid>0</gid>
+      <home>/root</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>0</uid>
+      <user_password>$1$.MVpwJfB$zfR2plMzsgo6Yn4wPJs7B1</user_password>
+      <username>root</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Manual pages viewer</fullname>
+      <gid>62</gid>
+      <home>/var/cache/man</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>13</uid>
+      <user_password>*</user_password>
+      <username>man</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>User for nscd</fullname>
+      <gid>495</gid>
+      <home>/run/nscd</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/sbin/nologin</shell>
+      <uid>496</uid>
+      <user_password>!</user_password>
+      <username>nscd</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>News system</fullname>
+      <gid>13</gid>
+      <home>/etc/news</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>9</uid>
+      <user_password>*</user_password>
+      <username>news</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>bin</fullname>
+      <gid>1</gid>
+      <home>/bin</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>1</uid>
+      <user_password>*</user_password>
+      <username>bin</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>WWW daemon apache</fullname>
+      <gid>8</gid>
+      <home>/var/lib/wwwrun</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/false</shell>
+      <uid>30</uid>
+      <user_password>*</user_password>
+      <username>wwwrun</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Smart Card Reader</fullname>
+      <gid>488</gid>
+      <home>/var/run/pcscd</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/usr/sbin/nologin</shell>
+      <uid>488</uid>
+      <user_password>!</user_password>
+      <username>scard</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>usbmuxd daemon</fullname>
+      <gid>65534</gid>
+      <home>/var/lib/usbmuxd</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/sbin/nologin</shell>
+      <uid>493</uid>
+      <user_password>!</user_password>
+      <username>usbmux</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Games account</fullname>
+      <gid>100</gid>
+      <home>/var/games</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>12</uid>
+      <user_password>*</user_password>
+      <username>games</username>
+    </user>
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>Printing daemon</fullname>
+      <gid>7</gid>
+      <home>/var/spool/lpd</home>
+      <password_settings>
+        <expire/>
+        <flag/>
+        <inact/>
+        <max/>
+        <min/>
+        <warn/>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>4</uid>
+      <user_password>*</user_password>
+      <username>lp</username>
+    </user>
+  </users>
+</profile>

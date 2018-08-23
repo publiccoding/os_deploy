@@ -1,0 +1,354 @@
+
+HADOOP PRACTICE :
+=================
+hduser@vagrant-ubuntu-trusty-64:~$ vi emp.txt
+hduser@vagrant-ubuntu-trusty-64:~$ hadoop fs -ls /
+Found 5 items
+drwxr-xr-x   - hduser supergroup          0 2018-04-02 14:10 /sqoop_test
+drwxr-xr-x   - hduser supergroup          0 2018-04-02 14:04 /sqooptest
+drwxrwxrwx   - hduser supergroup          0 2018-04-03 05:23 /tmp
+drwxr-xr-x   - hduser supergroup          0 2018-04-03 05:20 /user
+drwxr-xr-x   - hduser supergroup          0 2018-04-03 10:07 /usr
+hduser@vagrant-ubuntu-trusty-64:~$ hadoop fs -mkdir /gcp_test
+hduser@vagrant-ubuntu-trusty-64:~$ hadoop fs -put emp.txt /gcp_test
+hduser@vagrant-ubuntu-trusty-64:~$ hadoop fs -ls /usr/hive/warehouse/
+Found 3 items
+drwxrwxr-x   - hduser supergroup          0 2018-04-04 13:20 /usr/hive/warehouse/part_example
+drwxrwxr-x   - hduser supergroup          0 2018-04-04 12:08 /usr/hive/warehouse/student
+drwxrwxr-x   - hduser supergroup          0 2018-04-04 12:44 /usr/hive/warehouse/testdb.db
+hduser@vagrant-ubuntu-trusty-64:~$
+
+
+HIVE PRACTICE :
+===============
+
+load from HDFS FILE SYSTM :
+---------------------------
+hive > set hive.cli.print.current.db=true;
+hive (default)> create database if not exists testdb;
+OK
+Time taken: 0.245 seconds
+hive (default)> use testdb;
+OK
+Time taken: 0.092 seconds
+hive (testdb)>
+hive (testdb)> create table if not exists emp (id int ,name string, address string) row format delimited fields terminated by ',' lines terminated by '\n' stored as textfile;
+OK
+Time taken: 0.184 seconds
+hive (testdb)> load data inpath '/gcp_test/emp.txt' into table emp;
+Loading data to table testdb.emp
+OK
+Time taken: 1.186 seconds
+hive (testdb)> select * from emp;
+OK
+100     'thimma'        'hosur'
+200     'kumar' 'bangalore'
+300     'lakshmi'       'rayakottai'
+Time taken: 0.418 seconds, Fetched: 3 row(s)
+
+locad from local path :
+-----------------------
+
+hive (testdb)> create table if not exists student (name string, id int, year int)
+             > row format delimited fields terminated by '\t' lines terminated by '\n' stored as textfile;
+OK
+Time taken: 0.195 seconds
+hive (testdb)> select * from student;
+OK
+Time taken: 0.251 seconds
+hive (testdb)> load data local inpath '/home/hduser/student.txt' overwrite into table student;
+Loading data to table testdb.student
+OK
+Time taken: 0.628 seconds
+hive (testdb)> select * from student;
+OK
+'arun'  1       1
+'anil'  3       3
+'rahul' 4       4
+'venkat'        3       2
+'kumar' 5       3
+Time taken: 0.254 seconds, Fetched: 5 row(s)
+hive (testdb)>
+
+Partition example 
+-----------------
+hive> create table if not exists part_example(id int, name string, dept string) partitioned by (year int) row format delimited fields terminated by ',' lines terminated by '\n' stored as textfile;
+OK
+Time taken: 0.278 seconds
+hive> select * from part_example;
+OK
+Time taken: 0.659 seconds
+hive> load data local inpath '/home/hduser/student1.txt' overwrite into table part_example partition (year=2012);
+Loading data to table default.part_example partition (year=2012)
+OK
+Time taken: 2.435 seconds
+hive> load data local inpath '/home/hduser/student2.txt' overwrite into table part_example partition (year=2013);
+Loading data to table default.part_example partition (year=2013)
+OK
+Time taken: 2.252 seconds
+hive> select * from part_example;
+OK
+1        'gopal'         'TP'   2012
+2        'kiran'         'HR'   2012
+3        'kaleel'       'SC'    2013
+4        'Prasanth'      'SC'   2013
+Time taken: 0.578 seconds, Fetched: 4 row(s)
+
+HIVE bucketing using hql file :
+---------------
+
+bucketing.example.hql 
+
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+set hive.exec.max.dynamic.partitions.pernode=1000;
+set hive.enforce.bucketing = true;
+
+DROP TABLE IF EXISTS bucketed_user;
+
+create table all_state(street string, city string,	zip int, state string,	beds int,	baths int,	sq__ft int,	type string, price string ) row format delimited fields terminated by ',' lines terminated by '\n' stored as textfile;
+
+load data local inpath '/home/hduser/real_state.csv' overwrite into table all_state;
+
+create table bucket_example(street string, city string,	zip int, beds int,	baths int,	sq__ft int,	type string, price string )  partitioned by (state string) clustered by (street) sorted by (city) into 2 buckets row format delimited fields terminated by ',' lines terminated by '\n' stored as sequencefile;
+
+insert overwrite table bucket_example partition(state) select street, city, zip, state, beds, baths, sq__ft, type, price from all_state;
+
+
+hduser@vagrant-ubuntu-trusty-64:~$ hive -f bucketing.example.hql
+hduser@vagrant-ubuntu-trusty-64:~$ hive -e 'select * from student'
+
+MySQL PRACTICE:
+===============
+
+hduser@vagrant-ubuntu-trusty-64:~$ mysql -u mysql -p 'mysql'
+Enter password:
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 142
+Server version: 5.5.59-0ubuntu0.14.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use testdb;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> show tables;
++------------------+
+| Tables_in_testdb |
++------------------+
+| emp              |
++------------------+
+1 row in set (0.00 sec)
+
+mysql>
+
+SQOOP PRACTICE :
+=================
+
+ hduser@vagrant-ubuntu-trusty-64:~$ sqoop import --connect jdbc:mysql://localhost/testdb --username mysql --password mysql --table emp --m 1 --target-dir /sqoop_test
+Warning: /usr/local/sqoop/../hbase does not exist! HBase imports will fail.
+Please set $HBASE_HOME to the root of your HBase installation.
+Warning: /usr/local/sqoop/../hcatalog does not exist! HCatalog jobs will fail.
+Please set $HCAT_HOME to the root of your HCatalog installation.
+Warning: /usr/local/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+Warning: /usr/local/sqoop/../zookeeper does not exist! Accumulo imports will fail.
+Please set $ZOOKEEPER_HOME to the root of your Zookeeper installation.
+18/04/04 15:10:32 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6
+18/04/04 15:10:32 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+18/04/04 15:10:37 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+18/04/04 15:10:37 INFO tool.CodeGenTool: Beginning code generation
+18/04/04 15:10:39 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `emp` AS t LIMIT 1
+18/04/04 15:10:39 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `emp` AS t LIMIT 1
+18/04/04 15:10:39 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is /usr/local/hadoop
+Note: /tmp/sqoop-hduser/compile/25066b675c2e15ecd52300f864a47c97/emp.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+18/04/04 15:10:58 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-hduser/compile/25066b675c2e15ecd52300f864a47c97/emp.jar
+18/04/04 15:10:58 WARN manager.MySQLManager: It looks like you are importing from mysql.
+18/04/04 15:10:58 WARN manager.MySQLManager: This transfer can be faster! Use the --direct
+18/04/04 15:10:58 WARN manager.MySQLManager: option to exercise a MySQL-specific fast path.
+18/04/04 15:10:58 INFO manager.MySQLManager: Setting zero DATETIME behavior to convertToNull (mysql)
+18/04/04 15:10:58 INFO mapreduce.ImportJobBase: Beginning import of emp
+18/04/04 15:11:02 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use mapreduce.job.jar
+18/04/04 15:11:09 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead, use mapreduce.job.maps
+18/04/04 15:11:10 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
+18/04/04 15:11:26 INFO db.DBInputFormat: Using read commited transaction isolation
+18/04/04 15:11:26 INFO mapreduce.JobSubmitter: number of splits:1
+18/04/04 15:11:27 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1522854631174_0001
+18/04/04 15:11:31 INFO impl.YarnClientImpl: Submitted application application_1522854631174_0001
+18/04/04 15:11:32 INFO mapreduce.Job: The url to track the job: http://vagrant-ubuntu-trusty-64:8088/proxy/application_1522854631174_0001/
+18/04/04 15:11:32 INFO mapreduce.Job: Running job: job_1522854631174_0001
+18/04/04 15:12:12 INFO mapreduce.Job: Job job_1522854631174_0001 running in uber mode : false
+18/04/04 15:12:12 INFO mapreduce.Job:  map 0% reduce 0%
+18/04/04 15:12:43 INFO mapreduce.Job:  map 100% reduce 0%
+18/04/04 15:12:45 INFO mapreduce.Job: Job job_1522854631174_0001 completed successfully
+18/04/04 15:12:46 INFO mapreduce.Job: Counters: 30
+        File System Counters
+                FILE: Number of bytes read=0
+                FILE: Number of bytes written=124193
+                FILE: Number of read operations=0
+                FILE: Number of large read operations=0
+                FILE: Number of write operations=0
+                HDFS: Number of bytes read=87
+                HDFS: Number of bytes written=67
+                HDFS: Number of read operations=4
+                HDFS: Number of large read operations=0
+                HDFS: Number of write operations=2
+        Job Counters
+                Launched map tasks=1
+                Other local map tasks=1
+                Total time spent by all maps in occupied slots (ms)=24467
+                Total time spent by all reduces in occupied slots (ms)=0
+                Total time spent by all map tasks (ms)=24467
+                Total vcore-milliseconds taken by all map tasks=24467
+                Total megabyte-milliseconds taken by all map tasks=25054208
+        Map-Reduce Framework
+                Map input records=3
+                Map output records=3
+                Input split bytes=87
+                Spilled Records=0
+                Failed Shuffles=0
+                Merged Map outputs=0
+                GC time elapsed (ms)=313
+                CPU time spent (ms)=3150
+                Physical memory (bytes) snapshot=103124992
+                Virtual memory (bytes) snapshot=794468352
+                Total committed heap usage (bytes)=31850496
+        File Input Format Counters
+                Bytes Read=0
+        File Output Format Counters
+                Bytes Written=67
+18/04/04 15:12:46 INFO mapreduce.ImportJobBase: Transferred 67 bytes in 96.4643 seconds (0.6946 bytes/sec)
+18/04/04 15:12:46 INFO mapreduce.ImportJobBase: Retrieved 3 records.
+hduser@vagrant-ubuntu-trusty-64:~$ hadoop fs -ls /sqoop_test/
+Found 2 items
+-rw-r--r--   1 hduser supergroup          0 2018-04-04 15:12 /sqoop_test/_SUCCESS
+-rw-r--r--   1 hduser supergroup         67 2018-04-04 15:12 /sqoop_test/part-m-00000
+hduser@vagrant-ubuntu-trusty-64:~$ hadoop fs -cat /sqoop_test/part-m-00000
+100,thimma,varaganappalli
+100,kumar,nagamangalam
+100,lakshmi,hosur
+hduser@vagrant-ubuntu-trusty-64:~$hdfs dfsadmin -report
+
+GCP STORAGE PRACTICE:
+=====================
+C:\Users\kristhim>gsutil
+C:\Users\kristhim>gsutil mb -c Coldline gs://gcptest-demo-bucket/
+C:\Users\kristhim>gsutil -m cp -r C:\Users\kristhim\Desktop\thimma\practice\names gs://gcptest-demo-bucket
+C:\Users\kristhim>gsutil ls gs://gcptest-demo-bucket
+C:\Users\kristhim>MOVE C:\Users\kristhim\Desktop\thimma\practice\names>yob2009.txt  C:\Users\kristhim\Desktop\thimma\practice\names>yob2009_testfile.t
+C:\Users\kristhim>gsutil ls gs://gcptest-demo-bucket/names/*
+C:\Users\kristhim>gsutil -m rsync -d -r C:\Users\kristhim\Desktop\thimma\practice\names gs://gcptest-bucket-demo/names
+C:\Users\kristhim>gsutil -m rsync -d -r C:\Users\kristhim\Desktop\thimma\practice\names gs://gcptest-demo-bucket/names
+C:\Users\kristhim>gsutil acl ch -r -u AllUsers:R gs://gcptest-demo-bucket/names
+C:\Users\kristhim\Desktop\thimma\practice\names\yob2009_test_file.txt [Content-Type=text/plain]...
+http://storage.googleapis.com/gcptest-demo-bucket/names/NationalReadMe.pdf
+C:\Users\kristhim>gsutil ls -Lr gs://gcptest-demo-bucket
+C:\Users\kristhim>gsutil -m rm gs://gcptest-demo-bucket/**
+C:\Users\kristhim>gsutil rb gs://gcptest-demo-bucket
+
+
+BIGQUREY PRACTICE:
+=================
+
+
+C:\Users\kristhim>bq query "select id,title,url from bigquery-public-data.hacker_news.full group by title;
+C:\Users\kristhim>bq ls
+C:\Users\kristhim>bq query "select id,title,url from bigquery-public-data.hacker_news.full group by title";
+C:\Users\kristhim>BigQuery error in query operation: Not found: Project gcptest
+C:\Users\kristhim>gcloud init
+C:\Users\kristhim>bq l
+bq help' to get help
+C:\Users\kristhim>gcloud config set compute/zone us-east1-b
+C:\Users\kristhim>gcloud config set compute/region us-east1
+C:\Users\kristhim>bq ls publicdata:
+  datasetId
+C:\Users\kristhim>bq mk babynames
+Dataset 'gcptest-2:babynames' successfully created
+C:\Users\kristhim>bq load babynames.names2016 C:\Users\kristhim\Desktop\thimma\practice\names\yob2016.txt name:string, gender:string, count:integer
+C:\Users\kristhim>bq load babynames.names2010 C:\Users\kristhim\Desktop\thimma\practice\names\yob2010.txt name:string, gender:string, count:integer
+C:\Users\kristhim>bq load babynames.names2010 C:\\Users\\kristhim\\Desktop\\thimma\\practice\\names\\yob2010.txt name:string, gender:string, count:int
+C:\Users\kristhim>bq ls babynames:
+C:\Users\kristhim>bq ls gcptest-1:
+C:\Users\kristhim>bq load babynames.names2016 yob2016.txt name:string, gender:string, count:integer
+C:\Users\kristhim>bq load babynames.names2016 yob2016.txt [name:string, gender:string, count:integer]
+C:\Users\kristhim>bq load --autodetect babynames.names2016 yob2016.txt
+Upload complete
+Waiting on bqjob_r53f2284e_0000016294087986_1 ... (0s) Current status: DONE
+bqjob_r53f2284e_0000016294087986_1': Error while reading data, error
+C:\Users\kristhim>bq ls babynames.names2016
+TableReference
+C:\Users\kristhim>bq load --autodetect --source_format=csv babynames.names2016 yob2016.txt
+C:\Users\kristhim>bq load --autodetect --source_format=CSV babynames.names2016 yob2016.txt
+Waiting on bqjob_r250d320f_00000162940ba20d_1 ... (0s) Current status: DONE
+bqjob_r250d320f_00000162940ba20d_1': Error while reading data, error
+C:\Users\kristhim>bq load --source_format=csv babynames.names2016 yob2016.txt  name:string,gender:string,count:integer
+C:\Users\kristhim>bq load --source_format=CSV babynames.names2016 yob2016.txt  name:string,gender:string,count:integer
+Waiting on bqjob_r547bdf8d_00000162940d7ad6_1 ... (0s) Current status: DONE
+C:\Users\kristhim>bq ls babynames
+   tableId
+C:\Users\kristhim>bq show babynames.names2016
+Table gcptest-2:babynames.names2016
+C:\Users\kristhim>bq query "select name,gender from babynames.names2016 where gender='F' group by count ASC LIMIT 5"
+bqjob_r22d45c90_00000162941ae21e_1': Encountered " "ASC" "ASC "" at
+C:\Users\kristhim>bq query "select name,gender from babynames.names2016 where gender='F' order by count ASC LIMIT 5"
+Waiting on bqjob_r5a241d6f_00000162941b6667_1 ... (0s) Current status: DONE
+C:\Users\kristhim>
+C:\Users\kristhim>bq mk babynames2
+Dataset 'gcptest-2:babynames2' successfully created
+C:\Users\kristhim>bq load babynames2.names2000 gs://gcptest-demo-bucket/names/yob2000.txt
+bqjob_r5a384409_00000162957417f5_1': No schema specified on job or
+C:\Users\kristhim>bq load --autodetect  babynames2.names2000 gs://gcptest-demo-bucket/names/yob2000.txt
+Waiting on bqjob_r1765a816_000001629574e6c9_1 ... (0s) Current status: DONE
+bqjob_r1765a816_000001629574e6c9_1': Error while reading data, error
+C:\Users\kristhim>bq load --autodetect --source_format=CSV babynames2.names2000 gs://gcptest-demo-bucket/names/yob2000.txt
+Waiting on bqjob_r2af140cd_000001629575522e_1 ... (0s) Current status: DONE
+bqjob_r2af140cd_000001629575522e_1': Error while reading data, error
+C:\Users\kristhim>bq load babynames2.names2000 gs://gcptest-demo-bucket/names/yob2000.txt name:string,gender:string,count:integer
+Waiting on bqjob_r4f58cc2b_000001629575f4d0_1 ... (0s) Current status: DONE
+C:\Users\kristhim>bq show babynames2.names2000
+Table gcptest-2:babynames2.names2000
+bq mk babynames2
+bq load babynames2.names2000 gs://gcptest-demo-bucket/names/yob2000.txt
+bq load --autodetect  babynames2.names2000 gs://gcptest-demo-bucket/names/yob2000.txt
+bq load --autodetect --source_format=CSV babynames2.names2000 gs://gcptest-demo-bucket/names/yob2000.txt
+bq load babynames2.names2000 gs://gcptest-demo-bucket/names/yob2000.txt name:string,gender:string,count:integer
+bq show babynames2.names2000
+bq mk babynames3
+bq load babynames3.names2001 gs://gcptest-demo-bucket/names/yob2001.txt name:string,gender:string,count:integer
+bq cp babynames.names2016 babynames.names2016COPY
+bq update --description "Description for the baby Names on 2016" babynames.names2016
+bq cp -a babynames.names2016 testproject:babynames1.name2010
+bq cp -a babynames.names2016, babynames2.names2000 gcptest:babynames3.names2001
+bq cp -a babynames.names2016, babynames2.names2000 babynames3.names2001
+bq cp -f babynames.names2016, babynames2.names2000 babynames3.names2001
+bq show babynames3.names2001
+bq ls babynames3
+bq cp -f babynames.names2016 babynames3.names2001
+bq cp -f babynames.names2016, babynames2.names2000 babynames3.names20016
+bq cp -f babynames.names2016, babynames2.names2000 babynames3.names2016
+bq cp -f babynames.names2016 babynames3.names2016
+bq rm -t gcptest:babynames3.names2016
+bq ls
+bq rm -t gcptest-2:babynames3.names2016
+bq ls gcptest:babynames3
+bq head --max_rows=10 babynames3.names2001
+C:\Users\kristhim>bq head --max_rows=10 babynames3.names2001
+
+
+
+
+
+
+

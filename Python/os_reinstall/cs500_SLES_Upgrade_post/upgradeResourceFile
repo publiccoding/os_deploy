@@ -1,0 +1,65 @@
+###################################################################################################################
+#                    RESOURCES IN THIS SECTION ARE NOT ALLOWED TO BE MODIFIED.                                    #
+###################################################################################################################
+###################################################################################################################
+# The followng are the files and directories that will be backed up.
+# Additionally, the custom global.ini files for the active databases based on /usr/sap/sapservices will be backed
+# up in the archive backup if the compute node is a SAP HANA compute node.
+###################################################################################################################
+sapRestorationBackup = '/usr/sap, /var/lib/hdb'
+sglxRestorationBackup = '/etc/multipath.conf, /opt/cmcluster/conf/AutoPass/LicFile.txt, /opt/cmcluster/conf/hananfs/*.ascii, /opt/cmcluster/conf/hananfs/nfs/*.conf, /opt/cmcluster/conf/cmcluster.rc, /opt/cmcluster/conf/cmclnodelist'
+sglxArchiveBackup = '/opt/cmcluster/nfstoolkit, /opt/cmcluster/conf'
+sgQsRestorationBackup = '/opt/qs/conf/qs_authfile'
+sgQsArchiveBackup = '/opt/qs/conf'
+
+###################################################################################################################
+# The following is a list of the SAP HANA related partitions in /etc/fstab that will be restored to
+# /etc/fstab after the upgrade.
+###################################################################################################################
+fstabHANAEntries = '/hana/data, /hana/log, /hana/shared, /hana/backup, /usr/sap'
+
+###################################################################################################################
+# The following are the add on file archives that will be installed after the upgrade to add some additional
+# HPE provided files.
+###################################################################################################################
+haswellRHELAddOnFileArchive = 'haswellRHELAddOnFiles.tar.gz'
+haswellSLESAddOnFileArchive = 'haswellSLESAddOnFiles.tar.gz'
+ivyBridgeRHELAddOnFileArchive = 'ivyBridgeRHELAddOnFiles.tar.gz'
+ivyBridgeSLESAddOnFileArchive = 'ivyBridgeSLESAddOnFiles.tar.gz'
+cs900RHELAddOnFileArchive = 'cs900RHELAddOnFiles.tar.gz'
+cs900SLESAddOnFileArchive = ''
+
+###################################################################################################################
+# The following is the maximum allowed size (GB) of the backup archives.  The size also takes into account
+# the addition of the post archive ISO image.
+###################################################################################################################
+archiveSizeLimit = '3'
+
+###################################################################################################################
+# The following is the list of supported OS versions that a server can be upgraded to. 
+###################################################################################################################
+supportedSLESOSVersions = 'SLES 11.4, SLES 12.1, SLES 12.2'
+supportedRHELOSVersions = 'RHEL 7.2, RHEL 7.3'
+
+###################################################################################################################
+# The following is the list of supported servers that can be upgraded. 
+# CS500: 
+# 	ProLiant DL580 Gen8, ProLiant DL580 Gen9
+# CS900:
+# 	Superdome
+# Serviceguard NFS Servers:
+# 	ProLiant DL380p Gen8, ProLiant DL360p Gen8
+# Serviceguard Quorum Servers:
+# 	ProLiant DL320e Gen8 v2, ProLiant DL360 Gen9
+###################################################################################################################
+supportedServerList = 'ProLiant DL580 Gen8, ProLiant DL580 Gen9, Superdome, ProLiant DL380p Gen8, ProLiant DL360p Gen8, ProLiant DL360 Gen9, ProLiant DL320e Gen8 v2'
+
+###################################################################################################################
+# The followng are the files and directories that will be backed up.
+# Each file/directory is seperated by a comma.
+# Note, the size of the restoration archive is limited to 3GB, thus consideration should be giving if making
+# changes to the restoration archive resources.
+###################################################################################################################
+slesOSRestorationBackup = '/root, /etc/HOSTNAME, /etc/hosts, /etc/resolv.conf, /etc/nsswitch.conf, /etc/ntp.conf, /etc/sudoers, /etc/multipath.conf, /etc/sysctl.conf, /etc/sysctl.d/98-sysctl.conf, /etc/snmp/snmpd.conf, /etc/sysconfig/clock, /etc/sysconfig/network/ifcfg-*, /etc/sysconfig/network/routes, /etc/sysconfig/network/ifroute-*, /etc/krb5.conf, /etc/krb5.keytab, /var/spool/cron/tabs'
+rhelOSRestorationBackup = '/root, /etc/hosts, /etc/resolv.conf, /etc/nsswitch.conf, /etc/ntp.conf, /etc/sudoers, /etc/multipath.conf, /etc/sysctl.conf, /etc/sysctl.d/98-sysctl.conf, /etc/snmp/snmpd.conf, /etc/sysconfig/network, /etc/sysconfig/network-scripts/ifcfg-*, /etc/sysconfig/network-scripts/route-*, /etc/krb5.conf, /etc/krb5.keytab, /var/spool/cron'
+osArchiveBackup = '/etc, /var/spool/cron, /home, /root, /var/spool/mail'

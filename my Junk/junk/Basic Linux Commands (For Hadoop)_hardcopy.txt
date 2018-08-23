@@ -1,0 +1,165 @@
+Basic Linux commands necessary for Hadoop
+-----------------------------------------
+satish@ubuntu:~$
+
+satish : username
+ubuntu : host name/ machine name
+______________________________________________________________________________________________________
+satish@ubuntu:~$su root
+password : ****** 
+
+su : switch user
+______________________________________________________________________________________________________
+root@ubuntu:/home/satish#
+______________________________________________________________________________________________________
+root@ubuntu:/home#mkdir practice
+______________________________________________________________________________________________________
+To clear the screen
+Ctrl+l
+(or)
+clear
+______________________________________________________________________________________________________
+root@ubuntu:/home#ls -ltra
+
+a : to display hidden directories & files also
+
+drwxr-xr-x  2  root  root  4096  Time&Date   practice
+-rwxr-xr-x  2  root  root  4096  Time&Date   demo.txt
+
+d/- : directory/file
+rwx :
+r-x :
+r-x :
+2 : Number of internal links
+root : username
+root : groupname
+4096 : size of dir/file
+Time&Date : Time stamp
+practice : directory name
+demo.txt : file name
+
+ll : for exhaustive complete list
+______________________________________________________________________________________________________
+Creating new files
+------------------
+1. For flag files(0 kb files)
+root@ubuntu:/home#touch trigger
+
+2. Using cat
+root@ubuntu:/home#cat > trigger1
+Type text here
+For practice
+
+[Ctrl+d] - to save & exit
+
+3. Using vi(virtual interface) editor
+root@ubuntu:/home#vi trigger2  ##Opens window in read only mode
+#To go to insert mode
+[Esc+i] 
+#To go back to read only mode
+[Esc]
+#Write & Quit(saves the content)
+[shift+:+wq]
+
+4. Using nano editor
+root@ubuntu:/home#nano trigger3
+Type text here
+For practice
+
+#To save & exit
+[ctrl+x] -> [Y]
+
+______________________________________________________________________________________________________
+#To display high level processes
+root@ubuntu:/home#ps
+#To display all processes
+root@ubuntu:/home#ps -ef
+#To display Java processes
+root@ubuntu:/home#jps
+______________________________________________________________________________________________________
+To check versions of softwares 
+root@ubuntu:/home#hadoop version
+root@ubuntu:/home#java -version
+______________________________________________________________________________________________________
+File permissions
+----------------
+r - 4
+w - 2 
+x - 1
+
+Default permissions for :
+1.File(Default 644)  
+  -|rw-|r--|r--
+
+file(or)dir| rights of owner on the file| rights of group on the file|rights of others on the file
+
+2.Directory(Default 755)
+  d|rwx|r-x|r-x
+
+#To change permissions on a file
+root@ubuntu:/home#chmod 777 trigger.log
+
+#To change permissions on a dir(All files in the practice dir will be given 777 privileges)
+root@ubuntu:/home#chmod -R 777 practice
+______________________________________________________________________________________________________
+To copy files
+-------------
+root@ubuntu:/home#cp <source_path> <destination_path>
+______________________________________________________________________________________________________
+To move files
+-------------
+root@ubuntu:/home#mv <source_path> <destination_path>
+______________________________________________________________________________________________________
+To remove files/directories
+---------------------------
+root@ubuntu:/home#rm <file_name>
+root@ubuntu:/home#rmdir <dir_name>
+
+#For recursive remove
+root@ubuntu:/home#rm -r <dir_name>
+______________________________________________________________________________________________________
+Word count
+----------
+root@ubuntu:/home#wc file.log
+8(lines)  46(words)  270(characters without spaces)  file.log(filename)
+
+
+root@ubuntu:/home#cat file.log  | wc -l/-w/-c
+______________________________________________________________________________________________________
+Pattern searching
+-----------------
+root@ubuntu:/home#grep <hadoop>  <file.log>
+
+hadoop : pattern to be searched in file.log file
+
+#To ignore case while pattern searching
+root@ubuntu:/home#grep -i <hadoop>  <file.log>
+______________________________________________________________________________________________________
+Status of a file
+----------------
+root@ubuntu:/home#stat <file.log>
+______________________________________________________________________________________________________
+To change owner of a file
+-------------------------
+chown - change owner
+
+root@ubuntu:/home#chown <new_owner_name>  <file_name>
+______________________________________________________________________________________________________
+To change group of a file
+-------------------------
+chgrp - change group
+
+root@ubuntu:/home#chgrp <new_group_name>  <file_name>
+______________________________________________________________________________________________________
+Extracting jar files
+--------------------
+root@ubuntu:/home#jar cvf <destination_finalnameofjar.jar>  <source*.*>
+
+root@ubuntu:/home#jar xvf <extracted_to_be.jar>
+______________________________________________________________________________________________________
+Power-off VM
+------------
+root@ubuntu:/home#poweroff
+(or)
+VM->Power->Power Off
+______________________________________________________________________________________________________

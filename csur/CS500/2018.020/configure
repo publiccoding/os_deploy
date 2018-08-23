@@ -1,0 +1,247 @@
+#!/usr/bin/python
+
+
+import re
+import shutil
+import os
+import sys
+import subprocess
+import shutil
+
+
+RED = '\033[31m'
+GREEN = '\033[32m'
+RESETCOLORS = '\033[0m'
+
+def main():
+	#This is the base path for the csur directory.
+	csurDir = '/hp/support/csur'
+
+	#Get the location of where the archive was extracted to, so that we can add it to the archive image name.
+	executableFullPath = os.path.abspath(sys.argv[0])
+	executableName = os.path.basename(sys.argv[0])
+	executablePath = re.sub(executableName, '', executableFullPath)
+
+	#These are the license files that should be present and that will be installed in /var/share/doc/hpe.
+	gplLicenses = 'GPL_licenses.txt'
+	writtenOffer = 'Written_offer.txt'
+	licenseFileList = [executablePath + gplLicenses, executablePath + writtenOffer]
+
+	#This is the directory where the license files will copied to.
+	hpeLicenseDir = '/usr/share/doc/hpe'
+
+	#The program can only be ran by root.
+	if os.geteuid() != 0:
+		print(RED + "You must be root to run this program." + RESETCOLORS)
+		exit(1)
+
+	'''
+	Get the OS distribution level, since SLES does not have python curses installed
+	by default.
+	osDistLevel will be an empty string if the OS is RHEL.
+	'''
+	osDistLevel = getDistribution()
+
+	if osDistLevel != '':
+		if osDistLevel == '11.4':
+			pythonCursesRPM = 'python-curses-2.6.9-39.1.x86_64.rpm'
+		else: #Assume 12.x. Also, need to check the version of python, since the OS patch bundles update python.
+			cmd = 'python -V'	
+
+			result = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+			out, err = result.communicate()
+
+			if result.returncode != 0:
+				print(RED + "Errors were encountered while checking the version of python; fix the problem and try again.\n" + err + RESETCOLORS)
+				exit(1)
+
+			try:
+				pythonVersion = re.match('.*(([0-9]\.){2}[0-9]+)', err).group(1)
+			except AttributeError as err:
+				print(RED + "Errors were encountered while trying to extract the version of python; fix the problem and try again.\n" + err + RESETCOLORS)
+				exit(1)
+
+			if pythonVersion == '2.7.9':
+				pythonCursesRPM = 'python-curses-2.7.9-24.1.x86_64.rpm'
+			elif pythonVersion == '2.7.13':
+				pythonCursesRPM = 'python-curses-2.7.13-27.1.x86_64.rpm'
+
+		#Install python curses if it is not already installed.
+		cmd = 'rpm -q python-curses'
+
+		result = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+		out, err = result.communicate()
+
+		#This means that python curses was not installed.
+		if result.returncode != 0:
+			command = 'rpm -U ' + pythonCursesRPM
+			result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+			out, err = result.communicate()
+
+			if result.returncode != 0:
+				print(RED + "Errors were encountered while installing python curses; fix the problem and try again.\n" + err + RESETCOLORS)
+				exit(1)
+
+	'''
+	Delete the current csur directory contents, except for the bin directory, so that we start clean.
+	Also, we want to delete the csur directories that may of been left behind so that they do not contribute
+	to the root file system's usage check.
+	'''
+	if os.path.exists(csurDir):
+		dirs = os.listdir(csurDir)
+
+		for dir in dirs:
+			#We do not want to delete the bin directory hosting the csur bundle application.
+			if dir == 'bin':
+				continue
+			else:
+				dir = csurDir + '/' + dir
+
+				try:
+					shutil.rmtree(dir)
+				except IOError as err:
+					print(RED + "Unable to delete the current csur related directory (" + dir + "); fix the problem and try again.\n" + str(err) + RESETCOLORS)
+					exit(1)
+
+	#Get the root file system's usage.  There must be at least 10GB free in order to do the csur update.
+	command = "df /"
+	result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+	out, err = result.communicate()
+
+	if result.returncode != 0:
+		print(RED + "Unable to check the available disk space of the root file system; fix the problem and try again.\n" + err + RESETCOLORS)
+		exit(1)
+
+	out = out.strip()
+
+	tmpVar = re.match('(.*\s+){3}([0-9]+)\s+', out).group(2)
+
+	availableDiskSpace = round(float(tmpVar)/float(1024*1024), 2)
+
+	if not availableDiskSpace >= 10:
+		print(RED + "There is not enough disk space (" + str(availableDiskSpace) + "GB) on the root file system; There needs to be at least 10GB of free space on the root file system; fix the problem and try again." + RESETCOLORS)
+		exit(1)
+
+	command = 'ls ' + executablePath + '*.tgz'
+	result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+	out, err = result.communicate()
+
+	if result.returncode != 0:
+		print(RED + "Unable to get the csur archive name; fix the problem and try again.\n" + err + RESETCOLORS)
+		exit(1)
+
+	csurArchive = out.strip()
+	csurArchiveName = re.match(r'.*/(.*\.tgz)', csurArchive).group(1)
+	csurArchiveMd5sumFile = re.sub('tgz', 'md5sum', csurArchiveName)
+
+	#Check the md5sum of the csur archive to make sure it is not corrupt.
+	command = 'md5sum ' + csurArchive
+	result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+	out, err = result.communicate()
+
+	if result.returncode != 0:
+		print(RED + "Unable to determine the md5sum of the csur archive (" + csurArchive + "); fix the problem and try again.\n" + err + RESETCOLORS)
+		exit(1)
+
+	csurArchiveMd5sum = re.match('([0-9,a-f]*)\s+', out).group(1)
+
+	try:
+		with open(csurArchiveMd5sumFile) as f:
+			for line in f:
+				line = line.strip()
+				if csurArchiveName in line:
+					csurMd5sum = re.match('([0-9,a-f]*)\s+', out).group(1)
+	except IOError as err:
+		print(RED + "Unable to get the md5sum of the csur archive from (" + csurArchiveMd5sumFile + "); fix the problem and try again.\n" + str(err) + RESETCOLORS)
+		exit(1)
+
+	if csurArchiveMd5sum != csurMd5sum:
+		print(RED + "The csur archive (" + csurArchive + ") is corrupt; fix the problem and try again." + RESETCOLORS)
+		exit(1)
+
+	#Change into the root directory and extract the csur archive.
+	try:
+		os.chdir('/')
+	except OSError as err:
+		print(RED + "Could not change into the root (/) directory; fix the problem and try again.\n" + str(err) + RESETCOLORS)
+		exit(1)
+
+	command = 'tar -zxvf ' + csurArchive
+	result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+	out, err = result.communicate()
+
+	if result.returncode != 0:
+		print(RED + "Unable to extract the csur archive (" + csurArchive + "); fix the problem and try again.\n" + err + RESETCOLORS)
+		exit(1)
+
+	if not os.path.isdir(hpeLicenseDir):
+		try:
+			os.mkdir(hpeLicenseDir, 0755)
+		except OSError as err:
+			print(RED + "Unable to create the license directory " + hpeLicenseDir + "; fix the problem and try again.\n" + str(err) + RESETCOLORS)
+			exit(1)
+
+	for file in licenseFileList:
+		try:
+			shutil.copy(file, hpeLicenseDir)	
+		except IOError as err:
+			print(RED + "Unable to copy the license file " + file + " to " + hpeLicenseDir +"; fix the problem and try again.\n" + str(err) + RESETCOLORS)
+			exit(1)
+
+	print(GREEN + "The csur archive has been successfully extracted to (" + csurDir + ") and is ready to install.\n\n" + RESETCOLORS)
+
+	print(RED + "Before installing make sure the following tasks have been completed:\n")
+	print("\t1. The SAP HANA application has been shut down.\n")
+	print("\t2. The system has been backed up.\n")
+	print("\t3. The cluster has been stopped if this is a Serviceguard NFS node.\n")
+	print(RESETCOLORS)
+
+#End main():
+
+
+def getDistribution():
+	osDistLevel = ''
+
+	#Get the system's OS distribution version information.
+	command = "cat /proc/version"
+	result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+	out, err = result.communicate()
+
+	if result.returncode != 0:
+		print(RED + "Unable to get the server's OS distribution information; fix the problem and try again.\n" + str(err) + RESETCOLORS)
+		exit(1)
+
+	#Change version information to lowercase before checking for OS type.
+	versionInfo = out.lower()
+
+	if 'suse' in versionInfo:
+		command = "cat /etc/SuSE-release"
+
+		result = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+		out, err = result.communicate()
+
+		if result.returncode != 0:
+			print(RED + "Unable to get the server's OS distribution level; fix the problem and try again.\n" + str(err) + RESETCOLORS)
+			exit(1)
+		else:
+			releaseInfo = out.replace('\n', ' ')
+
+			try:
+				slesVersion = re.match('.*version\s*=\s*([1-2]{2})', releaseInfo, re.IGNORECASE).group(1)
+			except AttributeError as err:
+				print(RED + "There was an OS version match error when trying to match against '" + releaseInfo + "'; fix the problem and try again:\n" + str(err) + ".")
+				exit(1)
+
+			try:
+				slesPatchLevel = re.match('.*patchlevel\s*=\s*([1-4]{1})', releaseInfo, re.IGNORECASE).group(1)
+			except AttributeError as err:
+				print(RED + "There was an OS patch level match error when trying to match against '" + releaseInfo + "'; fix the problem and try again:\n" + str(err) + ".")
+				exit(1)
+
+			osDistLevel = slesVersion + '.' + slesPatchLevel
+
+	return osDistLevel
+
+#End getDistribution():
+
+main()

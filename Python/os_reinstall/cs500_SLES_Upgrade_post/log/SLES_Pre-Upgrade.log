@@ -1,0 +1,57 @@
+06/12/2018 11:05:47:INFO:The program's version is: 2018.03-0.
+06/12/2018 11:05:47:INFO:Getting the server's model information.
+06/12/2018 11:05:47:INFO:The server's model was determined to be: ProLiant DL580 Gen9.
+06/12/2018 11:05:47:INFO:Done getting the server's model information.
+06/12/2018 11:06:09:INFO:The choice to upgrade to 12.1 was made.
+06/12/2018 11:06:09:INFO:Getting the server's hostname.
+06/12/2018 11:06:09:INFO:The server's hostname was determined to be: cs500-3tb-hsw.
+06/12/2018 11:06:09:INFO:Done getting the server's hostname.
+06/12/2018 11:06:09:INFO:Getting the server's time zone information.
+06/12/2018 11:06:09:INFO:Done getting the server's time zone information.
+06/12/2018 11:06:09:INFO:Getting the server's processor type.
+06/12/2018 11:06:09:INFO:The server's processor type was determined to be: haswell.
+06/12/2018 11:06:09:INFO:Done getting the server's processor type.
+06/12/2018 11:06:09:INFO:Copying the additional RPMs needed for the post-upgrade to the pre-upgrade working directory.
+06/12/2018 11:06:09:INFO:The command used to copy the additional RPMs into place for the post upgrade installation was: 'cp /mnt/addOnSoftwareRPMS/SLES/12.1/* /tmp/CoE_SAP_HANA_SLES_Upgrade_Working_Dir_121105Jun2018/addOnSoftwareRPMS'.
+06/12/2018 11:06:09:INFO:Done copying the additional RPMs needed for the post-upgrade to the pre-upgrade working directory.
+06/12/2018 11:06:09:INFO:Getting SAP HANA related partition data from '/etc/fstab'.
+06/12/2018 11:06:09:INFO:Done getting SAP HANA related partition data from '/etc/fstab'.
+06/12/2018 11:06:09:INFO:Checking SAP HANA related components.
+06/12/2018 11:06:09:INFO:Getting the SID list for the currently active SIDs as identified by '/usr/sap/sapservices'.
+06/12/2018 11:06:09:INFO:The active SID list as determined by '/usr/sap/sapservices' was: ['DB1'].
+06/12/2018 11:06:09:INFO:Done getting the SID list for the currently active SIDs as identified by '/usr/sap/sapservices'.
+06/12/2018 11:06:09:INFO:Getting the global.ini files for the currently active SIDs and tenant user information if the SID is a MDC with high isolation.
+06/12/2018 11:06:09:INFO:Checking to see if 'DB1' is a multitenant database container.
+06/12/2018 11:06:09:INFO:Done checking to see if 'DB1' is a multitenant database container.
+06/12/2018 11:06:09:INFO:Done getting the global.ini files for the currently active SIDs and tenant user information if the SID is a MDC with high isolation.
+06/12/2018 11:06:21:INFO:Done checking SAP HANA related components.
+06/12/2018 11:06:21:INFO:Getting SAP HANA user account login data.
+06/12/2018 11:06:21:INFO:The SID list was determined to be: ['DB1', 'SAP'].
+06/12/2018 11:06:21:INFO:Done getting SAP HANA user account login data.
+06/12/2018 11:06:21:INFO:Getting the list of sapinit related files that will be added to the restoration backup.
+06/12/2018 11:06:22:INFO:The list of sapinit related files that will be added to the restoration backup was determined to be: ['/etc/rc.d/sapinit', '/etc/init.d/sapinit'].
+06/12/2018 11:06:22:INFO:Done getting the list of sapinit related files that will be added to the restoration backup.
+06/12/2018 11:06:22:INFO:Getting the conrep file that will be used during the post-upgrade to update the server's BIOS.
+06/12/2018 11:06:22:INFO:Done getting the conrep file that will be used during the post-upgrade to update the server's BIOS.
+06/12/2018 11:06:22:INFO:Updating the install control file with the partition ID that will have the OS installed on it.
+06/12/2018 11:06:24:INFO:Done updating the install control file with the partition ID that will have the OS installed on it.
+06/12/2018 11:06:24:INFO:Checking to ensure that there is enough disk space for the backup and the backup ISO image and that the overall restoration backup does not exceed 3GB.
+06/12/2018 11:06:24:INFO:Done checking to ensure that there is enough disk space for the backup and the backup ISO image and that the overall restoration backup does not exceed 3GB.
+06/12/2018 11:06:24:INFO:Creating the NIC MAC address cross reference file that will be used for reference after the upgrade.
+06/12/2018 11:06:24:INFO:The NIC dictionary was determined to be: {'50:65:f3:81:42:62': 'p8p2', '50:65:f3:81:42:61': 'p8p1', '24:be:05:c6:58:31': 'p4p1', '50:65:f3:81:42:b2': 'p5p2', '50:65:f3:81:42:b1': 'p5p1', '24:be:05:c6:48:92': 'p7p2', '24:be:05:c6:58:32': 'p4p2', '24:be:05:c6:48:91': 'p7p1', '28:80:23:9b:25:ed': 'p6p2', '28:80:23:9d:e7:27': 'em52', '28:80:23:9d:e7:26': 'em51', '28:80:23:9d:e7:25': 'em50', '28:80:23:9d:e7:24': 'em49', '28:80:23:9b:25:ee': 'p6p3', '28:80:23:9b:25:ef': 'p6p4', '28:80:23:9b:25:ec': 'p6p1'}.
+06/12/2018 11:06:24:INFO:It was determined that there were no active network bonds, since '/proc/net/bonding' did not exist.
+06/12/2018 11:06:24:INFO:Done creating the NIC MAC address cross reference file that will be used for reference after the upgrade.
+06/12/2018 11:06:24:INFO:Checking to see if Mellanox NIC cards are present.
+06/12/2018 11:06:26:INFO:Done checking to see if Mellanox NIC cards are present.
+06/12/2018 11:06:26:INFO:Creating the backup archive ISO image.
+06/12/2018 11:06:26:INFO:Checking the backup data list to ensure the selected files/directories are present and if not removing them from the list.
+06/12/2018 11:06:26:INFO:The following was removed from the backup list, since it was not present: /etc/sysctl.d/98-sysctl.conf.
+06/12/2018 11:06:26:INFO:The following was removed from the backup list, since it was not present: /etc/krb5.keytab.
+06/12/2018 11:06:26:INFO:Done checking the backup data list to ensure the selected files/directories are present and if not removing them from the list.
+06/12/2018 11:06:26:INFO:The command used to create the 'OS restoration' tar archive was: tar -cWf /tmp/CoE_SAP_HANA_SLES_Upgrade_Working_Dir_121105Jun2018/archiveImages/cs500-3tb-hsw_OS_Restoration_Backup_For_SLES_Upgrade_121106Jun2018.tar /root /etc/HOSTNAME /etc/hosts /etc/resolv.conf /etc/nsswitch.conf /etc/ntp.conf /etc/sudoers /etc/multipath.conf /etc/sysctl.conf /etc/snmp/snmpd.conf /etc/sysconfig/clock /etc/sysconfig/network/ifcfg-* /etc/sysconfig/network/routes /etc/sysconfig/network/ifroute-* /etc/krb5.conf /var/spool/cron/tabs /etc/rc.d/sapinit /etc/init.d/sapinit -C /.
+06/12/2018 11:06:26:INFO:Checking the backup data list to ensure the selected files/directories are present and if not removing them from the list.
+06/12/2018 11:06:26:INFO:Done checking the backup data list to ensure the selected files/directories are present and if not removing them from the list.
+06/12/2018 11:06:26:INFO:The command used to create the 'OS backup' tar archive was: tar -cWf /tmp/CoE_SAP_HANA_SLES_Upgrade_Working_Dir_121105Jun2018/archiveImages/cs500-3tb-hsw_OS_Archive_Backup_For_SLES_Upgrade_121106Jun2018.tar /etc /var/spool/cron /home /root /var/spool/mail -C /.
+06/12/2018 11:06:29:INFO:Checking the backup data list to ensure the selected files/directories are present and if not removing them from the list.
+06/12/2018 11:06:29:INFO:Done checking the backup data list to ensure the selected files/directories are present and if not removing them from the list.
+06/12/2018 11:06:29:INFO:The command used to create the 'SAP restoration' tar archive was: tar -cWf /tmp/CoE_SAP_HANA_SLES_Upgrade_Working_Dir_121105Jun2018/archiveImages/cs500-3tb-hsw_SAP_Restoration_Backup_For_SLES_Upgrade_121106Jun2018.tar /usr/sap /var/lib/hdb -C /.

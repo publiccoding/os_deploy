@@ -1,0 +1,5 @@
+/dev/vgHANA/lv-data    /hana/data           xfs     inode64,defaults 1 2
+/dev/vgHANA/lv-log     /hana/log            xfs     inode64,defaults 1 2
+/dev/vgHANA/lv-shared  /hana/shared         xfs     inode64,defaults 1 2
+/dev/vgHANA/lv-usr-sap /usr/sap             xfs    defaults 1 2
+/dev/vgHANA/lv-backup  /hana/backup         xfs     inode64,defaults 1 2

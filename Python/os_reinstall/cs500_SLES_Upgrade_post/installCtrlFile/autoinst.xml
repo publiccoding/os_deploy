@@ -1,0 +1,512 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <scripts>
+    <!--*****Begin pre-scripts*****-->
+    <pre-scripts config:type="list">
+      <!--
+          This script is used to set the device for a server belonging to a cs500 Scale-up system. It will be removed by the python pre-upgrade script
+          if the server belongs to a cs500 Scale-out system. Also, the ask-list will be updated by the python pre-upgrade script if the server 
+          belongs to a cs500 Scale-out system.
+      -->
+      <script>
+        <feedback config:type="boolean">true</feedback>
+        <feedback_type>error</feedback_type>
+	<debug config:type="boolean">false</debug>
+        <filename>getBootDisk.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/bash
+
+result=0
+# Get the SCSI disk, e.g. /dev/sda, that is attached to the P830i controller LUN 00.
+# If the DL580 is part of a Scale-out then this section will not exist as the pre-UpgradeBackup.py script
+# would of removed it.
+bootHost=$(cat /proc/scsi/scsi | egrep -B1 "P830i" | egrep -o "scsi[0-9]+");
+bootDisk=$(cat /proc/scsi/scsi | egrep -B1 "LOGICAL VOLUME" | grep ${bootHost} | grep "Lun: 00" | while read x1 dev x2 chan x3 id x4 lun; \
+           do echo ${dev/scsi/}:${chan:1}:${id:1}:${lun:1}; done | while read device; \
+           do ls -1 /sys/class/scsi_device/$device/device/block; done | tr '\n' '|' | sed 's/|$/\n/g')
+
+echo "Boot disk = $bootDisk." > /tmp/bootDisk.log
+
+#If the boot disk could not be determined or its device file is missing then exit the installation.
+if [[ -z $bootDisk ]]; then
+        echo "Error: There was a problem identifying the boot disk attached to the P830i Controller."
+else
+	ls /dev/${bootDisk} > /dev/null 2>&1
+
+	if [[ $? -ne 0 ]]; then
+        	echo "Error: The boot disk's (/dev/${bootDisk}) device file was not found."
+	else
+		#Set the correct boot disk.
+		cat /tmp/profile/autoinst.xml | sed "s,%%bootDisk%%,/dev/${bootDisk},g" >/tmp/profile/modified.xml
+
+		#Remove ask list, since the SCSI disk was found; thus no reason to exit out of the install.
+		sed -i "\|^[ \t]*<ask-list config:type=\"list\">|,\|^[ \t]*</ask-list>|d" /tmp/profile/modified.xml	
+	fi
+fi
+
+]]>
+        </source>
+      </script>
+    </pre-scripts>
+    <!--*****End pre-scripts*****-->
+
+    <!--*****Begin postpartitioning-scripts*****-->
+    <postpartitioning-scripts config:type="list">
+      <!--
+          This script blacklists the aacraid module, since it has been found to cause boot failures.
+      -->
+      <script>
+        <filename>blacklistController.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+mkdir -p /mnt/etc/modprobe.d
+cat<<EOF > /mnt/etc/modprobe.d/51-hpe-blacklist.conf
+blacklist aacraid
+EOF
+]]>
+        </source>
+      </script>
+    </postpartitioning-scripts>
+    <!--*****End postpartitioning-scripts*****-->
+
+    <!--*****Begin chroot-scripts*****-->
+    <chroot-scripts config:type="list">
+      <!--
+          This script updates /etc/motd with a custom message.
+      -->
+      <script>
+        <filename>motd.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+echo "This is SLES for SAP Applications on a HPE CS500 SAP HANA Converged System." > /mnt/etc/motd
+]]>
+        </source>
+      </script>
+      <!--
+          This script blacklists HPE controllers in /etc/multipath.conf so that they are ignored by multipath.
+      -->
+      <script>
+        <filename>blacklist.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+echo -e 'blacklist {\n\tdevice {\n\t\tvendor HP\n\t\tproduct "LOGICAL VOLUME.*"\n\t}\n}' > /mnt/etc/multipath.conf
+]]>
+        </source>
+      </script>
+      <!--
+          This script performs some extra OS specific tunings.
+      -->
+      <script>
+        <filename>osTuningConfiguration.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+cat<<EOF > /mnt/etc/sysctl.d/98-sysctl.conf
+######################################################
+# KDUMP feature settings
+######################################################
+kernel.panic_on_io_nmi = 1
+kernel.sysrq = 1
+kernel.panic = 10
+kernel.panic_on_oops = 1
+kernel.unknown_nmi_panic = 1
+kernel.panic_on_unrecovered_nmi = 1
+EOF
+
+mkdir -p /mnt/usr/lib/tuned/sap-hpe-hana
+cat<<EOF > /mnt/usr/lib/tuned/sap-hpe-hana/tuned.conf
+######################################################
+# START: tuned profile sap-hpe-hana settings
+######################################################
+#
+# tuned configuration for HPE SAP HANA.
+# Inherited from SuSE/SAP sap-hana profile
+#
+# Allows HPE SAP HANA specific tunings
+#
+[main]
+include = sap-hana
+
+
+[sysctl]
+# Disable response to broadcasts.
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+
+# enable route verification on all interfaces
+net.ipv4.conf.all.rp_filter = 1
+
+# increase the number of possible inotify(7) watches
+fs.inotify.max_user_watches = 65536
+
+# avoid deleting secondary IPs on deleting the primary IP
+net.ipv4.conf.default.promote_secondaries = 1
+net.ipv4.conf.all.promote_secondaries = 1
+
+####################################################
+# TCP optimizations
+####################################################
+
+# from Emulex
+net.core.rmem_default = 64000000
+net.core.rmem_max = 64000000
+net.core.wmem_default = 64000000
+net.core.wmem_max = 64000000
+net.ipv4.tcp_sack = 1
+
+# HANA network
+net.ipv4.tcp_max_orphans = 562144
+net.ipv4.tcp_max_tw_buckets = 1440000
+net.ipv4.tcp_mem = 10000000 10000000 13000000
+net.ipv4.tcp_wmem = 10000000 10000000 10000000
+net.ipv4.tcp_rmem = 10000000 10000000 10000000
+net.core.netdev_max_backlog = 600000
+net.core.optmem_max = 640000000
+net.ipv4.tcp_app_win = 31
+net.ipv4.tcp_adv_win_scale = 2
+net.ipv4.tcp_no_metrics_save = 1
+net.ipv4.tcp_moderate_rcvbuf = 1
+net.ipv4.udp_wmem_min = 16384
+
+net.core.somaxconn = 4096
+net.ipv4.tcp_max_syn_backlog = 8192
+net.ipv4.ip_local_port_range = 1024 64999
+net.ipv4.tcp_tw_reuse  = 1
+net.ipv4.tcp_tw_recycle  = 1
+net.ipv4.tcp_timestamps = 1
+net.ipv4.tcp_syn_retries = 8
+EOF
+
+######################################################
+# SAP Note changes
+######################################################
+
+# SAP Note: 2205917
+# "SAP HANA DB: Recommended OS settings for SLES 12 / SLES for SAP Applications 12"
+# Version 39 
+#
+
+mkdir -p /mnt/etc/systemd/logind.conf.d
+cat<<EOF > /mnt/etc/systemd/logind.conf.d/sap-hana.conf
+[Login]
+UserTasksMax=infinity
+EOF
+]]>
+        </source>
+      </script>
+    </chroot-scripts>
+    <!--*****End chroot-scripts*****-->
+
+    <!--*****Begin init-scripts*****-->
+    <init-scripts config:type="list">
+      <!--
+          This script sets the tuned profile.
+	  If upgrading to SLES 12.2 then the profile will be saptune
+	  and sap-hpe-hana and sap-hana will not exist.
+      -->
+      <script>
+        <filename>setTunedProfile.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+sapHPEHana='/usr/lib/tuned/sap-hpe-hana/tuned.conf'
+sapHana='/usr/lib/tuned/sap-hana/tuned.conf'
+saptuneHana='/usr/lib/tuned/saptune/tuned.conf'
+
+if [[ -f ${sapHPEHana} ]]; then
+	[[ $(egrep -q '^\s*force_latency\s*=.*$' ${sapHPEHana})$? -eq 0 ]] && sed -i 's/\s*force_latency\s*=.*$/force_latency=70/' ${sapHPEHana} || sed -i '/^\s*\[cpu\]\s*$/a force_latency=70' ${sapHPEHana}
+        tuned-adm profile sap-hpe-hana
+elif [[ -f ${sapHana} ]]; then
+	[[ $(egrep -q '^\s*force_latency\s*=.*$' ${sapHana})$? -eq 0 ]] && sed -i 's/\s*force_latency\s*=.*$/force_latency=70/' ${sapHana} || sed -i '/^\s*\[cpu\]\s*$/a force_latency=70' ${sapHana}
+        tuned-adm profile sap-hana
+else
+	sed -i 's/\s*TUNE_FOR_NOTES\s*=.*$/TUNE_FOR_NOTES="HPE"/' /etc/sysconfig/saptune
+	[[ $(egrep -q '^\s*force_latency\s*=.*$' ${saptuneHana})$? -eq 0 ]] && sed -i 's/\s*force_latency\s*=.*$/force_latency=70/' ${saptuneHana} || sed -i '/^\s*\[cpu\]\s*$/a force_latency=70' ${saptuneHana}
+	saptune solution apply HANA
+	saptune solution apply S4HANA-DBSERVER
+	tuned-adm profile saptune
+fi
+
+systemctl restart tuned
+EOF
+]]>
+        </source>
+      </script>
+    </init-scripts>
+    <!--*****End init-scripts*****-->
+  </scripts>
+  <bootloader>
+    <global>
+      <timeout config:type="integer">10</timeout>
+      <append>splash=silent quiet showopts log_buf_len=2M intel_idle.max_cstate=1 processor.max_cstate=1 elevator=noop biosdevname=1 net.ifnames=0 numa_balancing=disable transparent_hugepage=never</append>
+    </global>
+    <loader_type>grub2-efi</loader_type>
+    <sections config:type="list"/>
+  </bootloader>
+  <suse_register>
+      <do_registration config:type="boolean">false</do_registration>
+      <install_updates config:type="boolean">false</install_updates>
+  </suse_register>
+  <files config:type="list">
+    <file>
+      <file_path>/etc/hpe-release</file_path>
+      <file_script>
+        <source>
+<![CDATA[
+#!/bin/bash
+echo "HPE SAP HANA CoE CS500 Release 2018.01-0" > /etc/hpe-release
+echo "Installed on `date +'%b %d, %Y'` @ `date +'%H:%M:%S'`." >> /etc/hpe-release
+]]>
+        </source>
+      </file_script>
+    </file>
+  </files>
+  <general>
+    <ask-list config:type="list">
+      <ask>
+        <title>OS Disk Detection Failure</title>
+        <question>Choose option</question>
+        <selection config:type="list">
+          <entry>
+            <label>Reboot Server</label>
+            <value>reboot</value>
+          </entry>
+          <entry>
+            <label>Halt Server</label>
+            <value>halt</value>
+          </entry>
+          <entry>
+            <label>Display Boot Disk Log</label>
+            <value>display</value>
+          </entry>
+        </selection>
+        <stage>initial</stage>
+        <script>
+          <environment config:type="boolean">true</environment>
+          <feedback config:type="boolean">true</feedback>
+	  <debug config:type="boolean">false</debug>
+	  <rerun_on_error config:type="boolean">true</rerun_on_error>
+          <source>
+<![CDATA[
+#!/bin/bash
+
+
+case "$VAL" in
+    "reboot")
+        echo b > /proc/sysrq-trigger
+	exit 0 
+        ;;
+    "halt")
+        echo o > /proc/sysrq-trigger
+	exit 0 
+        ;;
+    "display")
+        cat /tmp/bootDisk.log
+	exit 1
+        ;;
+esac
+]]>
+          </source>
+        </script>
+      </ask>
+    </ask-list>
+    <mode>
+      <confirm config:type="boolean">false</confirm>
+    </mode>
+    <storage>
+      <start_multipath config:type="boolean">false</start_multipath>
+    </storage>
+  </general>
+  <keyboard>
+    <keymap>english-us</keymap>
+  </keyboard>
+  <language>
+    <language>en_US</language>
+    <languages>en_US</languages>
+  </language>
+  <partitioning config:type="list">
+    <drive>
+      <device>%%bootDisk%%</device>
+      <initialize config:type="boolean">true</initialize>
+      <enable_snapshots config:type="boolean">true</enable_snapshots>
+      <partitions config:type="list">
+        <partition>
+          <create config:type="boolean">true</create>
+          <crypt_fs config:type="boolean">false</crypt_fs>
+          <filesystem config:type="symbol">vfat</filesystem>
+          <format config:type="boolean">true</format>
+          <fstopt>umask=0002,utf8=true</fstopt>
+          <loop_fs config:type="boolean">false</loop_fs>
+          <mount>/boot/efi</mount>
+          <mountby config:type="symbol">uuid</mountby>
+          <partition_id config:type="integer">259</partition_id>
+          <partition_nr config:type="integer">1</partition_nr>
+          <resize config:type="boolean">false</resize>
+          <size>200M</size>
+        </partition>
+        <partition>
+          <create config:type="boolean">true</create>
+          <crypt_fs config:type="boolean">false</crypt_fs>
+          <filesystem config:type="symbol">swap</filesystem>
+          <format config:type="boolean">true</format>
+          <loop_fs config:type="boolean">false</loop_fs>
+          <mount>swap</mount>
+          <mountby config:type="symbol">uuid</mountby>
+          <partition_id config:type="integer">130</partition_id>
+          <partition_nr config:type="integer">2</partition_nr>
+          <resize config:type="boolean">false</resize>
+          <size>2G</size>
+        </partition>
+        <partition>
+          <create config:type="boolean">true</create>
+          <crypt_fs config:type="boolean">false</crypt_fs>
+          <filesystem config:type="symbol">btrfs</filesystem>
+          <format config:type="boolean">true</format>
+          <loop_fs config:type="boolean">false</loop_fs>
+          <mount>/</mount>
+          <mountby config:type="symbol">uuid</mountby>
+          <partition_id config:type="integer">131</partition_id>
+          <partition_nr config:type="integer">3</partition_nr>
+          <resize config:type="boolean">false</resize>
+          <subvolumes config:type="list">
+	    <listentry>boot/grub2/i386-pc</listentry>
+            <listentry>boot/grub2/x86_64-efi</listentry>
+            <listentry>home</listentry>
+            <listentry>opt</listentry>
+            <listentry>srv</listentry>
+            <listentry>tmp</listentry>
+            <listentry>usr/local</listentry>
+            <listentry>var/cache</listentry>
+            <listentry>var/crash</listentry>
+            <listentry>var/lib/mailman</listentry>
+            <listentry>var/log</listentry>
+            <listentry>var/opt</listentry>
+            <listentry>var/spool</listentry>
+            <listentry>var/tmp</listentry>
+          </subvolumes>
+        </partition>
+      </partitions>
+      <use>all</use>
+    </drive>
+  </partitioning>
+  <timezone>
+    <hwclock>UTC</hwclock>
+  </timezone>
+  <services-manager>
+    <default_target>multi-user</default_target>
+    <services>
+      <disable config:type="list">
+        <service>wickedd-auto4</service>
+        <service>wickedd-dhcp4</service>
+        <service>wickedd-dhcp6</service>
+        <service>wickedd</service>
+        <service>wickedd-nanny</service>
+      </disable>
+      <enable config:type="list">
+        <service>dm-event</service>
+        <service>mcelog</service>
+        <service>ntpd</service>
+        <service>rsyslog</service>
+        <service>sshd</service>
+        <service>tuned</service>
+      </enable>
+    </services>
+  </services-manager>
+  <software>
+    <packages config:type="list">
+      <!-- Added to match what R&D had included to make it easier to match patch bundles. -->
+      <package>cpuset</package>
+      <package>perl-Bootloader-YAML</package>
+      <package>git-core</package>
+      <package>perl-Error</package>
+      <package>unrar</package>
+      <package>tuned</package>
+      <package>open-lldp</package>
+      <package>libHBAAPI2</package>
+      <package>libpng12-0</package>
+      <package>uuidd</package>
+      <package>libcgroup-tools</package>
+      <package>libopenssl0_9_8</package>
+      <package>sapconf</package>
+      <package>bing</package>
+      <package>bonnie</package>
+      <package>cairo</package>
+      <package>graphviz</package>
+      <package>gtk2</package>
+      <package>java-1_7_1-ibm-plugin</package>
+      <package>java-1_7_1-ibm</package>
+      <package>java-1_7_1-ibm-jdbc</package>
+      <package>java-1_7_1-ibm-alsa</package>
+      <package>krb5-client</package>
+      <package>libicu</package>
+      <package>libts-1_0-0</package>
+      <package>sensors</package>
+      <package>sysstat</package>
+      <package>xrdp</package>
+      <package>yast2-ncurses</package>
+      <package>rear116</package>
+      <package>yast2-rear</package>
+      <!-- Added to further match what R&D has included.
+           As new released from R&D come out a review will
+           be made to see if any new packages need to be
+           added.
+      -->
+      <package>sblim-wbemcli</package>
+      <package>cmpi-bindings-pywbem</package>
+      <package>cmpi-pywbem-base</package>
+      <package>cmpi-pywbem-power-management</package>
+      <package>libiniparser0</package>
+      <package>lcms2</package>
+      <package>timezone-java</package>
+      <package>libgif6</package>
+      <package>java-1_7_0-openjdk</package>
+      <package>java-1_7_0-openjdk-headless</package>
+      <!-- Added for CS900. -->
+      <package>python-libxml2</package>
+      <package>openwsman-server</package>
+      <!-- Added for Serviceguard. -->
+      <package>pidentd</package>
+      <package>sblim-indication_helper</package>
+      <package>sblim-cmpi-base</package>
+      <package>sblim-sfcc</package>
+      <package>quota-nfs</package>
+      <!-- Added for the upgrade program. -->
+      <package>python-curses</package>
+      <!-- Added for module builds. -->
+      <package>gcc</package>
+      <package>kernel-syms</package>
+      <package>kernel-source</package>
+    </packages>
+    <patterns config:type="list">
+      <pattern>Minimal</pattern>
+      <pattern>base</pattern>
+      <pattern>x11</pattern>
+    </patterns>
+  </software>
+  <users config:type="list">
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>root</fullname>
+      <gid>0</gid>
+      <home>/root</home>
+      <password_settings>
+        <expire></expire>
+        <flag></flag>
+        <inact></inact>
+        <max></max>
+        <min></min>
+        <warn></warn>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>0</uid>
+      <user_password>LWfaLuAbZ18es</user_password>
+      <username>root</username>
+    </user>
+  </users>
+</profile>

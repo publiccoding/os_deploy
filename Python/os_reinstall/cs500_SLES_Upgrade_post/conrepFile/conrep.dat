@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Conrep>
+  <Section name="Intel_Hyperthreading" helptext="Toggles hyperthreading on Intel based G6 and greater systems">Enabled</Section>
+  <Section name="CPU_Virtualization" helptext="When enabled, a Virtual Machine Manager supporting this feature can utilize hardware capabilities provided by the server.">Disabled</Section>
+  <Section name="Intel_VT-d2" helptext="When enabled, a Virtual Machine Manager supporting this feature can utilize hardware capabilities provided by Intel's Virtualization Technology for Directed I/O.">Enabled</Section>
+  <Section name="HP_Power_Profile" helptext="Selects the level of power versus performance for the system.">Maximum_Performance</Section>
+  <Section name="Intel_QPI_Link_Power_Management" helptext="Places the Quick Path Interconnect (QPI) links into a low power state to save power.">Disabled</Section>
+  <Section name="Intel_Minimum_Processor_Idle_Power_State" helptext="Selects the lowest idle power state (C-state) the OS will use. The higher the C-state, the lower the power usage. C6 is the lowest power idle state supported. For G6/G7/Gen8 BIOS 05/05/2011 or later, this is the Power Core State. ">No_C-States</Section>
+  <Section name="Intel_Minimum_Processor_Idle_Power_Package_State" helptext="Selects the lowest idle power package state (C-state). On Gen8 and later servers, Package C3 State corresponds to Package C6(non-retention) State in RBSU.">No_Package_State</Section>
+  <Section name="Intel_Turbo_Boost_Optimization_Gen8" helptext="Optimize Turbo Boost heuristics for different situations. For Gen8 or later servers only.">Enabled</Section>
+  <Section name="ASR" helptext="Allows enabling/disabling of the Automatic Server Recovery feature.">Disabled</Section>
+</Conrep>

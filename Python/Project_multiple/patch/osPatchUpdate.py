@@ -104,8 +104,8 @@ def init(applicationResourceFile, loggerName):
         print RED + 'A resource key was not present in the resource file, check the log file for errors; exiting program execution.' + '\n' + RESETCOLORS
         exit(1)
 
-#from modules.preUpdate import checkOSVersion, setPatchDirectories, removeFusionIOPackages, checkOSVersion, checkDiskSpace, updateBootloaderCFG
-
+    #from modules.preUpdate import checkOSVersion, setPatchDirectories, removeFusionIOPackages, checkOSVersion, checkDiskSpace, updateBootloaderCFG
+    # check the diskspace and OS Distribution level
 
     checkDiskSpace(loggerName)  # Preupgrade  1
     osDistLevel = checkOSVersion(patchResourceDict.copy(), loggerName) # Preupgrade  2
@@ -122,7 +122,8 @@ def init(applicationResourceFile, loggerName):
     logger.info("The system's model was determined to be: " + systemModel + '.')
     patchResourceDict['systemModel'] = systemModel
 
-#from modules.issues import updateSUSE_SLES_SAPRelease, sles12MultipathFix
+    #from modules.issues import updateSUSE_SLES_SAPRelease, sles12MultipathFix
+    #Update the '/etc/dracut.conf.d/10-mp.conf' file by importing sles12MultipathFix 
     if osDistLevel == 'SLES_SP1':
         sles12MultipathFix(loggerName)  # issues 1
     if options.a or options.k:
@@ -146,7 +147,9 @@ def init(applicationResourceFile, loggerName):
                 if systemModel == 'DL580G7' or systemModel == 'DL980G7':
                     f.write('isFusionIOSystem = yes\n')
 
-#from modules.preUpdate import checkOSVersion, setPatchDirectories, removeFusionIOPackages, checkOSVersion, checkDiskSpace, updateBootloaderCFG
+            #from modules.preUpdate import checkOSVersion, setPatchDirectories, removeFusionIOPackages, checkOSVersion, checkDiskSpace, updateBootloaderCFG
+
+            # remove the removeFusionIOPackages by importing from preUpdate 
 
                     removeFusionIOPackages(patchResourceDict.copy(), loggerName) # Preupgrade  3
                 else:
@@ -171,9 +174,11 @@ def init(applicationResourceFile, loggerName):
             logger.error('Unable to determine if the SUSE_SLES_SAP-release RPM is installed.\n' + out)
             print RED + 'Unable to determine if the SUSE_SLES_SAP-release RPM is installed; check the log file for errors; exiting program execution.' + RESETCOLORS
             exit(1)
+    # from modules.preUpdate import setPatchDirectories 
+
     patchDirList = setPatchDirectories(patchResourceDict.copy(), loggerName) # Preupgrade 4 
 
-#from modules.configureRepository import configureRepositories
+    #from modules.configureRepository import configureRepositories
 
     configureRepositories(patchDirList[:], loggerName)  # configureRepository 
     repositoryList = []
@@ -181,14 +186,12 @@ def init(applicationResourceFile, loggerName):
         repositoryList.append(dir.split('/').pop())
 
     patchResourceDict['repositoryList'] = repositoryList
-
 	
-#from modules.updateZyppConf import updateZyppConf
+    #from modules.updateZyppConf import updateZyppConf
 
 	updateZyppConf(loggerName)  # updateZyppConf
     if osDistLevel == 'SLES_SP4':
 	
-
         updateBootloaderCFG(loggerName)   # Preupgrade 5
     return patchResourceDict
 
@@ -204,7 +207,7 @@ def main():
         osDistLevel = patchResourceDict['osDistLevel']
         if not options.k:
             if patchResourceDict['removeRPMs'] or patchResourceDict['addRPMs']:
-#from modules.oneOffs import OneOffs
+    #from modules.oneOffs import OneOffs
                 oneOffs = OneOffs(loggerName) # oneOffs
                 if patchResourceDict['removeRPMs']:
                     if not oneOffs.removeRPMs(patchResourceDict.copy()):
@@ -216,7 +219,7 @@ def main():
                         exit(1)
         original_sigint_handler = signal.getsignal(signal.SIGINT)
         original_sigquit_handler = signal.getsignal(signal.SIGQUIT)
-#from modules.applyPatches import ApplyPatches
+    #from modules.applyPatches import ApplyPatches
 
 		applyPatches = ApplyPatches()  # applyPatches
         s = SignalHandler(applyPatches)
@@ -244,7 +247,7 @@ def main():
         if (options.a or options.k) and osDistLevel == 'SLES_SP4':
             print GREEN + "Phase 3: Updating the system's bootloader." + RESETCOLORS
 
-#from modules.createBootloaderConfigFile import configureBootLoader
+    #from modules.createBootloaderConfigFile import configureBootLoader
 
             updateTaskStatusDict['configureBootLoader'] = configureBootLoader(loggerName)
         if (options.a or options.k) and osDistLevel == 'SLES_SP4':
@@ -252,7 +255,7 @@ def main():
         else:
             print GREEN + 'Phase 3: Updating the patch bundle information file.' + RESETCOLORS
         
-#from modules.updateReleaseInformation import updateVersionInformationFile
+    #from modules.updateReleaseInformation import updateVersionInformationFile
 
 
 		if options.a:
@@ -316,7 +319,7 @@ def main():
                 original_sigquit_handler = signal.getsignal(signal.SIGQUIT)
 
 				
-#from modules.deadman import BuildDeadmanDriver
+    #from modules.deadman import BuildDeadmanDriver
 
                 buildDeadmanDriver = BuildDeadmanDriver()
                 s = SignalHandler(buildDeadmanDriver)
@@ -338,7 +341,7 @@ def main():
                 signal.signal(signal.SIGINT, original_sigint_handler)
                 signal.signal(signal.SIGQUIT, original_sigquit_handler)
                 count += 1
-#from modules.fusionIO import UpdateFusionIO
+    #from modules.fusionIO import UpdateFusionIO
         if 'isFusionIOSystem' in resumeDict:
             if resumeDict['isFusionIOSystem'] == 'yes':
                 original_sigint_handler = signal.getsignal(signal.SIGINT)
@@ -385,6 +388,5 @@ def main():
             print GREEN + '\nThe system update has successfully completed.  Reboot the system for the changes to take affect.\n' + RESETCOLORS
         else:
             print RED + BOLD + '\nThe system update failed to complete successfully.  Address the failed post update tasks (' + taskFailureList + ') and then reboot the system for the changes to take affect.\n' + RESETCOLORS
-
 
 main()

@@ -1,0 +1,48 @@
+ALTER TABLE log_messages
+CHANGE COLUMN hms hours_minutes_seconds INT
+COMMENT 'The hours, minutes, and seconds part of the timestamp'
+AFTER severity;
+
+ALTER TABLE log_messages ADD COLUMNS (
+app_name STRING COMMENT 'Application name',
+session_id LONG COMMENT 'The current session id');
+
+ALTER TABLE log_messages REPLACE COLUMNS (
+	hours_mins_secs INT COMMENT 'hour, minute, seconds from timestamp',
+	severity STRING COMMENT 'The message severity'
+	message STRING COMMENT 'The rest of the message'
+);
+
+
+
+
+FROM staged_employees se
+INSERT OVERWRITE TABLE employees PARTITION (country = 'US', state = 'OR') SELECT * WHERE se.cnty = 'US' AND se.st = 'OR'
+INSERT OVERWRITE TABLE employees PARTITION (country = 'US', state = 'CA') SELECT * WHERE se.cnty = 'US' AND se.st = 'CA'
+INSERT OVERWRITE TABLE employees PARTITION (country = 'US', state = 'IL') SELECT * WHERE se.cnty = 'US' AND se.st = 'IL';
+
+INSERT OVERWRITE TABLE employees
+PARTITION (country, state)
+SELECT ..., se.cnty, se.st
+FROM staged_employees se;
+
+INSERT OVERWRITE TABLE employees
+PARTITION (country = 'US', state)
+SELECT ..., se.cnty, se.st
+FROM staged_employees se
+WHERE se.cnty = 'US';
+
+
+So, for example, our first example using dynamic partitioning for all partitions might
+actually look this, where we set the desired properties just before use:
+
+hive> set hive.exec.dynamic.partition=true;
+hive> set hive.exec.dynamic.partition.mode=nonstrict;
+hive> set hive.exec.max.dynamic.partitions.pernode=1000;
+hive> INSERT OVERWRITE TABLE employees
+    > PARTITION (country, state)
+    > SELECT ..., se.cty, se.st
+    > FROM staged_employees se;
+
+
+

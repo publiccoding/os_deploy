@@ -1,0 +1,96 @@
+###################################################################################################################
+#                    RESOURCES IN THIS SECTION ARE NOT ALLOWED TO BE MODIFIED.                                    #
+###################################################################################################################
+###################################################################################################################
+# The followng are the files and directories that will be backed up.
+# Additionally, the custom global.ini files for the active databases based on /usr/sap/sapservices will be backed
+# up in the archive backup if the server is a SAP HANA compute node.
+###################################################################################################################
+sapArchiveBackup = '/usr/sap, /var/lib/hdb'
+sglxArchiveBackup = '/opt/cmcluster/nfstoolkit, /opt/cmcluster/conf'
+sgQsArchiveBackup = '/opt/qs/conf'
+
+###################################################################################################################
+# The followng are the files and directories that will be backed up.
+# Each file/directory is seperated by a comma.
+###################################################################################################################
+osArchiveBackup = '/etc, /var/spool/cron, /home, /root, /var/spool/mail, /usr/share/rear/conf'
+
+###################################################################################################################
+# The following is the list of supported OS versions that a server can be upgraded to.
+###################################################################################################################
+supportedSLESOSVersions = 'SLES 12.1:SLES 12.2, SLES 12.2:SLES 12.3'
+supportedRHELOSVersions = 'RHEL 7.2:RHEL 7.4, RHEL 7.3:RHEL 7.4'
+
+###################################################################################################################
+# The following is the initial OS versions that a server can be upgraded from.
+###################################################################################################################
+initialSLESOSVersions = 'SLES 12.1, SLES 12.2'
+initialRHELOSVersions = 'RHEL 7.2, RHEL 7.3'
+
+###################################################################################################################
+# The following is the list of supported servers that can be upgraded.
+# CS500:
+#       ProLiant DL580 Gen8, ProLiant DL580 Gen9
+# CS900:
+#       Superdome
+# Serviceguard NFS Servers:
+#       ProLiant DL380p Gen8, ProLiant DL360p Gen8
+# Serviceguard Quorum Servers:
+#       ProLiant DL360 Gen9 **Currently not supported.
+###################################################################################################################
+slesSupportedServerList = 'ProLiant DL580 Gen8, ProLiant DL580 Gen9, Superdome, ProLiant DL320e Gen8 v2, ProLiant DL380p Gen8, ProLiant DL360p Gen8, ProLiant DL360 Gen9'
+rhelSupportedServerList = 'ProLiant DL580 Gen8, ProLiant DL580 Gen9, Superdome, ProLiant DL380p Gen8, ProLiant DL360 Gen9'
+
+###################################################################################################################
+# The following are kernel parameters for CS500 configurations set by
+# /etc/saptune/extra/HPE-Recommended_OS_settings.conf 
+###################################################################################################################
+slesKernelParameters = 'net.ipv4.conf.all.rp_filter : 1, net.ipv4.icmp_echo_ignore_broadcasts : 1, fs.inotify.max_user_watches : 65536, net.ipv4.conf.default.promote_secondaries : 1, net.ipv4.conf.all.promote_secondaries : 1, net.core.rmem_default : 64000000, net.core.rmem_max : 64000000, net.core.wmem_default : 64000000, net.core.wmem_max : 64000000, net.ipv4.tcp_sack : 1, net.ipv4.tcp_max_orphans : 562144, net.ipv4.tcp_max_tw_buckets : 1440000, net.ipv4.tcp_mem : 10000000 10000000 13000000, net.ipv4.tcp_wmem : 10000000 10000000 10000000, net.ipv4.tcp_rmem : 10000000 10000000 10000000, net.core.netdev_max_backlog : 600000, net.core.optmem_max : 640000000, net.ipv4.tcp_app_win : 31, net.ipv4.tcp_adv_win_scale : 2, net.ipv4.tcp_no_metrics_save : 1, net.ipv4.tcp_moderate_rcvbuf : 1, net.ipv4.udp_wmem_min : 16384, net.core.somaxconn : 4096, net.ipv4.tcp_max_syn_backlog : 8192, net.ipv4.ip_local_port_range : 1024 64999, net.ipv4.tcp_tw_reuse : 1, net.ipv4.tcp_tw_recycle : 1, net.ipv4.tcp_timestamps : 1, net.ipv4.tcp_syn_retries : 8'
+
+###################################################################################################################
+# The following are RHEL kernel parameters for CS500 configurations set by
+# /etc/tuned/sap-hpe-hana/tuned.conf
+###################################################################################################################
+rhelKernelParameters = 'net.core.rmem_default : 64000000, net.core.rmem_max : 64000000, net.core.wmem_default : 64000000, net.core.wmem_max : 64000000, net.ipv4.tcp_window_scaling : 1, net.ipv4.tcp_mem : 10000000 10000000 10000000, net.ipv4.tcp_wmem : 10000000 10000000 10000000, net.ipv4.tcp_rmem : 10000000 10000000 10000000, net.core.somaxconn : 4096, net.ipv4.tcp_max_syn_backlog : 8192, net.ipv4.ip_local_port_range : 1024 64999, net.ipv4.tcp_tw_reuse : 1, net.ipv4.tcp_tw_recycle : 1, net.ipv4.tcp_timestamps : 1, net.ipv4.tcp_syn_retries : 8'
+
+###################################################################################################################
+# The following are services that will be disabled as they should not be running.
+#	kdump.service (Should only be running during problem isolation.)
+#	smartd.service (Should not be running since HPE tools are used to monitor hard drives.)
+###################################################################################################################
+disableServiceList = 'kdump.service, smartd.service'
+
+###################################################################################################################
+# The following are NFS Server Serviceguard RPMS that will be used for the upgrade of NFS Serviceguard Nodes.
+###################################################################################################################
+sles12NFSServiceguardRPMS = 'serviceguard:1512050613|serviceguard-A.12.20.00-0.sles12.x86_64.rpm, serviceguard-license:1497032323|serviceguard-license-A.12.10.00-0.sles12.x86_64.rpm, serviceguard-nfs-toolkit:1494929947|serviceguard-nfs-toolkit-A.12.10.00-00.sles.noarch.rpm, serviceguard-providers:1497032334|serviceguard-providers-A.12.10.00-0.sles12.x86_64.rpm, serviceguard-snmp:1497032321|serviceguard-snmp-A.12.10.00-0.sles12.x86_64.rpm'
+
+rhel7NFSServiceguardRPMS = 'serviceguard:1512051214|serviceguard-A.12.20.00-0.rhel7.x86_64.rpm, serviceguard-license:1497032143|serviceguard-license-A.12.10.00-0.rhel7.x86_64.rpm, serviceguard-nfs-toolkit:1494918358|serviceguard-nfs-toolkit-A.12.10.00-00.redhat.noarch.rpm, serviceguard-providers:1497032151|serviceguard-providers-A.12.10.00-0.rhel7.x86_64.rpm, serviceguard-snmp:1497032141|serviceguard-snmp-A.12.10.00-0.rhel7.x86_64.rpm'
+###################################################################################################################
+# The following are Quorum Server Serviceguard RPMS that will be used for the upgrade of NFS Serviceguard Nodes.
+###################################################################################################################
+sles12QSServiceguardRPMS = 'serviceguard-qs:1497032336|serviceguard-qs-A.12.10.00-0.sles12.x86_64.rpm'
+
+###################################################################################################################
+# The following are Serviceguard packages that will be removed, since they are extras that are not needed.
+###################################################################################################################
+extraServiceguardPackages = 'serviceguard-manager, serviceguard-analytics, jetty9'
+
+###################################################################################################################
+# The following is the supported OS to SAP HANA minimum SPS revision.
+# SAP HANA 1.0 SPS12 starts with revision 120
+###################################################################################################################
+rhelSupportedSAPHANARevision = 'RHEL 7.4:1.00.122.14|2.00.023.00'
+slesSupportedSAPHANARevision = 'SLES 12.2:1.00.120.00|2.00.010.00, SLES 12.3:1.00.122.15|2.00.023.00'
+
+###################################################################################################################
+# The following are services that will be disabled, since they are either not needed or only needed for
+# debugging purposes.
+###################################################################################################################
+slesServices = 'SLES 12.2:smartd|kdump-rebuild-initrd.service|kdump.service, SLES 12.3:smartd|kdump.service'
+
+###################################################################################################################
+# The following is the soft/hard nofile value that will be set for @sapsys in /etc/security/limits.conf.
+###################################################################################################################
+sapsysNofileValue = '65536'

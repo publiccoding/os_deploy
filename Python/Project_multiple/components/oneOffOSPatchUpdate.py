@@ -34,8 +34,7 @@ class OneOffPatches:
 
                 handler = logging.FileHandler(logFile)
                 logger = logging.getLogger(self.loggerName)
-		logger.setLevel(logging.INFO)
-
+				logger.setLevel(logging.INFO)
                 formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(message)s', datefmt='%m/%d/%Y %H:%M:%S')
                 handler.setFormatter(formatter)
                 logger.addHandler(handler)

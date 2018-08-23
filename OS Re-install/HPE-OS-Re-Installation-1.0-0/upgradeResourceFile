@@ -1,0 +1,104 @@
+###################################################################################################################
+#                    RESOURCES IN THIS SECTION ARE NOT ALLOWED TO BE MODIFIED.                                    #
+###################################################################################################################
+###################################################################################################################
+# The followng are the files and directories that will be backed up.
+# Additionally, the custom global.ini files for the active databases based on /usr/sap/sapservices will be backed
+# up in the archive backup if the compute node is a SAP HANA compute node.
+# Each file/directory is seperated by a comma.
+# Note, the size of the restoration archive is limited to 3GB, thus consideration should be giving if making
+# changes to the restoration archive resources.
+###################################################################################################################
+rhelOSRestorationBackup = '/root, /etc/hosts, /etc/resolv.conf, /etc/nsswitch.conf, /etc/ntp.conf, /etc/sudoers, /etc/multipath.conf, /etc/sysctl.conf, /etc/sysctl.d/98-sysctl.conf, /etc/snmp/snmpd.conf, /etc/sysconfig/network, /etc/sysconfig/network-scripts/ifcfg-*, /etc/sysconfig/network-scripts/route-*, /etc/krb5.conf, /etc/krb5.keytab, /var/spool/cron'
+slesOSRestorationBackup = '/root, /etc/HOSTNAME, /etc/hosts, /etc/resolv.conf, /etc/nsswitch.conf, /etc/ntp.conf, /etc/sudoers, /etc/multipath.conf, /etc/sysctl.conf, /etc/sysctl.d/98-sysctl.conf, /etc/snmp/snmpd.conf, /etc/sysconfig/clock, /etc/sysconfig/network/ifcfg-*, /etc/sysconfig/network/routes, /etc/sysconfig/network/ifroute-*, /etc/krb5.conf, /etc/krb5.keytab, /var/spool/cron/tabs'
+sapRestorationBackup = '/usr/sap, /var/lib/hdb'
+sglxRestorationBackup = '/etc/multipath.conf, /opt/cmcluster/conf/AutoPass/LicFile.txt, /opt/cmcluster/conf/hananfs/*.ascii, /opt/cmcluster/conf/hananfs/nfs/*.conf, /opt/cmcluster/conf/cmcluster.rc, /opt/cmcluster/conf/cmclnodelist'
+sglxArchiveBackup = '/opt/cmcluster/nfstoolkit, /opt/cmcluster/conf'
+sgQsRestorationBackup = '/opt/qs/conf/qs_authfile'
+osArchiveBackup = '/etc, /var/spool/cron, /home, /root, /var/spool/mail'
+sgQsArchiveBackup = '/opt/qs/conf'
+
+###################################################################################################################
+# The following is a list of the SAP HANA related partitions in /etc/fstab that will be restored to
+# /etc/fstab after the upgrade.
+###################################################################################################################
+fstabHANAEntries = '/hana/data, /hana/log, /hana/shared, /hana/backup, /usr/sap'
+
+###################################################################################################################
+# The following are the add on file archives that will be installed after the upgrade to add some additional
+# HPE provided files.
+###################################################################################################################
+ivyBridgeSLESAddOnFileArchive = 'ivyBridgeSLESAddOnFiles.tar.gz'
+haswellSLESAddOnFileArchive = ''
+cs900SLESAddOnFileArchive = ''
+ivyBridgeRHELAddOnFileArchive = ''
+haswellRHELAddOnFileArchive = ''
+cs900RHELAddOnFileArchive = ''
+
+###################################################################################################################
+# The following is the maximum allowed size (GB) of the backup archives.  The size also takes into account
+# the addition of the post archive ISO image.
+###################################################################################################################
+archiveSizeLimit = '3'
+
+###################################################################################################################
+# The following is the list of supported OS versions that a server can be upgraded to. 
+###################################################################################################################
+supportedRHELOSVersions = 'RHEL 7.4'
+supportedSLESOSVersions = 'SLES 12.1, SLES 12.2, SLES 12.3, SLES 11.4'
+
+###################################################################################################################
+# The following is the initial OS versions that a server can be upgraded from.
+###################################################################################################################
+initialRHELOSVersions = 'RHEL 6.7'
+initialSLESOSVersions = 'SLES 11.3, SLES 11.4'
+
+###################################################################################################################
+# The following is the list of supported servers that can be upgraded. 
+# CS500: 
+# 	ProLiant DL580 Gen8, ProLiant DL580 Gen9
+# CS900:
+# 	Superdome
+# Serviceguard NFS Servers:
+# 	ProLiant DL380p Gen8, ProLiant DL360p Gen8
+# Serviceguard Quorum Servers:
+# 	ProLiant DL320e Gen8 v2, ProLiant DL360 Gen9
+# 	****Quorum Servers are currently not supported to upgrade to 12.3.****
+# 	****Also, DL360 Gen9 Quorum Servers are not supported at all at this time.****
+# 	****Quorum Servers are not supported with RHEL.
+# 	****CS900 Ivy Bridge is not supporte with RHEL. 
+###################################################################################################################
+slesSupportedServerList = 'ProLiant DL580 Gen8, ProLiant DL580 Gen9, Superdome, ProLiant DL380p Gen8, ProLiant DL360p Gen8, ProLiant DL320e Gen8 v2'
+rhelSupportedServerList = 'ProLiant DL580 Gen8, ProLiant DL580 Gen9, Superdome, ProLiant DL380p Gen8'
+dl320eSLES12Supported = 'True'
+dl360SLES12Supported = 'False'
+
+###################################################################################################################
+# The following are SLES kernel parameters for CS500 configurations set by
+# /etc/saptune/extra/HPE-Recommended_OS_settings.conf
+###################################################################################################################
+slesKernelParameters = 'net.ipv4.conf.all.rp_filter : 1, net.ipv4.icmp_echo_ignore_broadcasts : 1, fs.inotify.max_user_watches : 65536, net.ipv4.conf.default.promote_secondaries : 1, net.ipv4.conf.all.promote_secondaries : 1, net.core.rmem_default : 64000000, net.core.rmem_max : 64000000, net.core.wmem_default : 64000000, net.core.wmem_max : 64000000, net.ipv4.tcp_sack : 1, net.ipv4.tcp_max_orphans : 562144, net.ipv4.tcp_max_tw_buckets : 1440000, net.ipv4.tcp_mem : 10000000 10000000 13000000, net.ipv4.tcp_wmem : 10000000 10000000 10000000, net.ipv4.tcp_rmem : 10000000 10000000 10000000, net.core.netdev_max_backlog : 600000, net.core.optmem_max : 640000000, net.ipv4.tcp_app_win : 31, net.ipv4.tcp_adv_win_scale : 2, net.ipv4.tcp_no_metrics_save : 1, net.ipv4.tcp_moderate_rcvbuf : 1, net.ipv4.udp_wmem_min : 16384, net.core.somaxconn : 4096, net.ipv4.tcp_max_syn_backlog : 8192, net.ipv4.ip_local_port_range : 1024 64999, net.ipv4.tcp_tw_reuse : 1, net.ipv4.tcp_tw_recycle : 1, net.ipv4.tcp_timestamps : 1, net.ipv4.tcp_syn_retries : 8'
+
+###################################################################################################################
+# The following are RHEL kernel parameters for CS500 configurations set by
+# /etc/tuned/sap-hpe-hana/tuned.conf
+###################################################################################################################
+rhelKernelParameters = 'net.core.rmem_default : 64000000, net.core.rmem_max : 64000000, net.core.wmem_default : 64000000, net.core.wmem_max : 64000000, net.ipv4.tcp_window_scaling : 1, net.ipv4.tcp_mem : 10000000 10000000 10000000, net.ipv4.tcp_wmem : 10000000 10000000 10000000, net.ipv4.tcp_rmem : 10000000 10000000 10000000, net.core.somaxconn : 4096, net.ipv4.tcp_max_syn_backlog : 8192, net.ipv4.ip_local_port_range : 1024 64999, net.ipv4.tcp_tw_reuse : 1, net.ipv4.tcp_tw_recycle : 1, net.ipv4.tcp_timestamps : 1, net.ipv4.tcp_syn_retries : 8'
+
+###################################################################################################################
+# The following is the supported OS to SAP HANA minimum SPS revision.
+# SAP HANA 1.0 SPS12 starts with revision 120
+###################################################################################################################
+rhelSupportedSAPHANARevision = 'RHEL 7.4:1.00.122.14|2.00.023.00'
+slesSupportedSAPHANARevision = 'SLES 12.1:1.00.120.00|2.00.000.00, SLES 12.2:1.00.120.00|2.00.010.00, SLES 12.3:1.00.122.15|2.00.023.00'
+
+###################################################################################################################
+# The following are services that will be disabled, since they are either not needed or only needed for
+# debugging purposes.
+###################################################################################################################
+slesServices = 'SLES 12.1:smartd|kdump-rebuild-initrd.service|kdump.service, SLES 12.2:smartd|kdump-rebuild-initrd.service|kdump.service, SLES 12.3:smartd|kdump.service'
+
+###################################################################################################################
+# The following is the soft/hard nofile value that will be set for @sapsys in /etc/security/limits.conf.
+###################################################################################################################
+sapsysNofileValue = '65536'

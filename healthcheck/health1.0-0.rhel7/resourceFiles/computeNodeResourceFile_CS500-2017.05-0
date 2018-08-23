@@ -1,0 +1,216 @@
+#healthCheck-P1-CS500ComputeNodes-2017.05-0
+#csurBundle-P1-CS500ComputeNodes-2017.05-0
+#osPatchBundle 2017.04-0
+
+#Format of file is:
+#Component being updated|Current CSUR version|Update image. However, if the 
+#update image has driver dependencies than they will be listed before the
+#update image and they will all be seperated by a ':'. Also software packages
+#are listed in order of dependency. Note, the Mellanox driver changed from
+#mlx4_en to mlnx. Thus, both are listed. The command to get the software epoch
+#time is rpm -qp --queryformat="%{buildtime}" <software RPM> A component with
+#'None' means that an update is not available. This will be the case when a
+#component is an initial release without any updates.
+
+patchBundle:
+
+SLES11.4/SLES12.1-DL580G7/DL980G7/DL580Gen8/DL580Gen9
+osPatchUpdateReleaseNotes = 'HPE Converged Systems for SAP HANA Patch Bundle|Version: 2017.04-0
+
+
+Firmware:
+BIOSDL580Gen8|2016.08.18|hp-firmware-system-p79-1.96_2016_08_18-1.1.i386.rpm|BIOS-System ROM
+BIOSDL380pGen8|2015.07.01|hp-firmware-system-p70-2015.07.01-1.1.i386.rpm|BIOS-System ROM
+BIOSDL580Gen9|2016.09.12|hp-firmware-system-u17-2.30_2016_09_12-1.1.i386.rpm|BIOS-System ROM
+PMCDL580Gen8|4.1|hp-firmware-powerpic-dl580-4.1-5.i386.rpm|Power Mgmt Ctrl
+PMCDL380pGen8|3.3|hp-firmware-powerpic-gen8-3.3-4.i386.rpm|Power Mgmt Ctrl
+PMCDL580Gen9|4.1|hp-firmware-powerpic-dl580-4.1-5.i386.rpm|Power Mgmt Ctrl
+iLO|2.44|hp-firmware-ilo4-2.44-1.1.i386.rpm|Integrated Lights-Out
+560SFP+|1.1200.0|hp-firmware-nic-intel-1.10.8-1.1.x86_64.rpm|Intel 10Gb NIC
+561T|1.1200.0|hp-firmware-nic-intel-1.10.8-1.1.x86_64.rpm|Intel 10Gb NIC
+544+QSFP|2.36.5000|hp-firmware-hca-mellanox-vpi-eth-ib-1.0.4-2.1.x86_64.rpm|Mellanox Adapter
+NC552SFP|11.1.183.23|hp-firmware-cna-emulex-2016.10.01-1.20.x86_64.rpm|Emulex 10Gb NIC
+331FLR|v1.46|hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm|Broadcom 1Gb NIC
+331T|v1.46|hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm|Broadcom NIC
+332i|v1.39|hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm|Broadcom 1Gb NIC
+332T|v1.39|hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm|Broadcom 1Gb NIC
+SN1000Q|8.02.51|hp-firmware-fc-qlogic-2016.10.01-1.8.x86_64.rpm|HP (Qlogic) 16Gb FC HBA
+P830i|4.04|hp-firmware-smartarray-112204add8-4.04-1.1.x86_64.rpm|HP Smart Array Ctrl
+P431|4.04|hp-firmware-smartarray-112204add8-4.04-1.1.x86_64.rpm|HP Smart Array Ctrl
+P420i|8.00|hp-firmware-smartarray-46a4d957a7-8.00-1.1.x86_64.rpm|HP Smart Array Ctrl
+D3700|1.72|hp-firmware-d3600-d3700-1.72-3.1.x86_64.rpm|HP SAS Disk Enclosure
+D2700|0150|hp-firmware-d2600-d2700-0150-2.1.x86_64.rpm|HP SAS Disk Enclosure
+EG0600FCSPL|HPD0|None
+MO0800JEFPB|HPD1|hp-firmware-hdd-71af849f3b-HPD1-2.1.x86_64.rpm|800 GB HDD
+MO0800JDVEV|HPD2|hp-firmware-hdd-8c5d34ba77-HPD2-2.1.x86_64.rpm|800 GB HDD
+EG1800JEMDB|HPD2|hp-firmware-hdd-0a38b25661-HPD2-1.1.x86_64.rpm|1800 GB HDD
+EG1200JEHMC|HPD3|hp-firmware-hdd-31f91b8622-HPD3-1.1.x86_64.rpm|1200 GB HDD
+EG1200JEMDA|HPD4|hp-firmware-hdd-ac3fda26eb-HPD4-1.1.x86_64.rpm|1200 GB HDD
+EG1800JEHMD|HPD4|hp-firmware-hdd-8a2c06af48-HPD4-3.1.x86_64.rpm|1800 GB HDD
+MO0400JFFCF|HPD4|hp-firmware-hdd-edf6dcd906-HPD4-1.1.x86_64.rpm|400 GB HDD
+EG0900FDJYR|HPD4|hp-firmware-hdd-7cfa9118b1-HPD4-3.1.x86_64.rpm|900 GB HDD
+EG1200FDJYT|HPD4|hp-firmware-hdd-7cfa9118b1-HPD4-3.1.x86_64.rpm|1200 GB HDD
+EG0600FBDSR|HPD6|hp-firmware-hdd-06ac84a5d4-HPD6-2.x86_64.rpm|600 GB HDD
+EG0450FBDSQ|HPD6|hp-firmware-hdd-06ac84a5d4-HPD6-2.x86_64.rpm|450 GB HDD
+EG1200FCVBQ|HPD8|hp-firmware-hdd-33aee979c2-HPD8-2.1.x86_64.rpm|1200 GB HDD
+EG1200FDNJT|HPD8|hp-firmware-hdd-33aee979c2-HPD8-2.1.x86_64.rpm|1200 GB HDD
+EG0600FBLSH|HPD8|hp-firmware-hdd-815e5e101b-HPD8-1.1.x86_64.rpm|600 GB HDD
+EG0450FBLSF|HPD8|hp-firmware-hdd-815e5e101b-HPD8-1.1.x86_64.rpm|450 GB HDD
+EG0600FCVBK|HPD9|hp-firmware-hdd-415992e26f-HPD9-2.1.x86_64.rpm|600 GB HDD
+EG0450FCVBH|HPD9|hp-firmware-hdd-415992e26f-HPD9-2.1.x86_64.rpm|450 GB HDD
+EG0600FBDBU|HPDA|hp-firmware-hdd-f1eafd9715-HPDA-2.x86_64.rpm|600 GB HDD
+EG0450FBDBT|HPDA|hp-firmware-hdd-f1eafd9715-HPDA-2.x86_64.rpm|450 GB HDD
+EG0600FBVFP|HPDE|hp-firmware-hdd-b94f345c05-HPDE-2.1.x86_64.rpm|600 GB HDD
+EG0450FBVFM|HPDE|hp-firmware-hdd-b94f345c05-HPDE-2.1.x86_64.rpm|450 GB HDD
+MB1000GCEHH|HPGD|hp-firmware-hdd-b583d96f94-HPGD-3.x86_64.rpm|1000 GB GCEHH Drive
+EG0600JETKA|HPD2|hp-firmware-hdd-8c5d34ba77-HPD2-2.1.x86_64.rpm|600 GB HDD
+
+
+Drivers:
+
+SLES11.4-DL580Gen8
+tg3|3.137o|tg3-kmp-default-3.137o_3.0.101_63-1.sles11sp4.x86_64.rpm|Broadcom Tigon3 ethernet
+ixgbe|4.3.13|hp-ixgbe-kmp-default-4.3.13_3.0.101_63-2.sles11sp4.x86_64.rpm|Intel(R) 10 Gbit PCI Network
+hpsa|3.4.16-145|hpsa-kmp-default-3.4.16-145.sles11sp4.x86_64.rpm|HP Smart Array Controller
+qla2xxx|8.07.00.34.11.3-k|qlgc-qla2xxx-kmp-default-8.07.00.34.11.3_k_3.0.101_63-3.sles11sp4.x86_64.rpm|QLogic Fibre Channel HBA
+
+RHEL6.7-DL580Gen8
+tg3|3.137o|kmod-tg3-3.137o-1.rhel6u7.x86_64.rpm|Broadcom Tigon3 ethernet
+ixgbe|4.3.13|kmod-hp-ixgbe-4.3.13-2.rhel6u7.x86_64.rpm|Intel(R) 10 Gbit PCI Network
+hpsa|3.4.16-145|kmod-hpsa-3.4.16-145.rhel6u7.x86_64.rpm|HP Smart Array Controller
+qla2xxx|8.07.00.34.06.0-k1|kmod-qlgc-qla2xxx-8.07.00.34.06.0_k1-3.rhel6u7.x86_64.rpm|QLogic Fibre Channel HBA
+
+SLES11.4-DL580Gen9
+tg3|3.137o|tg3-kmp-default-3.137o_3.0.101_63-1.sles11sp4.x86_64.rpm|Broadcom Tigon3 ethernet
+mlnx|3.2-2.0.0|mlnx-ofa_kernel-kmp-default-3.2_3.0.101_63-OFED.3.2.2.0.0.1.g378ff02.sles11sp4.x86_64.rpm:mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.5.sles11sp4.x86_64.rpm|Mellanox 40 Gb NIC
+mlx4_en|3.2-2.0.0|mlnx-ofa_kernel-kmp-default-3.2_3.0.101_63-OFED.3.2.2.0.0.1.g378ff02.sles11sp4.x86_64.rpm:mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.5.sles11sp4.x86_64.rpm|Mellanox ConnectX HCA Ethernet
+hpsa|3.4.16-145|hpsa-kmp-default-3.4.16-145.sles11sp4.x86_64.rpm|HP Smart Array Controller
+qla2xxx|8.07.00.34.11.3-k|qlgc-qla2xxx-kmp-default-8.07.00.34.11.3_k_3.0.101_63-3.sles11sp4.x86_64.rpm|QLogic Fibre Channel HBA
+
+SLES12.1-DL580Gen9
+tg3|3.137o|tg3-kmp-default-3.137o_k3.12.49_11-1.sles12sp1.x86_64.rpm|Broadcom Tigon3 ethernet
+mlnx|3.3-1.0.7|mlnx-ofa_kernel-kmp-default-3.3_k3.12.49_11-OFED.3.3.1.0.7.1.g6317339.sles12sp1.x86_64.rpm:mlnx-ofa_kernel-3.3-OFED.3.3.1.0.7.1.g6317339.sles12sp1.x86_64.rpm|Mellanox 40 Gb NIC
+mlx4_en|3.3-1.0.7|mlnx-ofa_kernel-kmp-default-3.3_k3.12.49_11-OFED.3.3.1.0.7.1.g6317339.sles12sp1.x86_64.rpm:mlnx-ofa_kernel-3.3-OFED.3.3.1.0.7.1.g6317339.sles12sp1.x86_64.rpm|Mellanox ConnectX HCA Ethernet
+hpsa|3.4.16-145|hpsa-kmp-default-3.4.16-145.sles12sp1.x86_64.rpm|HP Smart Array Controller
+qla2xxx|8.07.00.34.12.0-k1|qlgc-qla2xxx-kmp-default-8.07.00.34.12.0_k1_k3.12.49_11-3.sles12sp1.x86_64.rpm|QLogic Fibre Channel HBA
+
+RHEL6.7-DL580Gen9
+tg3|3.137o|kmod-tg3-3.137o-1.rhel6u7.x86_64.rpm|Broadcom Tigon3 ethernet
+mlnx|3.2-2.0.0|kmod-mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.rhel6u7.x86_64.rpm:mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.5.rhel6u7.x86_64.rpm|Mellanox 40 Gb NIC
+mlx4_en|3.2-2.0.0|kmod-mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.rhel6u7.x86_64.rpm:mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.5.rhel6u7.x86_64.rpm|Mellanox ConnectX HCA Ethernet
+hpsa|3.4.16-145|kmod-hpsa-3.4.16-145.rhel6u7.x86_64.rpm|HP Smart Array Controller
+qla2xxx|8.07.00.34.06.0-k1|kmod-qlgc-qla2xxx-8.07.00.34.06.0_k1-3.rhel6u7.x86_64.rpm|QLogic Fibre Channel HBA
+
+RHEL7.2-DL580Gen9
+tg3|3.137o|kmod-tg3-3.137o-1.rhel7u2.x86_64.rpm|Broadcom Tigon3 ethernet
+mlnx|3.2-2.0.0|kmod-mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.rhel7u2.x86_64.rpm:mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.5.rhel7u2.x86_64.rpm|Mellanox 40 Gb NIC
+mlx4_en|3.2-2.0.0|kmod-mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.rhel7u2.x86_64.rpm:mlnx-ofa_kernel-3.2-OFED.3.2.2.0.0.1.g378ff02.5.rhel7u2.x86_64.rpm|Mellanox ConnectX HCA Ethernet
+hpsa|3.4.16-145|kmod-hpsa-3.4.16-145.rhel7u2.x86_64.rpm|HP Smart Array Controller
+qla2xxx|8.07.00.34.07.0-k1|kmod-qlgc-qla2xxx-8.07.00.34.07.0_k1-3.rhel7u2.x86_64.rpm|QLogic Fibre Channel HBA
+
+SLES11.4-DL380pGen8
+be2net|11.1.145.27|be2net-kmp-default-11.1.145.27_3.0.101_63-1.sles11sp4.x86_64.rpm|Emulex OneConnect NIC
+tg3|3.137o|tg3-kmp-default-3.137o_3.0.101_63-1.sles11sp4.x86_64.rpm|Broadcom Tigon3 ethernet
+hpsa|3.4.16-145|hpsa-kmp-default-3.4.16-145.sles11sp4.x86_64.rpm|HP Smart Array Controller
+qla2xxx|8.07.00.34.11.3-k|qlgc-qla2xxx-kmp-default-8.07.00.34.11.3_k_3.0.101_63-3.sles11sp4.x86_64.rpm|QLogic Fibre Channel HBA
+
+RHEL6.7-DL380pGen8
+be2net|11.1.145.27|kmod-be2net-11.1.145.27-1.rhel6u7.x86_64.rpm|Emulex OneConnect NIC
+tg3|3.137o|kmod-tg3-3.137o-1.rhel6u7.x86_64.rpm|Broadcom Tigon3 ethernet
+hpsa|3.4.16-145|kmod-hpsa-3.4.16-145.rhel6u7.x86_64.rpm|HP Smart Array Controller
+qla2xxx|8.07.00.34.06.0-k1|kmod-qlgc-qla2xxx-8.07.00.34.06.0_k1-3.rhel6u7.x86_64.rpm|QLogic Fibre Channel HBA
+
+
+Software:
+
+SLES11.4-DL580Gen8/DL580Gen9
+hpsmh|1474131240|7.6.0-11|hpsmh-7.6.0-11.x86_64.rpm|HP System Management Homepage
+hp-health|1466604219|10.50-1826.135.sles11|hp-health-10.50-1826.35.sles11.x86_64.rpm|HP System Health Applic. + CLI Utils
+hp-snmp-agents|1473844799|10.50-2926.39.sles11|hp-snmp-agents-10.50-2926.39.sles11.x86_64.rpm|Insight Management Agents(SNMP)
+hp-smh-templates|1455259457|10.5.0-1462.26|hp-smh-templates-10.5.0-1462.26.noarch.rpm|HP System Management Homepage Templates
+hpdiags|1446642563|10.50.2007-2076|hpdiags-10.50.2007-2076.linux.x86_64.rpm|HP Insight Diags
+hponcfg|1431321614|4.6.0-0|hponcfg-4.6.0-0.x86_64.rpm|HP Lights-Out Online Config. Utility
+hp-ams|1467053513|2.5.0-2055.32.sles11|hp-ams-2.5.0-2055.32.sles11.x86_64.rpm|Agentless Monitoring Service
+ssa|1472660811|2.60-18.0|ssa-2.60-18.0.x86_64.rpm|Smart Storage Administrator
+ssacli|1476383276|2.60-19.0|ssacli-2.60-19.0.x86_64.rpm|Smart Storage Administrator CLI
+hp-tg3sd|1453883708|1.0.20-1|hp-tg3sd-1.0.20-1.x86_64.rpm|TG3SD Daemon For Sensor Data
+HP-CNA-FC-hpqlgc-Enablement-Kit|1447836581|6.0.0.0-2|HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-2.noarch.rpm|QLogic Enablement Kit
+fibreutils|1456520522|3.3-1|fibreutils-3.3-1.x86_64.rpm|Fibre Channel Utilities
+
+SLES12.1-DL580Gen9
+hpsmh|1474131240|7.6.0-11|hpsmh-7.6.0-11.x86_64.rpm|HP System Management Homepage
+hp-health|1466589773|10.50-1826.37.sles12|hp-health-10.50-1826.37.sles12.x86_64.rpm|HP System Health Applic. + CLI Utils
+hp-snmp-agents|1473845166|10.50-2926.40.sles12|hp-snmp-agents-10.50-2926.40.sles12.x86_64.rpm|Insight Management Agents(SNMP)
+hp-smh-templates|1455259457|10.5.0-1462.26|hp-smh-templates-10.5.0-1462.26.noarch.rpm|HP System Management Homepage Templates
+hpdiags|1474395216|10.60.2109-2176|hpdiags-10.60.2109-2176.linux.x86_64.rpm|HP Insight Diags
+hponcfg|1431321614|4.6.0-0|hponcfg-4.6.0-0.x86_64.rpm|HP Lights-Out Online Config. Utility
+hp-ams|1456319293|2.5.0-1969.32.sles12|hp-ams-2.5.0-1969.32.sles12.x86_64.rpm|Agentless Monitoring Service
+ssa|1472660811|2.60-18.0|ssa-2.60-18.0.x86_64.rpm|Smart Storage Administrator
+ssacli|1476383276|2.60-19.0|ssacli-2.60-19.0.x86_64.rpm|Smart Storage Administrator CLI
+hp-tg3sd|1453883708|1.0.20-1|hp-tg3sd-1.0.20-1.x86_64.rpm|TG3SD Daemon For Sensor Data
+HP-CNA-FC-hpqlgc-Enablement-Kit|1447836581|6.0.0.0-2|HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-2.noarch.rpm|QLogic Enablement Kit
+fibreutils|1456520522|3.3-1|fibreutils-3.3-1.x86_64.rpm|Fibre Channel Utilities
+
+RHEL6.7-DL580Gen8/DL580Gen9
+hpsmh|1474131240|7.6.0-11|hpsmh-7.6.0-11.x86_64.rpm|HP System Management Homepage
+hp-health|1466604765|10.50-1826.38.rhel6|hp-health-10.50-1826.38.rhel6.x86_64.rpm|HP System Health Applic. + CLI Utils
+hp-snmp-agents|1473838123|10.50-2926.39.rhel6|hp-snmp-agents-10.50-2926.39.rhel6.x86_64.rpm|Insight Management Agents(SNMP)
+hp-smh-templates|1455259457|10.5.0-1462.26|hp-smh-templates-10.5.0-1462.26.noarch.rpm|HP System Management Homepage Templates
+hpdiags|1446642563|10.50.2007-2076|hpdiags-10.50.2007-2076.linux.x86_64.rpm|HP Insight Diags
+hponcfg|1431321614|4.6.0-0|hponcfg-4.6.0-0.x86_64.rpm|HP Lights-Out Online Config. Utility
+hp-ams|1467054976|2.5.0-2055.36.rhel6|hp-ams-2.5.0-2055.36.rhel6.x86_64.rpm|Agentless Monitoring Service
+ssa|1472660811|2.60-18.0|ssa-2.60-18.0.x86_64.rpm|Smart Storage Administrator
+ssacli|1476383276|2.60-19.0|ssacli-2.60-19.0.x86_64.rpm|Smart Storage Administrator CLI
+hp-tg3sd|1453883708|1.0.20-1|hp-tg3sd-1.0.20-1.x86_64.rpm|TG3SD Daemon For Sensor Data
+HP-CNA-FC-hpqlgc-Enablement-Kit|1447836581|6.0.0.0-2|HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-2.noarch.rpm|QLogic Enablement Kit
+fibreutils|1456520522|3.3-1|fibreutils-3.3-1.x86_64.rpm|Fibre Channel Utilities
+
+RHEL7.2-DL580Gen9
+hpsmh|1474131240|7.6.0-11|hpsmh-7.6.0-11.x86_64.rpm|HP System Management Homepage
+hp-health|1466605105|10.50-1826.40.rhel7|hp-health-10.50-1826.40.rhel7.x86_64.rpm|HP System Health Applic. + CLI Utils
+hp-snmp-agents|1473838192|10.50-2926.49.rhel7|hp-snmp-agents-10.50-2926.49.rhel7.x86_64.rpm|Insight Management Agents(SNMP)
+hp-smh-templates|1455259457|10.5.0-1462.26|hp-smh-templates-10.5.0-1462.26.noarch.rpm|HP System Management Homepage Templates
+hpdiags|1446642563|10.50.2007-2076|hpdiags-10.50.2007-2076.linux.x86_64.rpm|HP Insight Diags
+hponcfg|1431321614|4.6.0-0|hponcfg-4.6.0-0.x86_64.rpm|HP Lights-Out Online Config. Utility
+hp-ams|1456319647|2.5.0-1969.33.rhel7|hp-ams-2.5.0-1969.33.rhel7.x86_64.rpm|Agentless Monitoring Service
+ssa|1472660811|2.60-18.0|ssa-2.60-18.0.x86_64.rpm|Smart Storage Administrator
+ssacli|1476383276|2.60-19.0|ssacli-2.60-19.0.x86_64.rpm|Smart Storage Administrator CLI
+hp-tg3sd|1453883708|1.0.20-1|hp-tg3sd-1.0.20-1.x86_64.rpm|TG3SD Daemon For Sensor Data
+HP-CNA-FC-hpqlgc-Enablement-Kit|1447836581|6.0.0.0-2|HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-2.noarch.rpm|QLogic Enablement Kit
+fibreutils|1456520522|3.3-1|fibreutils-3.3-1.x86_64.rpm|Fibre Channel Utilities
+
+SLES11.4-DL380pGen8
+hpsmh|1474131240|7.6.0-11|hpsmh-7.6.0-11.x86_64.rpm|HP System Management Homepage
+hp-health|1466604219|10.50-1826.35.sles11|hp-health-10.50-1826.35.sles11.x86_64.rpm|HP System Health Applic. + CLI Utils
+hp-snmp-agents|1473844799|10.50-2926.39.sles11|hp-snmp-agents-10.50-2926.39.sles11.x86_64.rpm|Insight Management Agents(SNMP)
+hp-smh-templates|1455259457|10.5.0-1462.26|hp-smh-templates-10.5.0-1462.26.noarch.rpm|HP System Management Homepage Templates
+hpdiags|1446642563|10.50.2007-2076|hpdiags-10.50.2007-2076.linux.x86_64.rpm|HP Insight Diags
+hponcfg|1431321614|4.6.0-0|hponcfg-4.6.0-0.x86_64.rpm|HP Lights-Out Online Config. Utility
+hp-ams|1467053513|2.5.0-2055.32.sles11|hp-ams-2.5.0-2055.32.sles11.x86_64.rpm|Agentless Monitoring Service
+ssa|1472660811|2.60-18.0|ssa-2.60-18.0.x86_64.rpm|Smart Storage Administrator
+ssacli|1476383276|2.60-19.0|ssacli-2.60-19.0.x86_64.rpm|Smart Storage Administrator CLI
+hp-tg3sd|1453883708|1.0.20-1|hp-tg3sd-1.0.20-1.x86_64.rpm|TG3SD Daemon For Sensor Data
+HP-CNA-FC-hpqlgc-Enablement-Kit|1447836581|6.0.0.0-2|HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-2.noarch.rpm|QLogic Enablement Kit
+fibreutils|1456520522|3.3-1|fibreutils-3.3-1.x86_64.rpm|Fibre Channel Utilities
+serviceguard|1479260551|A.12.00.51-0.sles11|serviceguard-A.12.00.51-0.sles11.x86_64.rpm|ServiceGuard
+serviceguard-snmp|1478492880|A.12.00.51-0.sles11|serviceguard-snmp-A.12.00.51-0.sles11.x86_64.rpm|SNMP for ServiceGuard
+serviceguard-providers|1439351697|A.12.00.30-0.sles11|serviceguard-providers-A.12.00.30-0.sles11.x86_64.rpm|ServiceGuard Providers
+serviceguard-nfs-toolkit|1466574283|A.12.00.50-00|serviceguard-nfs-toolkit-A.12.00.50-00.sles.noarch.rpm|ServiceGuard NFS Toolkit
+
+RHEL6.7-DL380pGen8
+hpsmh|1474131240|7.6.0-11|hpsmh-7.6.0-11.x86_64.rpm|HP System Management Homepage
+hp-health|1466604765|10.50-1826.38.rhel6|hp-health-10.50-1826.38.rhel6.x86_64.rpm|HP System Health Applic. + CLI Utils
+hp-snmp-agents|1473838123|10.50-2926.39.rhel6|hp-snmp-agents-10.50-2926.39.rhel6.x86_64.rpm|Insight Management Agents(SNMP)
+hp-smh-templates|1455259457|10.5.0-1462.26|hp-smh-templates-10.5.0-1462.26.noarch.rpm|HP System Management Homepage Templates
+hpdiags|1446642563|10.50.2007-2076|hpdiags-10.50.2007-2076.linux.x86_64.rpm|HP Insight Diags
+hponcfg|1431321614|4.6.0-0|hponcfg-4.6.0-0.x86_64.rpm|HP Lights-Out Online Config. Utility
+hp-ams|1467054976|2.5.0-2055.36.rhel6|hp-ams-2.5.0-2055.36.rhel6.x86_64.rpm|Agentless Monitoring Service
+ssa|1472660811|2.60-18.0|ssa-2.60-18.0.x86_64.rpm|Smart Storage Administrator
+ssacli|1476383276|2.60-19.0|ssacli-2.60-19.0.x86_64.rpm|Smart Storage Administrator CLI
+hp-tg3sd|1453883708|1.0.20-1|hp-tg3sd-1.0.20-1.x86_64.rpm|TG3SD Daemon For Sensor Data
+HP-CNA-FC-hpqlgc-Enablement-Kit|1447836581|6.0.0.0-2|HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-2.noarch.rpm|QLogic Enablement Kit
+fibreutils|1456520522|3.3-1|fibreutils-3.3-1.x86_64.rpm|Fibre Channel Utilities
+serviceguard|1479284152|A.12.00.51-0.rhel6|serviceguard-A.12.00.51-0.rhel6.x86_64.rpm|ServiceGuard
+serviceguard-snmp|1478516477|A.12.00.51-0.rhel6|serviceguard-snmp-A.12.00.51-0.rhel6.x86_64.rpm|SNMP for ServiceGuard
+serviceguard-providers|1439368712t|A.12.00.30-0.rhel6|serviceguard-providers-A.12.00.30-0.rhel6.x86_64.rpm|ServiceGuard Providers
+serviceguard-nfs-toolkit|1466570054|A.12.00.50-00|serviceguard-nfs-toolkit-A.12.00.50-00.redhat.noarch.rpm|ServiceGuard NFS Toolkit

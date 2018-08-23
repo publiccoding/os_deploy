@@ -1,0 +1,35 @@
+BEGIN:VCALENDAR
+PRODID:-//Microsoft Corporation//Outlook 10.0 MIMEDIR//EN
+VERSION:2.0
+METHOD:REQUEST
+BEGIN:VTIMEZONE
+TZID:India Time
+BEGIN:STANDARD
+DTSTART:20160101T000000
+TZOFFSETFROM:+0530
+TZOFFSETTO:+0530
+TZNAME:Standard Time
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+ATTENDEE;CN="";ROLE=REQ-PARTICIPANT;RSVP=TRUE:MAILTO:thimmarayan.krishnappa@gmail.com
+ORGANIZER;CN="Varghese Joji":MAILTO:vjoji@akamai.com
+DTSTART;TZID="India Time":20180412T121500
+DTEND;TZID="India Time":20180412T131500
+LOCATION:https://akamai.webex.com/akamai
+TRANSP:OPAQUE
+SEQUENCE:1523514230
+UID:f220f763-dfe6-440a-972b-64030611b7f0
+DTSTAMP:20180412T064500Z
+DESCRIPTION:\n\n\n\nJOIN WEBEX MEETING\nhttps://akamai.webex.com/akamai/j.php?MTID=m698ed9c343331d8f6ce07b2d374d0d15\nMeeting number (access code): 928 541 288\n\n\n\nJOIN FROM A VIDEO SYSTEM OR APPLICATION\nDial sip:928541288@akamai.webex.com\nFrom Akamai Video Conference Rooms:\nSelect *WebEx Now* from the directory to place your call and enter the 9-digit Meeting/Access ID. \nIf you are the host, remember to open your meeting using the WebEx Application.\n\n\n\nJOIN BY PHONE\n1-408-792-6300 Call-in toll number (US/Canada)\n1-877-668-4490 Call-in toll-free number (US/Canada)\n\nGlobal call-in numbers:\nhttps://akamai.webex.com/akamai/globalcallin.php?serviceType=MC&ED=662656712&tollFree=1\n\nToll-free dialing restrictions: \nhttps://www.webex.com/pdf/tollfree_restrictions.pdf\n\n\n\nCan't join the meeting?\nhttps://help.webex.com/docs/DOC-5412\n\n\nIMPORTANT NOTICE: Please note that this WebEx service allows audio and other information sent during the session to be recorded, which may be discoverable in a legal matter. By joining this session, you automatically consent to such recordings. If you do not consent to being recorded, discuss your concerns with the host or do not join the session.\n
+X-ALT-DESC;FMTTYPE=text/html:	<FONT SIZE="1" FACE="ARIAL">&nbsp;<BR>&nbsp;<BR>&nbsp;<BR><FONT SIZE="4" FACE="ARIAL">		<a href="https://akamai.webex.com/akamai/j.php?MTID=m698ed9c343331d8f6ce07b2d374d0d15"><FONT SIZE="3" COLOR="#00AFF9" FACE="Arial">Join WebEx meeting</FONT></a>			<table>				<tr>					<td>						<FONT SIZE="2" COLOR="#666666" FACE="arial">Meeting number (access code): 928 541 288</FONT>					</td>				</tr>			</table>								</FONT><br><FONT size="2" COLOR="#FF0000"></FONT><br><FONT SIZE="1" FACE="ARIAL">&nbsp;<BR>&nbsp;<BR></FONT><FONT SIZE="4" FACE="ARIAL"><FONT SIZE="3" COLOR="#666666" FACE="arial">Join from a video system or application</FONT><BR><FONT SIZE="2" COLOR="#666666" FACE="arial">Dial</FONT> <a href="sip:928541288@akamai.webex.com"><FONT SIZE="2" COLOR="#00AFF9" FACE="arial">928541288@akamai.webex.com</FONT></a>&nbsp; <BR><FONT SIZE="2" COLOR="#666666" FACE="arial">From Akamai Video Conference Rooms:<BR>Select *WebEx Now* from the directory to place your call and enter the 9-digit Meeting/Access ID. <BR>If you are the host, remember to open your meeting using the WebEx Application.<BR></FONT> &nbsp; <BR></FONT>&nbsp; <BR>&nbsp; <BR><FONT SIZE="4" FACE="ARIAL"><FONT SIZE="3" COLOR="#666666" FACE="arial">Join by phone</FONT>&nbsp; <BR><FONT SIZE="2" COLOR="#666666" FACE="Segoe UI"><strong>1-408-792-6300</strong>&nbsp;Call-in toll number (US/Canada)</FONT>&nbsp; <BR><FONT SIZE="2" COLOR="#666666" FACE="Segoe UI"><strong>1-877-668-4490</strong>&nbsp;Call-in toll-free number (US/Canada)</FONT>&nbsp; <BR><a href="https://akamai.webex.com/akamai/globalcallin.php?serviceType=MC&ED=662656712&tollFree=1"><FONT SIZE="1" COLOR="#00AFF9" FACE="arial">Global call-in numbers</FONT></a><FONT SIZE="1" FACE="ARIAL">&nbsp;&nbsp;|&nbsp;&nbsp;</FONT><a href="https://www.webex.com/pdf/tollfree_restrictions.pdf"><FONT SIZE="1" COLOR="#00AFF9" FACE="arial">Toll-free calling restrictions</FONT></a> &nbsp; <BR></FONT><BR><BR>	&nbsp;<BR>	<a href="https://help.webex.com/docs/DOC-5412">	<FONT SIZE="1" COLOR="#00AFF9" FACE="Arial">Can't join the meeting?</FONT></a>	&nbsp;<BR>&nbsp;<BR><FONT COLOR="#A0A0A0" size="1" FACE="arial">IMPORTANT NOTICE: Please note that this WebEx service allows audio and other information sent during the session to be recorded, which may be discoverable in a legal matter. By joining this session, you automatically consent to such recordings. If you do not consent to being recorded, discuss your concerns with the host or do not join the session.</FONT></FONT>
+SUMMARY:Telephonic Discussion
+PRIORITY:5
+CLASS:PUBLIC
+BEGIN:VALARM
+TRIGGER:-PT5M
+ACTION:DISPLAY
+DESCRIPTION:Reminder
+END:VALARM
+END:VEVENT
+END:VCALENDAR

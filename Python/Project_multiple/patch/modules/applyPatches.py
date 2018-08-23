@@ -33,6 +33,7 @@ class ApplyPatches:
         for repository in repositoryList:
             time.sleep(2)
             if 'kernel' in repository.lower():
+                # from spUtils import TimeFeedbackThread 
                 self.timeFeedbackThread = TimeFeedbackThread(componentMessage='Installing the new kernel', event=self.timerController)
                 self.timeFeedbackThread.start()
                 command = 'zypper -n --non-interactive-include-reboot-patches --no-refresh in -r ' + repository + ' ' + repository + ':*'

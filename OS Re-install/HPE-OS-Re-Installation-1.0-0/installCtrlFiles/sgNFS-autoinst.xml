@@ -1,0 +1,415 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <scripts>
+    <!--*****Begin pre-scripts*****-->
+    <pre-scripts config:type="list">
+      <script>
+        <feedback config:type="boolean">true</feedback>
+        <feedback_type>error</feedback_type>
+        <debug config:type="boolean">false</debug>
+        <filename>getBootDisk.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/bash
+
+
+set +x
+# Get the SCSI disk, e.g. /dev/sda, that is attached to the P420i controller LUN 00|LUN01.
+bootHost=$(cat /proc/scsi/scsi | egrep -B1 "P420i" | egrep -o "scsi[0-9]+");
+bootDisk=$(cat /proc/scsi/scsi | egrep -B1 "LOGICAL VOLUME" | grep ${bootHost} | egrep "Lun: 00|Lun: 01" | while read x1 dev x2 chan x3 id x4 lun; \
+           do echo ${dev/scsi/}:${chan:1}:${id:1}:${lun:1}; done | while read device; \
+           do ls -1 /sys/class/scsi_device/$device/device/block; done | tr '\n' '|' | sed 's/|$/\n/g')
+
+echo "Boot disk = $bootDisk." > /tmp/bootDisk.log
+
+#If the boot disk could not be determined or its device file is missing then exit the installation.
+if [[ -z $bootDisk ]]; then
+        echo "Error: There was a problem identifying the boot disk attached to the P420i Controller."
+elif [[ $bootDisk =~ sd[ab]\| ]]; then
+        diskOne="/dev/${bootDisk%%|sd[ab]}"
+        ls ${diskOne} > /dev/null 2>&1
+
+        if [[ $? -ne 0 ]]; then
+                echo "Error: The boot disk's (${diskOne}) device file was not found."
+        fi
+
+        diskOneSize="$(($(blockdev --getsize64 ${diskOne})/(1024*1024*1024)))GB"
+        diskOneInfo="${diskOne} (${diskOneSize})"
+
+        diskTwo="/dev/${bootDisk##sd[ab]|}"
+        ls ${diskTwo} > /dev/null 2>&1
+
+        if [[ $? -ne 0 ]]; then
+                echo "Error: The boot disk's (${diskTwo}) device file was not found."
+        fi
+
+        diskTwoSize="$(($(blockdev --getsize64 ${diskTwo})/(1024*1024*1024)))GB"
+        diskTwoInfo="${diskTwo} (${diskTwoSize})"
+
+        #Replace the ask-list section.
+        askContents="    <ask-list config:type=\"list\">\\n      <ask>\\n        <title>OS Device Selection</title> \\n        <question>Choose option</question> \\n        <selection config:type=\"list\"> \\n          <entry> \\n            <label>Reboot Server</label> \\n            <value>reboot</value> \\n          </entry> \\n          <entry> \\n            <label>Halt Server</label> \\n            <value>halt</value> \\n          </entry> \\n          <entry> \\n            <label>Overwrite the device ${diskOneInfo}.</label> \\n            <value>${diskOne##/dev/}</value> \\n          </entry> \\n          <entry> \\n            <label>Overwrite the device ${diskTwoInfo}.</label> \\n            <value>${diskTwo##/dev/}</value> \\n          </entry> \\n        </selection> \\n        <stage>initial</stage> \\n        <script> \\n          <environment config:type=\"boolean\">true</environment> \\n          <feedback config:type=\"boolean\">true</feedback> \\n          <debug config:type=\"boolean\">false</debug> \\n          <rerun_on_error config:type=\"boolean\">true</rerun_on_error> \\n          <source> \\n<![CDATA[ \\n#!/bin/bash \\n \\ncase \"\$VAL\" in \\n    \"reboot\") \\n        echo b > /proc/sysrq-trigger \\n        exit 0 \\n        ;; \\n    \"halt\") \\n        echo o > /proc/sysrq-trigger \\n        exit 0 \\n        ;; \\n    \"${diskOne##/dev/}\") \\n        sed -e \"s,%%bootDisk%%,${diskOne},g\" -e \"\\\|^\\\s*<ask-list config:type=|,\\\|^\\\s*</ask-list>\$|d\" /tmp/profile/autoinst.xml > /tmp/profile/modified.xml \\n        exit 0 \\n        ;; \\n    \"${diskTwo##/dev/}\") \\n        sed -e \"s,%%bootDisk%%,${diskTwo},g\" -e \"\\\|^\\\s*<ask-list config:type=|,\\\|^\\\s*</ask-list>\$|d\" /tmp/profile/autoinst.xml > /tmp/profile/modified.xml \\n        exit 0 \\n        ;; \\nesac \\n]]]]><![CDATA[> \\n          </source> \\n        </script> \\n      </ask> \\n    </ask-list>"
+
+        cat /tmp/profile/autoinst.xml | sed "\|<ask-list config:type=\"list\">|,\|</ask-list>|c\\$askContents" >/tmp/profile/modified.xml
+else
+        osDisk="/dev/${bootDisk}"
+
+        ls ${osDisk} > /dev/null 2>&1
+
+        if [[ $? -ne 0 ]]; then
+                echo "Error: The boot disk's (${osDisk}) device file was not found."
+        else
+                #Set the correct boot disk.
+                cat /tmp/profile/autoinst.xml | sed "s,%%bootDisk%%,${osDisk},g" >/tmp/profile/modified.xml
+
+                #Replace the ask-list section.
+                askContents="    <ask-list config:type=\"list\">\\n      <ask>\\n        <title>OS Device: $osDisk</title> \\n        <question>Choose option</question> \\n        <selection config:type=\"list\"> \\n          <entry> \\n            <label>Reboot Server</label> \\n            <value>reboot</value> \\n          </entry> \\n          <entry> \\n            <label>Halt Server</label> \\n            <value>halt</value> \\n          </entry> \\n          <entry> \\n            <label>Continue to overwrite the OS device.</label> \\n            <value>continue</value> \\n          </entry> \\n        </selection> \\n        <stage>initial</stage> \\n        <script> \\n          <environment config:type=\"boolean\">true</environment> \\n          <feedback config:type=\"boolean\">true</feedback> \\n          <debug config:type=\"boolean\">false</debug> \\n          <rerun_on_error config:type=\"boolean\">true</rerun_on_error> \\n          <source> \\n<![CDATA[ \\n#!/bin/bash \\n \\ncase \"\$VAL\" in \\n    \"reboot\") \\n        echo b > /proc/sysrq-trigger \\n        exit 0 \\n        ;; \\n    \"halt\") \\n        echo o > /proc/sysrq-trigger \\n        exit 0 \\n        ;; \\n    \"continue\") \\n        exit 0 \\n        ;; \\nesac \\n]]]]><![CDATA[> \\n          </source> \\n        </script> \\n      </ask> \\n    </ask-list>"
+
+                sed -i "\|<ask-list config:type=\"list\">|,\|</ask-list>|c\\$askContents" /tmp/profile/modified.xml
+        fi
+fi
+]]>
+        </source>
+      </script>
+    </pre-scripts>
+    <!--*****End pre-scripts*****-->
+
+    <!--*****Begin postpartitioning-scripts*****-->
+    <postpartitioning-scripts config:type="list">
+      <!--
+          This script blacklists the aacraid module, since it has been found to cause boot failures.
+      -->
+      <script>
+        <filename>blacklistController.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+mkdir -p /mnt/etc/modprobe.d
+cat<<EOF > /mnt/etc/modprobe.d/51-hpe-blacklist.conf
+blacklist aacraid
+EOF
+]]>
+        </source>
+      </script>
+    </postpartitioning-scripts>
+    <!--*****End postpartitioning-scripts*****-->
+
+    <!--*****Begin chroot-scripts*****-->
+    <chroot-scripts config:type="list">
+      <!--
+          This script updates /etc/motd with a custom message.
+      -->
+      <script>
+        <filename>motd.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+echo "This is SLES for SAP Applications on a HPE SAP HANA Serviceguard NFS Server." > /mnt/etc/motd
+]]>
+        </source>
+      </script>
+      <!--
+          This script blacklists HP controllers in /etc/multipath.conf so that they are ignored by multipath.
+      -->
+      <script>
+        <filename>blacklist.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+echo -e 'blacklist {\n\tdevice {\n\t\tvendor HP\n\t\tproduct "LOGICAL VOLUME.*"\n\t}\n}' > /mnt/etc/multipath.conf
+]]>
+        </source>
+      </script>
+    </chroot-scripts>
+    <!--*****End chroot-scripts*****-->
+
+    <!--*****Begin post-scripts*****-->
+    <post-scripts config:type="list">
+      <!--
+          This script configures journld.service so that it logs to /var/log/journal.
+      -->
+      <script>
+        <filename>configureJournald.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+journalResources='[journal]\nStorage=persistent\nCompress=yes\nSystemMaxUse=1G\nMaxRetentionSec=12month\nMaxFileSec=1day\nForwardToConsole=yes\nMaxLevelStore=4\nMaxLevelConsole=3'
+
+journaldConf='/etc/systemd/journald.conf'
+
+dateString=$(date +%d%b%Y)
+
+if [[ -e $journaldConf ]]; then
+        mv $journaldConf ${journaldConf}.${dateString}
+fi
+
+echo -e $journalResources > $journaldConf
+
+mkdir -p /var/log/journal
+systemd-tmpfiles --create --prefix /var/log/journal
+]]>
+        </source>
+      </script>
+    </post-scripts>
+    <!--*****End post-scripts*****-->
+  </scripts>
+  <bootloader>
+    <global>
+      <timeout config:type="integer">10</timeout>
+      <append>splash=silent quiet showopts log_buf_len=2M intel_idle.max_cstate=1 processor.max_cstate=1 elevator=noop biosdevname=1</append>
+    </global>
+    <loader_type>grub2</loader_type>
+    <sections config:type="list"/>
+  </bootloader>
+  <suse_register>
+      <do_registration config:type="boolean">false</do_registration>
+      <install_updates config:type="boolean">false</install_updates>
+  </suse_register>
+  <files config:type="list">
+    <file>
+      <file_path>/etc/hpe-release</file_path>
+      <file_script>
+        <source>
+<![CDATA[
+#!/bin/bash
+echo "HPE SAP HANA CoE Serviceguard NFS Server Release 1.0-0" > /etc/hpe-release
+echo "Installed on `date +'%b %d, %Y'` @ `date +'%H:%M:%S'`." >> /etc/hpe-release
+]]>
+        </source>
+      </file_script>
+    </file>
+  </files>
+  <general>
+    <ask-list config:type="list">
+      <ask>
+        <title>OS Disk Detection Failure</title>
+        <question>Choose option</question>
+        <selection config:type="list">
+          <entry>
+            <label>Reboot Server</label>
+            <value>reboot</value>
+          </entry>
+          <entry>
+            <label>Halt Server</label>
+            <value>halt</value>
+          </entry>
+          <entry>
+            <label>Display Boot Disk Log</label>
+            <value>display</value>
+          </entry>
+        </selection>
+        <stage>initial</stage>
+        <script>
+          <environment config:type="boolean">true</environment>
+          <feedback config:type="boolean">true</feedback>
+          <debug config:type="boolean">false</debug>
+          <rerun_on_error config:type="boolean">true</rerun_on_error>
+          <source>
+<![CDATA[
+#!/bin/bash
+
+
+case "$VAL" in
+    "reboot")
+        echo b > /proc/sysrq-trigger
+        exit 0
+        ;;
+    "halt")
+        echo o > /proc/sysrq-trigger
+        exit 0
+        ;;
+    "display")
+        cat /tmp/bootDisk.log
+        exit 1
+        ;;
+esac
+]]>
+          </source>
+        </script>
+      </ask>
+    </ask-list>
+    <mode>
+      <confirm config:type="boolean">false</confirm>
+    </mode>
+    <storage>
+      <start_multipath config:type="boolean">false</start_multipath>
+    </storage>
+  </general>
+  <keyboard>
+    <keymap>english-us</keymap>
+  </keyboard>
+  <language>
+    <language>en_US</language>
+    <languages>en_US</languages>
+  </language>
+  <partitioning config:type="list">
+    <drive>
+      <device>%%bootDisk%%</device>
+      <initialize config:type="boolean">true</initialize>
+      <enable_snapshots config:type="boolean">true</enable_snapshots>
+      <partitions config:type="list">
+        <partition>
+          <create config:type="boolean">true</create>
+          <crypt_fs config:type="boolean">false</crypt_fs>
+          <filesystem config:type="symbol">swap</filesystem>
+          <format config:type="boolean">true</format>
+          <loop_fs config:type="boolean">false</loop_fs>
+          <mount>swap</mount>
+          <mountby config:type="symbol">uuid</mountby>
+          <partition_id config:type="integer">130</partition_id>
+          <partition_nr config:type="integer">2</partition_nr>
+          <resize config:type="boolean">false</resize>
+          <size>2G</size>
+        </partition>
+        <partition>
+          <create config:type="boolean">true</create>
+          <crypt_fs config:type="boolean">false</crypt_fs>
+          <filesystem config:type="symbol">btrfs</filesystem>
+          <format config:type="boolean">true</format>
+          <loop_fs config:type="boolean">false</loop_fs>
+          <mount>/</mount>
+          <mountby config:type="symbol">uuid</mountby>
+          <partition_id config:type="integer">131</partition_id>
+          <partition_nr config:type="integer">3</partition_nr>
+          <resize config:type="boolean">false</resize>
+          <subvolumes config:type="list">
+            <listentry>boot/grub2/i386-pc</listentry>
+            <listentry>boot/grub2/x86_64-efi</listentry>
+            <listentry>home</listentry>
+            <listentry>opt</listentry>
+            <listentry>srv</listentry>
+            <listentry>tmp</listentry>
+            <listentry>usr/local</listentry>
+            <listentry>var/cache</listentry>
+            <listentry>var/crash</listentry>
+            <listentry>var/lib/mailman</listentry>
+            <listentry>var/log</listentry>
+            <listentry>var/opt</listentry>
+            <listentry>var/spool</listentry>
+            <listentry>var/tmp</listentry>
+          </subvolumes>
+        </partition>
+      </partitions>
+      <use>all</use>
+    </drive>
+  </partitioning>
+  <services-manager>
+    <default_target>multi-user</default_target>
+    <services>
+     <disable config:type="list">
+        <service>wickedd-auto4</service>
+        <service>wickedd-dhcp4</service>
+        <service>wickedd-dhcp6</service>
+        <service>wickedd</service>
+        <service>wickedd-nanny</service>
+        <service>kdump</service>
+        <service>smartd</service>
+      </disable>
+      <enable config:type="list">
+        <service>dm-event</service>
+        <service>mcelog</service>
+        <service>multipathd</service>
+        <service>ntpd</service>
+        <service>rsyslog</service>
+        <service>sshd</service>
+        <service>tuned</service>
+      </enable>
+    </services>
+  </services-manager>
+  <software>
+    <packages config:type="list">
+      <!-- Added to match what R&D had included to make it easier to match patch bundles. -->
+      <package>cpuset</package>
+      <package>perl-Bootloader-YAML</package>
+      <package>git-core</package>
+      <package>perl-Error</package>
+      <package>unrar</package>
+      <package>tuned</package>
+      <package>open-lldp</package>
+      <package>libHBAAPI2</package>
+      <package>libpng12-0</package>
+      <package>uuidd</package>
+      <package>libcgroup-tools</package>
+      <package>libopenssl0_9_8</package>
+      <package>saptune</package>
+      <package>bing</package>
+      <package>bonnie</package>
+      <package>cairo</package>
+      <package>graphviz</package>
+      <package>gtk2</package>
+      <package>java-1_7_1-ibm-plugin</package>
+      <package>java-1_7_1-ibm</package>
+      <package>java-1_7_1-ibm-jdbc</package>
+      <package>java-1_7_1-ibm-alsa</package>
+      <package>krb5-client</package>
+      <package>libicu</package>
+      <package>libts-1_0-0</package>
+      <package>sensors</package>
+      <package>sysstat</package>
+      <package>xrdp</package>
+      <package>yast2-ncurses</package>
+      <package>rear118a</package>
+      <package>yast2-rear</package>
+      <!-- Added to further match what R&D has included.
+           As new released from R&D come out a review will
+	   be made to see if any new packages need to be 
+	   added.
+      -->
+      <package>sblim-wbemcli</package>
+      <package>cmpi-bindings-pywbem</package>
+      <package>cmpi-pywbem-base</package>
+      <package>cmpi-pywbem-power-management</package>
+      <package>libiniparser0</package>
+      <package>lcms2</package>
+      <package>timezone-java</package>
+      <package>libgif6</package>
+      <package>java-1_7_0-openjdk</package>
+      <package>java-1_7_0-openjdk-headless</package>
+      <!-- Added for CS900. -->
+      <package>python-libxml2</package>
+      <package>openwsman-server</package>
+      <!-- Added for Serviceguard. -->
+      <package>pidentd</package>
+      <package>sblim-indication_helper</package>
+      <package>sblim-cmpi-base</package>
+      <package>sblim-sfcc</package>
+      <package>quota-nfs</package>
+      <!-- Added for the upgrade program. -->
+      <package>python-curses</package>
+      <!-- Added for module builds. -->
+      <package>gcc</package>
+      <package>kernel-syms</package>
+      <package>kernel-source</package>
+      <!-- Added since it is not getting selected by default. -->
+      <package>ucode-intel</package>
+    </packages>
+    <patterns config:type="list">
+      <pattern>Minimal</pattern>
+      <pattern>base</pattern>
+      <pattern>x11</pattern>
+    </patterns>
+  </software>
+  <users config:type="list">
+    <user>
+      <encrypted config:type="boolean">true</encrypted>
+      <fullname>root</fullname>
+      <gid>0</gid>
+      <home>/root</home>
+      <password_settings>
+        <expire></expire>
+        <flag></flag>
+        <inact></inact>
+        <max></max>
+        <min></min>
+        <warn></warn>
+      </password_settings>
+      <shell>/bin/bash</shell>
+      <uid>0</uid>
+      <user_password>LWfaLuAbZ18es</user_password>
+      <username>root</username>
+    </user>
+  </users>
+</profile>

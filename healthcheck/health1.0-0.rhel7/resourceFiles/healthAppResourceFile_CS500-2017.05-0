@@ -1,0 +1,134 @@
+###############################################################################
+#healthAppResourceFile_CS500-2017.05-0
+#csurBundle-P1-CS500ComputeNodes-2017.05-1
+#osPatchBundle 2017.04.0
+
+#Directories and files used by the application.
+#This following are hardcoded:
+#     healthBasePath = '/hp/support/health'
+#     healthAppResourceFile = healthBasePath + '/resourceFiles/healthAppResourceFile'
+#Also, it is expected that all files/directories exist off of /hp/support/health.
+#Do not change the names on the left side as they are the key names
+#(resource names) used by the application.
+#Added support for DL380p Gen8 (2016-12-07)
+###############################################################################
+
+###############################################################################
+#This is the main health log file.
+###############################################################################
+mainApplicationLog = 'healthApplicationLog.log'
+
+###############################################################################
+#This is the compute node's resource file.
+###############################################################################
+computeNodeResourceFile = 'computeNodeResourceFile'
+
+###############################################################################
+#This is the file that holds the pci ids that will be used to identify
+#the model of NIC cards present on a server.
+###############################################################################
+pciIdsFile = 'pci.ids'
+
+###############################################################################
+#This is a list of RPMs that are no longer needed and will be removed.
+###############################################################################
+rpmsToRemove = ''
+
+###############################################################################
+#This is the list of supported operating systems that can be updated.
+###############################################################################
+supportedDistributionLevels = 'SLES11.4, SLES12.1, RHEL6.7, RHEL7.2'
+
+###############################################################################
+#This is the list of unsupported operating systems that can be upgraded to
+#supported.
+###############################################################################
+unsupportedUpgradableDistLevels = 'SLES11.3'
+
+###############################################################################
+#This is the list of supported compute nodes that can be updated.
+###############################################################################
+supportedComputeNodeModels = 'DL580Gen9, DL580Gen8, DL380pGen8'
+
+###############################################################################
+#This is a list of servers for which PMC firmware is not updated.
+#Because there is currently not update and/or we cannot detect the version.
+###############################################################################
+noPMCFirmwareUpdateModels = ''
+
+###############################################################################
+#This is a list of Mellanox RPMs that will be removed, if present, before the
+#driver is updated.
+###############################################################################
+slesMellanoxPackageList = 'mlnx-en-kmp-default, mlnx-en-utils, libmlx4-rdmav2, libmlx4, libibverbs, libibverbs1, librdmacm, libmthca-rdmav2, libibcm, opensm, opensm-devel, ibutils, infiniband-diags'
+rhelMellanoxPackageList = 'mlnx-en-kmp-default, mlnx-en-utils, libmlx4-rdmav2, libmlx4, libibverbs, libibverbs1, librdmacm, libmthca-rdmav2, libibcm, libibverbs-utils, libibverbs-devel, librdmacm-utils, libmthca, mlnx-ofed-basic, libmlx5, ofed-scripts, kmod-srp, kmod-iser, libibmad-devel, opensm, opensm-devel, libibumad-devel'
+
+###############################################################################
+#This is the CSUR bundle version information. 
+###############################################################################
+releaseNotes = 'HPE Converged Systems for SAP HANA CSUR Bundle|Version: 2017.05-0|Release Date: 2017-05-31|Install Date:'
+
+###############################################################################
+#This is the CSUR Bundle version information file. 
+###############################################################################
+versionInformationFile = '/etc/csurBundle-release'
+
+################################################################################
+#This is the OS Patch Update Release file. 
+################################################################################
+osPatchUpdateReleaseFile = '/etc/osPatchUpdate-release'
+
+################################################################################
+#This is the OS Patch Update Release Version. 
+################################################################################
+osPatchUpdateReleaseNotes = 'HPE Converged Systems for SAP HANA Patch Bundle|Version: 2017.04-0
+
+################################################################################
+#This is the supported level that Serviceguard must be at in order to upgrade.
+################################################################################
+supportedServiceguardLevels = 'A.12.00'
+
+################################################################################
+#This is a list of the Serviceguard RPMs.
+################################################################################
+sgSoftwareList = 'serviceguard, serviceguard-snmp, serviceguard-providers'
+
+################################################################################
+#This is a list of the Serviceguard NFS Toolkit RPMs.
+################################################################################
+sgNFSSoftwareList = 'serviceguard-nfs-toolkit'
+
+################################################################################
+#This is a list of HBA specific drivers.
+################################################################################
+hbaDrivers = 'qla2xxx'
+
+################################################################################
+#This is a list of HBA specific software.
+################################################################################
+hbaSoftware = 'HP-CNA-FC-hpqlgc-Enablement-Kit, fibreutils'
+
+################################################################################
+#This is a list of local storage specific drivers.
+################################################################################
+localStorageDrivers = 'hpsa'
+
+################################################################################
+#This is a list of local storage specific software.
+################################################################################
+localStorageSoftware = 'ssa, ssacli'
+
+################################################################################
+#This is the complete list of nic cards that are referenced when doing a
+#compute node firmware inventory.
+################################################################################
+nicList = 'NC375T|NC375i|NC550SFP|NC552SFP|331FLR|331T|544\+QSFP|560SFP\+|331T|561T|332i|332T'
+
+################################################################################
+# This is the list of component resource files
+################################################################################
+networkSwitchResourceFile = 'networkSwitchResourceFile'
+sanSwitchResourceFile = 'sanSwitchResourceFile'
+threePARResourceFile = 'threePARResourceFile'
+
+

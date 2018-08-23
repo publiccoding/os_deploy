@@ -16,25 +16,17 @@ class Log(object):
 
         self.a_name=name
         logger.info(" Constructer for log class initiated {}".format(self.a_name))
-
     def Getter(self):
-
         logger.warning("value is assinged  {}".format(self.a_name))
-
         logger.error("this value is not printed")
-
         return self.a_name
-        
+     
     def Settter(self, name):
-
-
         self.a_name=name
         logger.debug(" values is assingned  {}".format(self.a_name))
 	
 log = Log("thimma")
 log1 = Log('rayan')
-
 log.Settter(45)
-	
 t=log.Getter()
 print(t)

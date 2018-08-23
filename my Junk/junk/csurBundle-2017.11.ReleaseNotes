@@ -1,0 +1,761 @@
++--------------------------------------+
+|    CSUR 2017.11 Release Notes        |
++--------------------------------------+
+
+Version: 2017.11
+
+Description: CSUR 2017.11 is made up of nine bundles:
+		- csurBundle-P1-Gen1.xComputeNodes-2017.11-2
+		- csurBundle-P1-CS500ComputeNodes-2017.11-4
+		- csurBundle-P1-CS900ComputeNodes-2017.11-3
+		- csurBundle-P2-switches-2017.11-0
+		- csurBundle-P2-c7000-2017.11-0
+		- csurBundle-P2-sdComplex-2017.11-0
+		- csurBundle-P2-3parStorage-2017.11-0
+		- csurBundle-P2-ibrixStorage-2017.11-0
+		- csurBundle-P2-Prerequisites-2017.11-0
+
+              The reference SPP versions for the compute nodes are SPP version 2016.10.0 and SPP version 2017.10.1.
+
+Installation Instructions: It is the responsibility of the individual peforming
+                           a CSUR update to read the pertinent component Release
+                           Notes and Upgrade Instructions before performing
+                           an upgrade.
+
+Revision History:
+	11/20/2017: Initial release.
+	01/13/2018: Included the correct firmware RPM for 544+QSFP card in the CS500 bundle. 
+	01/15/2018: Updated the resource file in the CS500 bundle to include the correct hp-ams package for nfs nodes.
+	01/18/2018: Updated the Release Notes to list all the firmware RPMs in the CS900 bundle.
+		    Added the missing firmware RPM for HPAJ764A to the Gen1.x bundle.
+		    Remove old RPMs from the CS900 bundle.
+	01/29/2018: Updated the resource file in the Gen1.x bundle to add NC553i and NC553m to the driver reference list.
+	02/14/2018: Fixed a typo in the compute node resource file for hp-snmp-agents-10.60-2936.33.sles12.x86_64.rpm 
+		    for the DL380p in CS500 bundle (csurBundle-P1-CS500ComputeNodes-2017.11-2).
+	02/14/2018: Removed SLES 12.2 references/bits from CS500 bundle (csurBundle-P1-CS500ComputeNodes-2017.11-2) 
+		    and CS900 bundle (csurBundle-P1-CS900ComputeNodes-2017.11-1).
+	02/27/2018: Removed RHEL 7.3 references/bits from CS500 bundle (csurBundle-P1-CS500ComputeNodes-2017.11-3) 
+		    and CS900 bundle (csurBundle-P1-CS900ComputeNodes-2017.11-2).
+
+Contents: The following is a list of all the components contained within the
+          CSURs.
+
+###############################################################################
+# Gen 1.x Compute Nodes: csurBundle-P1-Gen1.xComputeNodes-2017.11-2.tgz       #
+###############################################################################
+
++-------------+
+| Firmware:   |
++-------------+
+
+Component                          Version               Package
+---------                          -------               -------
+BIOSDL580G7                        2015.08.16            hp-firmware-system-p65-2015.08.16-1.1.i386.rpm
+BIOSDL980G7                        2015.08.16            hp-firmware-system-p66-2015.08.16-1.1.i386.rpm
+BIOSDL380pGen8                     2015.07.01            hp-firmware-system-p70-2015.07.01-1.1.i386.rpm
+BIOSBL680cG7                       2015.08.16            hp-firmware-system-i25-2015.08.16-1.1.i386.rpm
+PMCDL380pGen8                      3.3                   hp-firmware-powerpic-gen8-3.3-4.i386.rpm
+iLODL380pGen8                      2.54                  hp-firmware-ilo4-2.54-1.1.i386.rpm
+iLO                                1.89                  hp-firmware-ilo3-1.89-1.1.i386.rpm
+NC550SFP                           4.9.416.2             hp-firmware-cna-emulex-2015.02.02-1.1.x86_64.rpm
+NC552SFP                           11.1.183.23           hp-firmware-cna-emulex-2016.10.01-1.20.x86_64.rpm
+NC553i                             11.1.183.23           hp-firmware-cna-emulex-2016.10.01-1.20.x86_64.rpm
+NC553m                             11.1.183.23           hp-firmware-cna-emulex-2016.10.01-1.20.x86_64.rpm
+NC375T                             4.0.596               hp-firmware-nic-netxen-5.6.10-1.1.x86_64.rpm
+NC375i                             4.0.596               hp-firmware-nic-netxen-5.6.10-1.1.x86_64.rpm
+331FLR                             v1.46                 hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm
+P410i                              6.64                  hp-firmware-smartarray-14ef73e580-6.64-2.x86_64.rpm
+P812                               6.64                  hp-firmware-smartarray-14ef73e580-6.64-2.x86_64.rpm
+P420i                              8.00                  hp-firmware-smartarray-46a4d957a7-8.00-1.1.x86_64.rpm
+D2700                              0150                  hp-firmware-d2600-d2700-0150-2.1.x86_64.rpm
+SN1000Q                            8.05.63               firmware-fc-qlogic-2017.09.01-1.5.x86_64.rpm
+HPAJ764A                           8.02.00               hp-firmware-fc-qlogic-2016.10.01-1.8.x86_64.rpm
+EG0300FBDBR                        HPDA                  hp-firmware-hdd-f1eafd9715-HPDA-2.x86_64.rpm
+EG0450FBDBT                        HPDA                  hp-firmware-hdd-f1eafd9715-HPDA-2.x86_64.rpm
+EH0146FARWD                        HPDD                  hp-firmware-hdd-92875cb465-HPDD-2.x86_64.rpm
+EG0450FBVFM                        HPDE                  hp-firmware-hdd-b94f345c05-HPDE-2.1.x86_64.rpm
+EG0300FBVFL                        HPDE                  hp-firmware-hdd-b94f345c05-HPDE-2.1.x86_64.rpm
+EG0146FAWJC                        HPDG                  hp-firmware-hdd-fdfb5070cf-HPDG-2.x86_64.rpm
+EG0300FAWJD                        HPDG                  hp-firmware-hdd-fdfb5070cf-HPDG-2.x86_64.rpm
+EG0300FAWHV                        HPDG                  hp-firmware-hdd-eedc8e3953-HPDG-1.1.x86_64.rpm
+EH0146FAWJB                        HPDK                  hp-firmware-hdd-ca173adbad-HPDK-2.1.x86_64.rpm
+EH0146FBQDC                        HPD5                  hp-firmware-hdd-1ec3c02013-HPD5-1.1.x86_64.rpm
+EG0300FBDSP                        HPD6                  hp-firmware-hdd-06ac84a5d4-HPD6-2.x86_64.rpm
+EG0450FBDSQ                        HPD6                  hp-firmware-hdd-06ac84a5d4-HPD6-2.x86_64.rpm
+EG0600JETKA                        HPD6                  firmware-hdd-7505dfb5ae-HPD6-1.1.x86_64.rpm
+EG0450FBLSF                        HPD8                  hp-firmware-hdd-815e5e101b-HPD8-1.1.x86_64.rpm
+EG0300FBLSE                        HPD8                  hp-firmware-hdd-815e5e101b-HPD8-1.1.x86_64.rpm
+EG0450FCHHT                        HPD8                  hp-firmware-hdd-8a9b54701e-HPD8-1.1.x86_64.rpm
+EH0146FCBVB                        HPD8                  hp-firmware-hdd-74df2d6c5c-HPD8-1.1.x86_64.rpm
+EG0300FCVBF                        HPD9                  hp-firmware-hdd-415992e26f-HPD9-2.1.x86_64.rpm
+EG0450FCVBH                        HPD9                  hp-firmware-hdd-415992e26f-HPD9-2.1.x86_64.rpm
+EH0146FARUB                        HPD9                  hp-firmware-hdd-88df5ee1cd-HPD9-2.x86_64.rpm
+EG0300FCSPH                        HPD2                  firmware-hdd-7c1a1734f9-HPD2-1.1.x86_64.rpm
+EG0450FCSPK                        HPD2                  firmware-hdd-7c1a1734f9-HPD2-1.1.x86_64.rpm
+FusionIO                           v7.1.17               ioaccelerator_3.2.8-20140508.fff
+
+
++-------------+
+| Drivers:    |
++-------------+
+
+SLES11.4-DL580G7/DL980G7:
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.1.145.27           be2net-kmp-default-11.1.145.27_3.0.101_63-1.sles11sp4.x86_64.rpm
+nx_nic                             4.0.596.1             hp-nx_nic-tools-4.0.596.1-4.noarch.rpm
+                                                         hp-nx_nic-docs-1.0.0-4.noarch.rpm
+                                                         hpqlgc-nx_nic-kmp-default-4.0.596.1_3.0.101_63-5.sles11sp4.x86_64.rpm
+iomemory_vsl                       3.2.8.1350            fio-common-3.2.8.1350-1.0.noarch.rpm
+                                                         fio-util-3.2.8.1350-1.0.noarch.rpm
+                                                         fio-sysvinit-3.2.8.1350-1.0.noarch.rpm
+
+SLES11.4-BL680cG7:
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.1.145.27           be2net-kmp-default-11.1.145.27_3.0.101_63-1.sles11sp4.x86_64.rpm
+
+SLES11.4-DL380pGen8:
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.2.1263.16          be2net-kmp-default-11.2.1263.16_3.0.101_63-1.sles11sp4.x86_64.rpm
+tg3                                3.137o                tg3-kmp-default-3.137o_3.0.101_63-1.sles11sp4.x86_64.rpm
+hpsa                               3.4.20-110            hpsa-kmp-default-3.4.20-110.sles11sp4.x86_64.rpm
+qla2xxx                            8.07.00.50.11.3-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.11.3_k3_3.0.101_63-1.sles11sp4.x86_64.rpm
+
+
++-------------+
+| Software:   |
++-------------+
+
+SLES11.4-DL580G7/DL980G7:
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.36.sles11  hp-health-10.60-1833.36.sles11.x86_64.rpm
+hp-snmp-agents                     10.60-2936.32.sles11  hp-snmp-agents-10.60-2936.32.sles11.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+fio-agent                          3.9.0.192-1.0         fio-agent-3.9.0.192-1.0.x86_64.rpm
+fio-common-mgmt                    3.9.0.192-1.0         fio-common-mgmt-3.9.0.192-1.0.x86_64.rpm
+fio-remote-util                    3.9.0.192-1.0         fio-remote-util-3.9.0.192-1.0.x86_64.rpm
+fio-smis                           3.9.0.192-1.0         fio-smis-3.9.0.192-1.0.x86_64.rpm
+fio-snmp-agentx                    3.9.0.192-1.0         fio-snmp-agentx-3.9.0.192-1.0.x86_64.rpm
+fio-snmp-mib                       3.9.0.192-1.0         fio-snmp-mib-3.9.0.192-1.0.x86_64.rpm
+fio-snmp-mib-hp                    3.9.0.192-1.0         fio-snmp-mib-hp-3.9.0.192-1.0.x86_64.rpm
+hp-io-accel-msrv                   3.9.0.192-1.0         hp-io-accel-msrv-3.9.0.192-1.0.x86_64.rpm
+
+SLES11.4-BL680cG7:
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.36.sles11  hp-health-10.60-1833.36.sles11.x86_64.rpm
+hp-snmp-agents                     10.60-2936.32.sles11  hp-snmp-agents-10.60-2936.32.sles11.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+
+SLES11.4-DL380pGen8:
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.36.sles11  hp-health-10.60-1833.36.sles11.x86_64.rpm
+hp-snmp-agents                     10.60-2936.32.sles11  hp-snmp-agents-10.60-2936.32.sles11.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-ams                             2.6.1-2457.5.sles11   hp-ams-2.6.1-2457.5.sles11.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+serviceguard                       A.12.00.51-0.sles11   serviceguard-A.12.00.51-0.sles11.x86_64.rpm
+serviceguard-snmp                  A.12.00.51-0.sles11   serviceguard-snmp-A.12.00.51-0.sles11.x86_64.rpm
+serviceguard-providers             A.12.00.30-0.sles11   serviceguard-providers-A.12.00.30-0.sles11.x86_64.rpm
+serviceguard-nfs-toolkit           A.12.00.50-00         serviceguard-nfs-toolkit-A.12.00.50-00.sles.noarch.rpm
+
+
+###############################################################################
+# CS500 Compute Nodes: csurBundle-P1-CS500ComputeNodes-2017.11-4.tgz          #
+###############################################################################
+
++-------------+
+| Firmware:   |
++-------------+
+
+Component                          Version               Package
+---------                          -------               -------
+BIOSDL580Gen8                      2016.08.18            hp-firmware-system-p79-1.96_2016_08_18-1.1.i386.rpm
+BIOSDL380pGen8                     2015.07.01            hp-firmware-system-p70-2015.07.01-1.1.i386.rpm
+BIOSDL580Gen9                      2017.10.01		 firmware-system-u17-2.50_2017_10_01-1.1.i386.rpm
+PMCDL580Gen8                       4.1                   hp-firmware-powerpic-dl580-4.1-5.i386.rpm
+PMCDL380pGen8                      3.3                   hp-firmware-powerpic-gen8-3.3-4.i386.rpm
+PMCDL580Gen9                       4.1                   hp-firmware-powerpic-dl580-4.1-5.i386.rpm
+iLO                                2.55                  hp-firmware-ilo4-2.55-1.1.i386.rpm
+560SFP+                            1.1752.0		 firmware-nic-intel-1.13.12-1.1.x86_64.rpm
+561T                               1.1752.0              firmware-nic-intel-1.13.12-1.1.x86_64.rpm
+544+QSFP                           2.36.5000		 hp-firmware-hca-mellanox-vpi-eth-ib-1.0.4-2.1.x86_64.rpm
+NC552SFP                           11.1.183.23           hp-firmware-cna-emulex-2016.10.01-1.20.x86_64.rpm
+331FLR                             v1.46                 hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm
+331T                               v1.46                 hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm
+332i                               v1.39                 hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm
+332T                               v1.39                 hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm
+SN1000Q                            8.05.63               firmware-fc-qlogic-2017.09.01-1.5.x86_64.rpm
+P830i                              4.10                  hp-firmware-smartarray-112204add8-4.10-1.1.x86_64.rpm
+P431                               4.10                  hp-firmware-smartarray-112204add8-4.10-1.1.x86_64.rpm
+P420i                              8.00                  hp-firmware-smartarray-46a4d957a7-8.00-1.1.x86_64.rpm
+D3700                              3.64                  firmware-d3000-3.64-1.1.x86_64.rpm
+D2700                              0150                  hp-firmware-d2600-d2700-0150-2.1.x86_64.rpm
+EG0600FCSPL                        HPD2                  firmware-hdd-7c1a1734f9-HPD2-1.1.x86_64.rpm
+MO0800JEFPB                        HPD1                  hp-firmware-hdd-71af849f3b-HPD1-2.1.x86_64.rpm
+MO0800JDVEV                        HPD2                  hp-firmware-hdd-8c5d34ba77-HPD2-2.1.x86_64.rpm
+EG1800JEMDB                        HPD3                  firmware-hdd-0a38b25661-HPD3-1.1.x86_64.rpm
+EG1200JEHMC                        HPD3                  hp-firmware-hdd-31f91b8622-HPD3-1.1.x86_64.rpm
+EG1200JEMDA                        HPD6                  firmware-hdd-ac3fda26eb-HPD6-2.1.x86_64.rpm
+EG1800JEHMD                        HPD4                  hp-firmware-hdd-8a2c06af48-HPD4-3.1.x86_64.rpm
+MO0400JFFCF                        HPD4                  hp-firmware-hdd-edf6dcd906-HPD4-1.1.x86_64.rpm
+EG0900FDJYR                        HPD4                  hp-firmware-hdd-7cfa9118b1-HPD4-3.1.x86_64.rpm
+EG1200FDJYT                        HPD4                  hp-firmware-hdd-7cfa9118b1-HPD4-3.1.x86_64.rpm
+EG1200JETKC			   HPD6			 firmware-hdd-7505dfb5ae-HPD6-1.1.x86_64.rpm
+EG0600JETKA                        HPD6                  firmware-hdd-7505dfb5ae-HPD6-1.1.x86_64.rpm
+EG1800JFHMH		           HPD5			 hp-firmware-hdd-7fc5497116-HPD5-1.1.x86_64.rpm
+EG0600FBDSR                        HPD6                  hp-firmware-hdd-06ac84a5d4-HPD6-2.x86_64.rpm
+EG0450FBDSQ                        HPD6                  hp-firmware-hdd-06ac84a5d4-HPD6-2.x86_64.rpm
+EG1200FCVBQ                        HPD8                  hp-firmware-hdd-33aee979c2-HPD8-2.1.x86_64.rpm
+EG1200FDNJT                        HPD8                  hp-firmware-hdd-33aee979c2-HPD8-2.1.x86_64.rpm
+EG0600FBLSH                        HPD8                  hp-firmware-hdd-815e5e101b-HPD8-1.1.x86_64.rpm
+EG0450FBLSF                        HPD8                  hp-firmware-hdd-815e5e101b-HPD8-1.1.x86_64.rpm
+EG0600FCVBK                        HPD9                  hp-firmware-hdd-415992e26f-HPD9-2.1.x86_64.rpm
+EG0450FCVBH                        HPD9                  hp-firmware-hdd-415992e26f-HPD9-2.1.x86_64.rpm
+EG0600FBDBU                        HPDA                  hp-firmware-hdd-f1eafd9715-HPDA-2.x86_64.rpm
+EG0450FBDBT                        HPDA                  hp-firmware-hdd-f1eafd9715-HPDA-2.x86_64.rpm
+EG0600FBVFP                        HPDE                  hp-firmware-hdd-b94f345c05-HPDE-2.1.x86_64.rpm
+EG0450FBVFM                        HPDE                  hp-firmware-hdd-b94f345c05-HPDE-2.1.x86_64.rpm
+MB1000GCEHH                        HPGD                  hp-firmware-hdd-b583d96f94-HPGD-3.x86_64.rpm
+EG0450FCSPK                        HPD2                  firmware-hdd-7c1a1734f9-HPD2-1.1.x86_64.rpm
+
+
++-------------+
+| Drivers:    |
++-------------+
+
+SLES11.4-DL580Gen8
+Component                          Version               Package
+---------                          -------               -------
+tg3                                3.137o                tg3-kmp-default-3.137o_3.0.101_63-1.sles11sp4.x86_64.rpm
+ixgbe                              5.2.1                 hp-ixgbe-kmp-default-5.2.1_3.0.101_63-4.sles11sp4.x86_64.rpm
+hpsa                               3.4.20-110            hpsa-kmp-default-3.4.20-110.sles11sp4.x86_64.rpm
+qla2xxx                            8.07.00.50.11.3-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.11.3_k3_3.0.101_63-1.sles11sp4.x86_64.rpm
+
+SLES12.1-DL580Gen8
+Component                          Version               Package
+---------                          -------               -------
+tg3                                3.137o                tg3-kmp-default-3.137o_k3.12.49_11-1.sles12sp1.x86_64.rpm
+ixgbe                              5.0.7		 hp-ixgbe-kmp-default-5.0.7_k3.12.49_11-1.sles12sp1.x86_64.rpm
+hpsa                               3.4.20-100            hpsa-kmp-default-3.4.20-100.sles12sp1.x86_64.rpm
+qla2xxx                            8.07.00.50.12.0-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.12.0_k3_k3.12.49_11-1.sles12sp1.x86_64.rpm
+
+RHEL6.7-DL580Gen8
+Component                          Version               Package
+---------                          -------               -------
+tg3                                3.137o                kmod-tg3-3.137o-1.rhel6u7.x86_64.rpm
+ixgbe                              4.3.13                kmod-hp-ixgbe-4.3.13-2.rhel6u7.x86_64.rpm
+hpsa                               3.4.18-108            kmod-hpsa-3.4.18-108.rhel6u7.x86_64.rpm
+qla2xxx                            8.07.00.34.06.0-k1    kmod-qlgc-qla2xxx-8.07.00.34.06.0_k1-3.rhel6u7.x86_64.rpm
+
+RHEL7.2-DL580Gen8
+Component                          Version               Package
+---------                          -------               -------
+tg3                                3.137o                kmod-tg3-3.137o-1.rhel7u2.x86_64.rpm
+ixgbe                              5.0.7                 kmod-hp-ixgbe-5.0.7-1.rhel7u2.x86_64.rpm
+hpsa				   3.4.20-100 	         kmod-hpsa-3.4.20-100.rhel7u2.x86_64.rpm
+qla2xxx                            8.07.00.50.07.0-k3    kmod-qlgc-qla2xxx-8.07.00.50.07.0_k3-1.rhel7u2.x86_64.rpm
+
+SLES11.4-DL580Gen9
+Component                          Version               Package
+---------                          -------               -------
+tg3                                3.137o                tg3-kmp-default-3.137o_3.0.101_63-1.sles11sp4.x86_64.rpm
+mlx4_en                            3.4-2.1.5             mlnx-ofa_kernel-kmp-default-3.4_3.0.101_63-OFED.3.4.2.1.5.1.ged26eb5.sles11sp4.x86_64.rpm
+                                                         mlnx-ofa_kernel-3.4-OFED.3.4.2.1.5.1.ged26eb5.1.sles11sp4.x86_64.rpm
+hpsa                               3.4.20-110            hpsa-kmp-default-3.4.20-110.sles11sp4.x86_64.rpm
+qla2xxx                            8.07.00.50.11.3-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.11.3_k3_3.0.101_63-1.sles11sp4.x86_64.rpm
+
+SLES12.1-DL580Gen9
+Component                          Version               Package
+---------                          -------               -------
+tg3                                3.137o                tg3-kmp-default-3.137o_k3.12.49_11-1.sles12sp1.x86_64.rpm
+mlx4_en                            3.4-2.1.5             mlnx-ofa_kernel-kmp-default-3.4_k3.12.49_11-OFED.3.4.2.1.5.1.ged26eb5.sles12sp1.x86_64.rpm
+                                                         mlnx-ofa_kernel-3.4-OFED.3.4.2.1.5.1.ged26eb5.1.sles12sp1.x86_64.rpm
+hpsa                               3.4.20-100            hpsa-kmp-default-3.4.20-100.sles12sp1.x86_64.rpm
+qla2xxx                            8.07.00.50.12.0-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.12.0_k3_k3.12.49_11-1.sles12sp1.x86_64.rpm
+ixgbe				   5.0.7                 hp-ixgbe-kmp-default-5.0.7_k3.12.49_11-1.sles12sp1.x86_64.rpm 
+
+RHEL6.7-DL580Gen9
+Component                          Version               Package
+---------                          -------               -------
+tg3                                3.137o                kmod-tg3-3.137o-1.rhel6u7.x86_64.rpm
+mlx4_en                            3.2-2.0.4             kmod-mlnx-ofa_kernel-3.2-OFED.3.2.2.0.4.1.gabd759c.rhel6u7.x86_64.rpm
+                                                         mlnx-ofa_kernel-3.2-OFED.3.2.2.0.4.1.gabd759c.rhel6u7.x86_64.rpm
+hpsa                               3.4.18-108            kmod-hpsa-3.4.18-108.rhel6u7.x86_64.rpm
+qla2xxx                            8.07.00.34.06.0-k1    kmod-qlgc-qla2xxx-8.07.00.34.06.0_k1-3.rhel6u7.x86_64.rpm
+
+RHEL7.2-DL580Gen9
+Component                          Version               Package
+---------                          -------               -------
+tg3                                3.137o                kmod-tg3-3.137o-1.rhel7u2.x86_64.rpm
+mlx4_en                            3.4-2.1.5             kmod-mlnx-ofa_kernel-3.4-OFED.3.4.2.1.5.1.ged26eb5.rhel7u2.x86_64.rpm
+                                                         mlnx-ofa_kernel-3.4-OFED.3.4.2.1.5.1.ged26eb5.1.rhel7u2.x86_64.rpm
+hpsa                               3.4.20-100            kmod-hpsa-3.4.20-100.rhel7u2.x86_64.rpm
+qla2xxx                            8.07.00.50.07.0-k3    kmod-qlgc-qla2xxx-8.07.00.50.07.0_k3-1.rhel7u2.x86_64.rpm
+ixgbe				   5.0.7                 kmod-hp-ixgbe-5.0.7-1.rhel7u2.x86_64.rpm
+
+SLES11.4-DL380pGen8
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.2.1263.16		 be2net-kmp-default-11.2.1263.16_3.0.101_63-1.sles11sp4.x86_64.rpm
+tg3                                3.137o                tg3-kmp-default-3.137o_3.0.101_63-1.sles11sp4.x86_64.rpm
+hpsa                               3.4.20-110            hpsa-kmp-default-3.4.20-110.sles11sp4.x86_64.rpm
+qla2xxx                            8.07.00.50.11.3-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.11.3_k3_3.0.101_63-1.sles11sp4.x86_64.rpm
+
+SLES12.1-DL380pGen8
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.1.145.27           be2net-kmp-default-11.1.145.27_k3.12.49_11-1.sles12sp1.x86_64.rpm
+tg3                                3.137o                tg3-kmp-default-3.137o_k3.12.49_11-1.sles12sp1.x86_64.rpm
+hpsa                               3.4.20-100            hpsa-kmp-default-3.4.20-100.sles12sp1.x86_64.rpm
+qla2xxx                            8.07.00.50.12.0-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.12.0_k3_k3.12.49_11-1.sles12sp1.x86_64.rpm
+
+RHEL6.7-DL380pGen8
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.1.145.27           kmod-be2net-11.1.145.27-1.rhel6u7.x86_64.rpm
+tg3                                3.137o                kmod-tg3-3.137o-1.rhel6u7.x86_64.rpm
+hpsa                               3.4.18-108            kmod-hpsa-3.4.18-108.rhel6u7.x86_64.rpm
+qla2xxx                            8.07.00.34.06.0-k1    kmod-qlgc-qla2xxx-8.07.00.34.06.0_k1-3.rhel6u7.x86_64.rpm
+
+RHEL7.2-DL380pGen8
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.2.1226.2-1         kmod-be2net-11.2.1226.2-1.rhel7u2.x86_64.rpm
+tg3                                3.137o                kmod-tg3-3.137o-1.rhel7u2.x86_64.rpm
+hpsa                               3.4.20-100            kmod-hpsa-3.4.20-100.rhel7u2.x86_64.rpm
+qla2xxx                            8.07.00.50.07.0-k3    kmod-qlgc-qla2xxx-8.07.00.50.07.0_k3-1.rhel7u2.x86_64.rpm
+
+
++-------------+
+| Software:   |
++-------------+
+
+SLES11.4-DL580Gen8/DL580Gen9
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.36.sles11  hp-health-10.60-1833.36.sles11.x86_64.rpm
+hp-snmp-agents                     10.60-2936.32.sles11  hp-snmp-agents-10.60-2936.32.sles11.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.5.sles11   hp-ams-2.6.1-2457.5.sles11.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+
+SLES12.1-DL580Gen8/DL580Gen9
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.31.sles12  hp-health-10.60-1833.31.sles12.x86_64.rpm
+hp-snmp-agents                     10.60-2936.33.sles12  hp-snmp-agents-10.60-2936.33.sles12.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.5.sles12   hp-ams-2.6.1-2457.5.sles12.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+
+RHEL6.7-DL580Gen8/DL580Gen9
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.33.rhel6   hp-health-10.60-1833.33.rhel6.x86_64.rpm
+hp-snmp-agents                     10.60-2936.35.rhel6   hp-snmp-agents-10.60-2936.35.rhel6.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.5.rhel6    hp-ams-2.6.1-2457.5.rhel6.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+
+RHEL7.2-DL580Gen8/DL580Gen9
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.32.rhel7   hp-health-10.60-1833.32.rhel7.x86_64.rpm
+hp-snmp-agents                     10.60-2936.31.rhel7   hp-snmp-agents-10.60-2936.31.rhel7.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.6.rhel7    hp-ams-2.6.1-2457.6.rhel7.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+
+SLES11.4-DL380pGen8
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.36.sles11  hp-health-10.60-1833.36.sles11.x86_64.rpm
+hp-snmp-agents                     10.60-2936.32.sles11  hp-snmp-agents-10.60-2936.32.sles11.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.5.sles11   hp-ams-2.6.1-2457.5.sles11.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+serviceguard                       A.12.00.51-0.sles11   serviceguard-A.12.00.51-0.sles11.x86_64.rpm
+serviceguard-snmp                  A.12.00.51-0.sles11   serviceguard-snmp-A.12.00.51-0.sles11.x86_64.rpm
+serviceguard-providers             A.12.00.30-0.sles11   serviceguard-providers-A.12.00.30-0.sles11.x86_64.rpm
+serviceguard-nfs-toolkit           A.12.00.50-00         serviceguard-nfs-toolkit-A.12.00.50-00.sles.noarch.rpm
+
+SLES12.1-DL380pGen8
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.31.sles12  hp-health-10.60-1833.31.sles12.x86_64.rpm
+hp-snmp-agents                     10.60-2936.33.sles12  hp-snmp-agents-10.60-2936.33.sles12.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.5.sles12   hp-ams-2.6.1-2457.5.sles12.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+serviceguard                       A.12.00.51-0.sles12   serviceguard-A.12.00.51-0.sles12.x86_64.rpm
+serviceguard-snmp                  A.12.00.51-0.sles12   serviceguard-snmp-A.12.00.51-0.sles12.x86_64.rpm
+serviceguard-providers             A.12.00.30-0.sles12   serviceguard-providers-A.12.00.30-0.sles12.x86_64.rpm
+serviceguard-nfs-toolkit           A.12.00.50-00         serviceguard-nfs-toolkit-A.12.00.50-00.sles.noarch.rpm
+
+RHEL6.7-DL380pGen8
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.33.rhel6   hp-health-10.60-1833.33.rhel6.x86_64.rpm
+hp-snmp-agents                     10.60-2936.35.rhel6   hp-snmp-agents-10.60-2936.35.rhel6.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.5.rhel6    hp-ams-2.6.1-2457.5.rhel6.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+serviceguard                       A.12.00.51-0.rhel6    serviceguard-A.12.00.51-0.rhel6.x86_64.rpm
+serviceguard-snmp                  A.12.00.51-0.rhel6    serviceguard-snmp-A.12.00.51-0.rhel6.x86_64.rpm
+serviceguard-providers             A.12.00.30-0.rhel6    serviceguard-providers-A.12.00.30-0.rhel6.x86_64.rpm
+serviceguard-nfs-toolkit           A.12.00.50-00         serviceguard-nfs-toolkit-A.12.00.50-00.redhat.noarch.rpm
+
+RHEL7.2-DL380pGen8
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.32.rhel7   hp-health-10.60-1833.32.rhel7.x86_64.rpm
+hp-snmp-agents                     10.60-2936.31.rhel7   hp-snmp-agents-10.60-2936.31.rhel7.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.6.rhel7    hp-ams-2.6.1-2457.6.rhel7.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+serviceguard                       A.12.00.51-0.rhel7    serviceguard-A.12.00.51-0.rhel7.x86_64.rpm
+serviceguard-snmp                  A.12.00.51-0.rhel7    serviceguard-snmp-A.12.00.51-0.rhel7.x86_64.rpm
+serviceguard-providers             A.12.00.30-0.rhel7    serviceguard-providers-A.12.00.30-0.rhel7.x86_64.rpm
+serviceguard-nfs-toolkit           A.12.00.50-00         serviceguard-nfs-toolkit-A.12.00.50-00.redhat.noarch.rpm
+
+
+###############################################################################
+# CS900 Compute Nodes: csurBundle-P1-CS900ComputeNodes-2017.11-3.tgz          #
+###############################################################################
+
++-------------+
+| Firmware:   |
++-------------+
+
+Component                          Version               Package
+---------                          -------               -------
+BIOSDL360pGen8                     2015.07.01            hp-firmware-system-p71-2015.07.01-1.1.i386.rpm
+BIOSDL360pGen9			   2017.02.17		 hp-firmware-system-p89-2.40_2017_02_17-2.1.i386.rpm
+PMCDL360pGen8                      3.3                   hp-firmware-powerpic-gen8-3.3-4.i386.rpm
+PMCDL360pGen9			   1.0.9		 firmware-powerpic-gen9-1.0.9-7.1.i386.rpm
+iLO                                2.54                  hp-firmware-ilo4-2.54-1.1.i386.rpm
+NC552SFP                           11.1.183.23           hp-firmware-cna-emulex-2016.10.01-1.20.x86_64.rpm
+331FLR                             v1.46                 hp-firmware-nic-broadcom-2.17.6-1.1.x86_64.rpm
+560SFP+				   1.1200.0		 hp-firmware-nic-intel-1.10.8-1.1.x86_64.rpm
+560FLB                             0x800008c7            hp-firmware-nic-intel-1.11.13-1.1.x86_64.rpm
+630FLB                             7.13.75               hp-firmware-nic-qlogic-nx2-2.18.44-1.1.x86_64.rpm
+650FLB                             11.2.1226.20          firmware-cna-emulex-2017.06.01-1.41.x86_64.rpm
+QMH2672                            8.02.51               hp-firmware-fc-qlogic-2016.12.01-1.5.x86_64.rpm
+SN1000Q                            8.05.63               firmware-fc-qlogic-2017.09.01-1.5.x86_64.rpm
+P420i                              8.00                  hp-firmware-smartarray-46a4d957a7-8.00-1.1.x86_64.rpm
+P440ar				   5.04			 hp-firmware-smartarray-ea3138d8e8-5.04-1.1.x86_64.rpm
+EG0600FCSPL                        HPD2                  firmware-hdd-7c1a1734f9-HPD2-1.1.x86_64.rpm
+MO0800JEFPB                        HPD1                  hp-firmware-hdd-71af849f3b-HPD1-2.1.x86_64.rpm
+MO0800JDVEV                        HPD2                  hp-firmware-hdd-8c5d34ba77-HPD2-2.1.x86_64.rpm
+EG1800JEMDB                        HPD2                  hp-firmware-hdd-0a38b25661-HPD2-1.1.x86_64.rpm
+EG1200JEHMC                        HPD3                  hp-firmware-hdd-31f91b8622-HPD3-1.1.x86_64.rpm
+EG0600JEHMA			   HPD3			 hp-firmware-hdd-31f91b8622-HPD3-2.1.x86_64.rpm
+EG1200JEMDA                        HPD4                  hp-firmware-hdd-ac3fda26eb-HPD4-1.1.x86_64.rpm
+EG1800JEHMD                        HPD4                  hp-firmware-hdd-8a2c06af48-HPD4-3.1.x86_64.rpm
+MO0400JFFCF                        HPD4                  hp-firmware-hdd-edf6dcd906-HPD4-1.1.x86_64.rpm
+EG0900FDJYR                        HPD4                  hp-firmware-hdd-7cfa9118b1-HPD4-3.1.x86_64.rpm
+EG1200FDJYT                        HPD4                  hp-firmware-hdd-7cfa9118b1-HPD4-3.1.x86_64.rpm
+EG0600JEMCV			   HPD4			 hp-firmware-hdd-ac3fda26eb-HPD4-2.1.x86_64.rpm
+EG0600JETKA			   HPD4			 hp-firmware-hdd-7505dfb5ae-HPD4-1.1.x86_64.rpm
+EG0600FBDSR                        HPD6                  hp-firmware-hdd-06ac84a5d4-HPD6-2.x86_64.rpm
+EG0450FBDSQ                        HPD6                  hp-firmware-hdd-06ac84a5d4-HPD6-2.x86_64.rpm
+EG1200FCVBQ                        HPD8                  hp-firmware-hdd-33aee979c2-HPD8-2.1.x86_64.rpm
+EG1200FDNJT                        HPD8                  hp-firmware-hdd-33aee979c2-HPD8-2.1.x86_64.rpm
+EG0600FBLSH                        HPD8                  hp-firmware-hdd-815e5e101b-HPD8-1.1.x86_64.rpm
+EG0450FBLSF                        HPD8                  hp-firmware-hdd-815e5e101b-HPD8-1.1.x86_64.rpm
+EG0600FCHHU			   HPD8			 hp-firmware-hdd-8a9b54701e-HPD8-2.1.x86_64.rpm
+EG0600FCVBK                        HPD9                  hp-firmware-hdd-415992e26f-HPD9-2.1.x86_64.rpm
+EG0450FCVBH                        HPD9                  hp-firmware-hdd-415992e26f-HPD9-2.1.x86_64.rpm
+EG0600FBDBU                        HPDA                  hp-firmware-hdd-f1eafd9715-HPDA-2.x86_64.rpm
+EG0450FBDBT                        HPDA                  hp-firmware-hdd-f1eafd9715-HPDA-2.x86_64.rpm
+EG0600FBVFP                        HPDE                  hp-firmware-hdd-b94f345c05-HPDE-2.1.x86_64.rpm
+EG0450FBVFM                        HPDE                  hp-firmware-hdd-b94f345c05-HPDE-2.1.x86_64.rpm
+MB1000GCEHH                        HPGD                  hp-firmware-hdd-b583d96f94-HPGD-3.x86_64.rpm
+
+
++-------------+
+| Drivers:    |
++-------------+
+
+SLES11.4-DL360pGen8
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.2.1263.16          be2net-kmp-default-11.2.1263.16_3.0.101_63-1.sles11sp4.x86_64.rpm
+tg3                                3.137o                tg3-kmp-default-3.137o_3.0.101_63-1.sles11sp4.x86_64.rpm
+hpsa                               3.4.20-110            hpsa-kmp-default-3.4.20-110.sles11sp4.x86_64.rpm
+qla2xxx                            8.07.00.50.11.3-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.11.3_k3_3.0.101_63-1.sles11sp4.x86_64.rpm
+
+SLES12.1-DL360pGen8
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.1.145.27           be2net-kmp-default-11.1.145.27_k3.12.49_11-1.sles12sp1.x86_64.rpm
+tg3                                3.137o                tg3-kmp-default-3.137o_k3.12.49_11-1.sles12sp1.x86_64.rpm
+hpsa                               3.4.20-100            hpsa-kmp-default-3.4.20-100.sles12sp1.x86_64.rpm
+qla2xxx                            8.07.00.50.12.0-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.12.0_k3_k3.12.49_11-1.sles12sp1.x86_64.rpm
+
+SLES12.1-DL360pGen9
+Component                          Version               Package
+---------                          -------               -------
+be2net                             11.1.145.27           be2net-kmp-default-11.1.145.27_k3.12.49_11-1.sles12sp1.x86_64.rpm
+ixgbe                              5.0.7                 hp-ixgbe-kmp-default-5.0.7_k3.12.49_11-1.sles12sp1.x86_64.rpm
+tg3                                3.137o                tg3-kmp-default-3.137o_k3.12.49_11-1.sles12sp1.x86_64.rpm
+hpsa                               3.4.20-100            hpsa-kmp-default-3.4.20-100.sles12sp1.x86_64.rpm
+qla2xxx                            8.07.00.50.12.0-k3    qlgc-qla2xxx-kmp-default-8.07.00.50.12.0_k3_k3.12.49_11-1.sles12sp1.x86_64.rpm
+
++-------------+
+| Software:   |
++-------------+
+
+SLES11.4-16sx86
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+hpmgmtbase                         3.2.0-59.sles11       hpmgmtbase-3.2.0-59.sles11.x86_64.rpm
+hp-smx                             3.2.0-59.sles11       hp-smx-3.2.0-59.sles11.x86_64.rpm
+hpsmx-webapp                       1.2.0-59.sles11       hpsmx-webapp-1.2.0-59.sles11.noarch.rpm
+hp-smx-EnableWsman                 3.2.0-59.sles11       hp-smx-EnableWsman-3.2.0-59.sles11.x86_64.rpm
+hpshd                              1.2.0-59.sles11       hpshd-1.2.0-59.sles11.x86_64.rpm
+
+SLES12.1-16sx86
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+hpmgmtbase                         3.2.0-59.sles12       hpmgmtbase-3.2.0-59.sles12.x86_64.rpm
+hp-smx                             3.2.0-59.sles12       hp-smx-3.2.0-59.sles12.x86_64.rpm
+hpsmx-webapp                       1.2.0-59.sles12       hpsmx-webapp-1.2.0-59.sles12.noarch.rpm
+hp-smx-EnableWsman                 3.2.0-59.sles12       hp-smx-EnableWsman-3.2.0-59.sles12.x86_64.rpm
+hpshd                              1.2.0-59.sles12       hpshd-1.2.0-59.sles12.x86_64.rpm
+
+RHEL6.7-16sx86
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+hpmgmtbase                         3.2.0-59.rhel6        hpmgmtbase-3.2.0-59.rhel6.x86_64.rpm
+hp-smx                             3.2.0-59.rhel6        hp-smx-3.2.0-59.rhel6.x86_64.rpm
+hpsmx-webapp                       1.2.0-59.rhel6        hpsmx-webapp-1.2.0-59.rhel6.noarch.rpm
+hp-smx-EnableWsman                 3.2.0-59.rhel6        hp-smx-EnableWsman-3.2.0-59.rhel6.x86_64.rpm
+hpshd                              1.2.0-59.rhel6        hpshd-1.2.0-59.rhel6.x86_64.rpm
+
+RHEL7.2-16sx86
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+hpmgmtbase                         3.2.0-59.rhel7        hpmgmtbase-3.2.0-59.rhel7.x86_64.rpm
+hp-smx                             3.2.0-59.rhel7        hp-smx-3.2.0-59.rhel7.x86_64.rpm
+hpsmx-webapp                       1.2.0-59.rhel7        hpsmx-webapp-1.2.0-59.rhel7.noarch.rpm
+hp-smx-EnableWsman                 3.2.0-59.rhel7        hp-smx-EnableWsman-3.2.0-59.rhel7.x86_64.rpm
+hpshd                              1.2.0-59.rhel7        hpshd-1.2.0-59.rhel7.x86_64.rpm
+
+SLES11.4-DL360pGen8
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.36.sles11  hp-health-10.60-1833.36.sles11.x86_64.rpm
+hp-snmp-agents                     10.60-2936.32.sles11  hp-snmp-agents-10.60-2936.32.sles11.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.5.sles11   hp-ams-2.6.1-2457.5.sles11.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+serviceguard                       A.12.00.51-0.sles11   serviceguard-A.12.00.51-0.sles11.x86_64.rpm
+serviceguard-snmp                  A.12.00.51-0.sles11   serviceguard-snmp-A.12.00.51-0.sles11.x86_64.rpm
+serviceguard-providers             A.12.00.30-0.sles11   serviceguard-providers-A.12.00.30-0.sles11.x86_64.rpm
+serviceguard-nfs-toolkit           A.12.00.50-00         serviceguard-nfs-toolkit-A.12.00.50-00.sles.noarch.rpm
+
+SLES12.1-DL360pGen8/DL360pGen9
+Component                          Version               Package
+---------                          -------               -------
+hpsmh                              7.6.1-9               hpsmh-7.6.1-9.x86_64.rpm
+hp-health                          10.60-1833.31.sles12  hp-health-10.60-1833.31.sles12.x86_64.rpm
+hp-snmp-agents                     10.60-2936.33.sles12  hp-snmp-agents-10.60-2936.33.sles12.x86_64.rpm
+hp-smh-templates                   10.6.0-1479.39        hp-smh-templates-10.6.0-1479.39.noarch.rpm
+hpdiags                            10.50.2007-2076       hpdiags-10.50.2007-2076.linux.x86_64.rpm
+hponcfg                            5.0.0-0               hponcfg-5.0.0-0.x86_64.rpm
+hp-ams                             2.6.1-2457.5.sles12   hp-ams-2.6.1-2457.5.sles12.x86_64.rpm
+ssa                                3.10-3.0              ssa-3.10-3.0.x86_64.rpm
+ssacli                             3.10-3.0              ssacli-3.10-3.0.x86_64.rpm
+hp-tg3sd                           1.0.20-1              hp-tg3sd-1.0.20-1.x86_64.rpm
+HP-CNA-FC-hpqlgc-Enablement-Kit    6.0.0.0-4             HP-CNA-FC-hpqlgc-Enablement-Kit-6.0.0.0-4.noarch.rpm
+fibreutils                         3.3-5                 fibreutils-3.3-5.x86_64.rpm
+serviceguard                       A.12.00.51-0.sles12   serviceguard-A.12.00.51-0.sles12.x86_64.rpm
+serviceguard-snmp                  A.12.00.51-0.sles12   serviceguard-snmp-A.12.00.51-0.sles12.x86_64.rpm
+serviceguard-providers             A.12.00.30-0.sles12   serviceguard-providers-A.12.00.30-0.sles12.x86_64.rpm
+serviceguard-nfs-toolkit           A.12.00.50-00         serviceguard-nfs-toolkit-A.12.00.50-00.sles.noarch.rpm
+
+
+###############################################################################
+# C7000 Enclosure: csurBundle-P2-c7000-2017.11-0.tgz                          #
+###############################################################################
+
+Component                          Version               Package
+---------                          -------               -------
+HP C7000 Onboard Administrator     4.70                  cp030712.exe
+HP VC Flex Fabric Module           4.50                  CP028428.exe
+
+
+###############################################################################
+# Superdome Enclosure: csurBundle-P2-sdComplex-2017.11-0.tgz                  #
+###############################################################################
+
+Component                          Version               Package
+---------                          -------               -------
+Superdome Complex                  8.8.2                 hpsdx-8.8.2-fw.bundle
+
+
+###############################################################################
+# Switches: csurBundle-P2-switches-2017.11-0.tgz                              #
+###############################################################################
+
++---------------------+
+| Network Switches:   |
++---------------------+
+
+Component                          Version               Package
+---------                          -------               -------
+HP ProCurve 2910 LAN Switch        W.15.14.0014          W_15_14_0014.swi
+HP ProCurve 2920 LAN Switch        WB.16.02.0016         WB_16_02_0016.swi
+HP ProCurve 6600 LAN Switch        K.15.18.0015          K_15_18_0015.swi
+HP ProCurve 5406 LAN Switch        K.15.18.0015          K_15_18_0015.swi
+HP ProCurve 6120XG LAN Switch      Z.14.54               Z_14_54.swi
+HP 3Com 6125XLG LAN Switch         7.10.R2432P01         6125XLG-CMW710-R2432P01.ipe
+                                                         6125xlg-cmw710-packet-capture-r2432p01.bin
+HP 3Com 6127XLG LAN Switch         7.10.R2432P01         6127XLG-CMW710-R2432P01.ipe
+                                                         6127xlg-cmw710-packet-capture-R2432P01.bin
+HP 3Com 5900 LAN Switch            7.10.R2432P01         5900_5920-CMW710-R2432P01.ipe
+							 5900_5920-cmw710-packet-capture-R2432P01.bin
+HP 3Com 5930 LAN Switch            7.10.R2432P01         5930-CMW710-R2432P01.ipe
+							 5930-cmw710-packet-capture-r2432p01.bin
+
+
++---------------------+
+| SAN Switches:       |
++---------------------+
+
+Component                          Version               Package
+---------                          -------               -------
+8/8 SAN Switch                     v7.4.1e               v7.4.1e.tgz
+8/24 SAN Switch                    v7.4.1e               v7.4.1e.tgz
+SN6000B SAN Switch                 v8.0.2a               v8.0.2a.tgz
+Brocade SAN Switch		   v8.0.2a               v8.0.2a.tgz
+
+
+###############################################################################
+# IBRIX Storage: csurBundle-P2-ibrixStorage-2017.11-0.tgz                     #
+###############################################################################
+
+Component                          Version               Package
+---------                          -------               -------
+HP StoreEasy 1430                  3.02.2a               SrPackage3.02.2a.25.exe 
+HP EVA P6500 Controller            v11001100             EVA_P6500_XCS.iso
+HP EVA P6500 Disk Drives           SAS_2012_08_17        EVA_P6500_SAS.zip
+HP EVA Command View                10.2                  EVA_P6500_CV.iso
+HP IBRIX X9300                     6.2.386               IBRIX_X9300.iso
+HP X3400 G2 Storage                SR 2.04.0a            X3400_Storage_Server.exe
+
+
+###############################################################################
+# 3PAR Storage: csurBundle-P2-3parStorage-2017.11-0.tgz                       #
+# Note: rhel_sp_4.5.GA-57_P002.iso includes 4.5.GA-57 and 5.0.2.1 versions    #
+###############################################################################
+
+Component                          Version               Package
+---------                          -------               -------
+HP 3PAR 7200/7400/8400             3.3.1 MU1 P19         OS-3.3.1.269-EMU1.iso	
+                                                         OS-3.3.1.269-P19.iso
+HP 3PAR Service Processor          5.0.2.1-24315    	 rhel_sp_4.5.GA-57_P002.iso
+
+
+###############################################################################
+# Prerequisites: csurBundle-P2-Prerequisites-2017.11-0.tgz                    #
+###############################################################################
+
+Component                          Version               Package
+---------                          -------               -------
+HP 3PAR 7200/7400/8400		   3.2.2 MU4	 	 OS-3.2.2.612-MU4.iso
+HP 3PAR Service Processor          SP-4.4.0.GA-58 MU3	 rhel_sp-4.4.0.GA-58.iso

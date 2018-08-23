@@ -1,0 +1,113 @@
+csurUpdate v1.4-3 Release Notes
+
+
+Scope:
+The purpose of this application is to automate the update of drivers and
+firmware on HPE SAP HANA Compute nodes. The application is intended to be used
+with a pre-packaged CSUR bundle specifically built to work with the
+application. The application must be ran as root.
+
+
+Installation Instructions:
+To install the RPM execute the following command as root (this assumes you are
+in the directory containing the RPM):
+	rpm -Uvh csurUpdate-1.4-3.<OS_Version>.x86_64.rpm
+
+Once the application is installed and the appropriate CSUR bundle has been 
+installed the application (csurUpdate.pyc) will reside in 
+'/hp/support/csur/bin/' and can be ran to update a compute node. For example
+to update the local OS hard drives before the mirror is split, the following
+command would be executed:
+	python csurUpdate.pyc -u
+
+The following is a list of options that the application uses. 
+Usage: csurUpdate.pyc [[-h] [-r] [-s] [-u] [-v]]
+
+Options:
+  -h, --help  show this help message and exit
+  -r          This option is used to generate a version report.
+  -s          This option is used when upgrading Servicegaurd nodes to
+              indicate which node is the primary node; the secondary node
+              should already be upgraded before envoking this option.
+  -u          This option is used to update the local OS hard drives before
+              the mirror is split.
+  -v          This option is used to display the application's version.
+
+
+Revision History:
+* Fri Jul 14 2017 Bill Neumann
+- 1.4 r3 Fixed a bug where the HBA firmware was incorrectly detected.
+
+* Thu Jul 13 2017 Bill Neumann
+- 1.4 r2 Fixed a bug so that NIC drivers are only checked to be loaded if the corresponding NIC card is installed.
+
+* Wed Apr 12 2017 Bill Neumann
+- 1.4 r1 Added support for CS900 and NFS server DL360pGen8.
+
+* Fri Apr 07 2017 Bill Neumann
+- 1.3 r2 Updated so that missing firmware for hard drives is just reported,
+         however, for local hard drive updates no update will occur if firmware
+         is missing for at least one hard drive.
+
+* Sat Mar 11 2017
+- 1.3 r1 Added the functionality to upgrade Serviceguard on NFS DL380pGen8
+         servers.
+         Added nicList to change the NIC cards to a resource used during the
+         firmware inventory.
+         Additionally, a change was made so that HBA drivers and software are
+         ignored if HBA cards are not present.
+
+* Tue Mar 07 2017
+- 1.2 r8 Changed the stopping of hp-health, since at 12.x systemd is used.
+         Updated so that connectx.conf is properly configured for SLES11.4 so
+         that Mellanox NIC cards are configured as Ethernet.
+
+* Mon Mar 06 2017
+- 1.2 r7 Changed regex for matching hard drives, since ssacli changed the
+         output of the command from hpssacli. Modified log directory date
+         format.
+
+* Sat Mar 04 2017
+- 1.2 r6 Updated so that a NIC that does not show up is reported.
+         Fixed a bug where a FusionIO driver unload failure was not being
+         detected.
+
+* Thu Mar 02 2017
+- 1.2 r5 Removed reference to model cross references for NIC cards.
+
+* Wed Mar 01 2017
+- 1.2 r2 Added missing module oneOffs.pyc.
+- 1.2 r3 Added missing reference in oneOffs.py to loggerName.
+- 1.2 r4 Changed Mellanox RPMs that are removed before a driver update to a
+         resource.
+
+* Tue Feb 28 2017
+- 1.2 r1 Added a module to remove RPMs that are no longer needed. Also,
+         removed debugging.
+
+* Thu Dec 22 2016
+- 1.1 r3 Added the ability to handle the case when there is not an update
+         available for a component.
+-        Modified so that HBA version information is only logged once for each
+         card.
+
+* Sat Dec 17 2016
+- 1.1 r2 Fixed a bug with NIC inventory when matching bus to model.
+
+* Fri Dec 09 2016
+- 1.1 r1 Updated to include support all compute nodes excluding DL320e, BL680c,
+         and CS900 systems.
+
+* Tue Nov 08 2016
+- 1.0 r3 Updated to fix FusionIO update failure.
+-        Added an option to get a version report without needing to do an
+         update.
+-        Added an option to only update the local OS hard drives for the
+         purpose of splitting the hard drives before a complete system update.
+
+* Mon Oct 31 2016
+- 1.0 r2 Updated the user interface so that scrolling through lines is more
+         visible.
+
+* Wed Oct 26 2016
+- 1.0 r1 First release.

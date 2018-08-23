@@ -1,0 +1,317 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <upgrade>
+    <only_installed_packages config:type="boolean">false</only_installed_packages>
+    <stop_on_solver_conflict config:type="boolean">true</stop_on_solver_conflict>
+  </upgrade>
+  <networking>
+    <keep_install_network config:type="boolean">true</keep_install_network>
+    <start_immediately config:type="boolean">false</start_immediately>
+  </networking>
+  <backup>
+    <sysconfig config:type="boolean">true</sysconfig>
+    <modified config:type="boolean">true</modified>
+    <remove_old config:type="boolean">false</remove_old>
+  </backup>
+  <general>
+    <ask-list config:type="list">
+      <ask>
+        <title>OS Disk Detection Failure</title>
+        <question>Choose option</question>
+        <selection config:type="list">
+          <entry>
+            <label>Reboot Server</label>
+            <value>reboot</value>
+          </entry>
+          <entry>
+            <label>Halt Server</label>
+            <value>halt</value>
+          </entry>
+          <entry>
+            <label>Display Boot Disk Log</label>
+            <value>display</value>
+          </entry>
+        </selection>
+        <stage>initial</stage>
+        <script>
+          <environment config:type="boolean">true</environment>
+          <feedback config:type="boolean">true</feedback>
+          <debug config:type="boolean">false</debug>
+          <rerun_on_error config:type="boolean">true</rerun_on_error>
+          <source>
+<![CDATA[
+#!/bin/bash
+
+
+case "$VAL" in
+    "reboot")
+        echo b > /proc/sysrq-trigger
+        exit 0
+        ;;
+    "halt")
+        echo o > /proc/sysrq-trigger
+        exit 0
+        ;;
+    "display")
+        cat /tmp/bootDisk.log
+        exit 1
+        ;;
+esac
+]]>
+          </source>
+        </script>
+      </ask>
+    </ask-list>
+    <mode>
+      <confirm config:type="boolean">false</confirm>
+    </mode>
+    <storage>
+      <start_multipath config:type="boolean">false</start_multipath>
+    </storage>
+  </general>
+  <suse_register>
+      <do_registration config:type="boolean">false</do_registration>
+      <install_updates config:type="boolean">false</install_updates>
+  </suse_register>
+  <scripts>
+    <!--*****Begin pre-scripts*****-->
+    <pre-scripts config:type="list">
+      <!--
+          This script is used to set the device for a the Gen8 Serviceguard Quorum Server nodes (DL320e Gen8 v2). It will be removed by the python pre-upgrade script
+          if the server is a DL360. Also, the ask-list will be updated by the python pre-upgrade script if the server
+          belongs to a DL360.
+      -->
+      <script>
+        <feedback config:type="boolean">true</feedback>
+        <feedback_type>error</feedback_type>
+        <debug config:type="boolean">false</debug>
+        <filename>getBootDisk.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/bash
+
+
+set +x
+# Get the SCSI disk, e.g. /dev/sda, that is attached to the B120i controller LUN 00|LUN01.
+bootHost=$(cat /proc/scsi/scsi | egrep -B1 "B120i" | egrep -o "scsi[0-9]+");
+bootDisk=$(cat /proc/scsi/scsi | egrep -B1 "LOGICAL VOLUME" | grep ${bootHost} | egrep "Lun: 00|Lun: 01" | while read x1 dev x2 chan x3 id x4 lun; \
+           do echo ${dev/scsi/}:${chan:1}:${id:1}:${lun:1}; done | while read device; \
+           do ls -1 /sys/class/scsi_device/$device/device/block; done | tr '\n' '|' | sed 's/|$/\n/g')
+
+echo "Boot disk = $bootDisk." > /tmp/bootDisk.log
+
+#If the boot disk could not be determined or its device file is missing then exit the installation.
+if [[ -z $bootDisk ]]; then
+        echo "Error: There was a problem identifying the boot disk attached to the B120i Controller."
+elif [[ $bootDisk =~ sd[ab]\| ]]; then
+        diskOne="/dev/${bootDisk%%|sd[ab]}"
+        ls ${diskOne} > /dev/null 2>&1
+
+        if [[ $? -ne 0 ]]; then
+                echo "Error: The boot disk's (${diskOne}) device file was not found."
+        fi
+
+        diskOneSize="$(($(blockdev --getsize64 ${diskOne})/(1024*1024*1024)))GB"
+        diskOneInfo="${diskOne} (${diskOneSize})"
+
+        diskTwo="/dev/${bootDisk##sd[ab]|}"
+        ls ${diskTwo} > /dev/null 2>&1
+
+        if [[ $? -ne 0 ]]; then
+                echo "Error: The boot disk's (${diskTwo}) device file was not found."
+        fi
+
+        diskTwoSize="$(($(blockdev --getsize64 ${diskTwo})/(1024*1024*1024)))GB"
+        diskTwoInfo="${diskTwo} (${diskTwoSize})"
+
+        #Replace the ask-list section.
+        askContents="    <ask-list config:type=\"list\">\\n      <ask>\\n        <title>OS Device Selection</title> \\n        <question>Choose option</question> \\n        <selection config:type=\"list\"> \\n          <entry> \\n            <label>Reboot Server</label> \\n            <value>reboot</value> \\n          </entry> \\n          <entry> \\n            <label>Halt Server</label> \\n            <value>halt</value> \\n          </entry> \\n          <entry> \\n            <label>Overwrite the device ${diskOneInfo}.</label> \\n            <value>${diskOne##/dev/}</value> \\n          </entry> \\n          <entry> \\n            <label>Overwrite the device ${diskTwoInfo}.</label> \\n            <value>${diskTwo##/dev/}</value> \\n          </entry> \\n        </selection> \\n        <stage>initial</stage> \\n        <script> \\n          <environment config:type=\"boolean\">true</environment> \\n          <feedback config:type=\"boolean\">true</feedback> \\n          <debug config:type=\"boolean\">false</debug> \\n          <rerun_on_error config:type=\"boolean\">true</rerun_on_error> \\n          <source> \\n<![CDATA[ \\n#!/bin/bash \\n \\ncase \"\$VAL\" in \\n    \"reboot\") \\n        echo b > /proc/sysrq-trigger \\n        exit 0 \\n        ;; \\n    \"halt\") \\n        echo o > /proc/sysrq-trigger \\n        exit 0 \\n        ;; \\n    \"${diskOne##/dev/}\") \\n        sed -e \"s,%%bootDisk%%,${diskOne},g\" -e \"\\\|^\\\s*<ask-list config:type=|,\\\|^\\\s*</ask-list>\$|d\" /tmp/profile/autoinst.xml > /tmp/profile/modified.xml \\n        exit 0 \\n        ;; \\n    \"${diskTwo##/dev/}\") \\n        sed -e \"s,%%bootDisk%%,${diskTwo},g\" -e \"\\\|^\\\s*<ask-list config:type=|,\\\|^\\\s*</ask-list>\$|d\" /tmp/profile/autoinst.xml > /tmp/profile/modified.xml \\n        exit 0 \\n        ;; \\nesac \\n]]]]><![CDATA[> \\n          </source> \\n        </script> \\n      </ask> \\n    </ask-list>"
+
+        cat /tmp/profile/autoinst.xml | sed "\|<ask-list config:type=\"list\">|,\|</ask-list>|c\\$askContents" >/tmp/profile/modified.xml
+else
+        osDisk="/dev/${bootDisk}"
+
+        ls ${osDisk} > /dev/null 2>&1
+
+        if [[ $? -ne 0 ]]; then
+                echo "Error: The boot disk's (${osDisk}) device file was not found."
+        else
+                #Set the correct boot disk.
+                cat /tmp/profile/autoinst.xml | sed "s,%%bootDisk%%,${osDisk},g" >/tmp/profile/modified.xml
+
+                #Replace the ask-list section.
+                askContents="    <ask-list config:type=\"list\">\\n      <ask>\\n        <title>OS Device: $osDisk</title> \\n        <question>Choose option</question> \\n        <selection config:type=\"list\"> \\n          <entry> \\n            <label>Reboot Server</label> \\n            <value>reboot</value> \\n          </entry> \\n          <entry> \\n            <label>Halt Server</label> \\n            <value>halt</value> \\n          </entry> \\n          <entry> \\n            <label>Continue to overwrite the OS device.</label> \\n            <value>continue</value> \\n          </entry> \\n        </selection> \\n        <stage>initial</stage> \\n        <script> \\n          <environment config:type=\"boolean\">true</environment> \\n          <feedback config:type=\"boolean\">true</feedback> \\n          <debug config:type=\"boolean\">false</debug> \\n          <rerun_on_error config:type=\"boolean\">true</rerun_on_error> \\n          <source> \\n<![CDATA[ \\n#!/bin/bash \\n \\ncase \"\$VAL\" in \\n    \"reboot\") \\n        echo b > /proc/sysrq-trigger \\n        exit 0 \\n        ;; \\n    \"halt\") \\n        echo o > /proc/sysrq-trigger \\n        exit 0 \\n        ;; \\n    \"continue\") \\n        exit 0 \\n        ;; \\nesac \\n]]]]><![CDATA[> \\n          </source> \\n        </script> \\n      </ask> \\n    </ask-list>"
+
+                sed -i "\|<ask-list config:type=\"list\">|,\|</ask-list>|c\\$askContents" /tmp/profile/modified.xml
+        fi
+fi
+]]>
+        </source>
+      </script>
+    </pre-scripts>
+    <!--*****End pre-scripts*****-->
+
+    <!--*****Begin chroot-scripts*****-->
+    <chroot-scripts config:type="list">
+      <!--
+          This script updates /etc/motd with a custom message
+	  and updates /etc/hpe-release with release information.
+      -->
+      <script>
+        <filename>motd.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+echo "This is SLES for SAP Applications on a HPE SAP HANA Serviceguard Quorum Server." > /mnt/etc/motd
+
+echo "HPE SAP HANA CoE Serviceguard Quorum Server Release 1.0-0" > /mnt/etc/hpe-release
+echo "Installed on `date +'%b %d, %Y'` @ `date +'%H:%M:%S'`." >> /mnt/etc/hpe-release
+]]>
+        </source>
+      </script>
+    </chroot-scripts>
+    <!--*****End chroot-scripts*****-->
+
+    <!--*****Begin init-scripts*****-->
+    <init-scripts config:type="list">
+      <!--
+	  This script sets the hostname, since it has been found to change during an upgrade.
+      -->
+      <script>
+        <filename>setHostname.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+hostnamectl set-hostname %%hostname%%
+]]>
+        </source>
+      </script>
+    </init-scripts>
+    <!--*****End init-scripts*****-->
+
+    <!--*****Begin post-scripts*****-->
+    <post-scripts config:type="list">
+<BEGIN LOGROTATE>
+      <!--
+         This script enables the logrotate service for SLES 12.3.
+      -->
+      <script>
+        <filename>enableLogrotate.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+systemctl enable logrotate.timer
+]]>
+        </source>
+      </script>
+<END LOGROTATE>
+      <!--
+          This script restores the network configuration in /etc/sysconifg/network, since
+          upgrades are inconsistent in retaining the network configuration.
+      -->
+      <script>
+        <filename>restoreNetworkCfg.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+sysconfigArchive=$(ls -altF /var/adm/backup/etc.sysconfig*.tar.gz|awk '{print $9}'|head -1)
+
+tar -C / -zxvf $sysconfigArchive etc/sysconfig/network
+
+echo "#Cleared on `date +%d%b%Y` by SAP HANA CoE Upgrade" > /etc/udev/rules.d/70-persistent-net.rules
+]]>
+        </source>
+      </script>
+    </post-scripts>
+    <!--*****End post-scripts*****-->
+  </scripts>
+  <partitioning config:type="list">
+    <drive>
+      <device>%%bootDisk%%</device>
+    </drive>
+  </partitioning>
+  <software>
+    <packages config:type="list">
+      <!-- Added to match what R&D had included to make it easier to match patch bundles. -->
+      <package>cpuset</package>
+      <package>perl-Bootloader-YAML</package>
+      <package>git-core</package>
+      <package>perl-Error</package>
+      <package>unrar</package>
+      <package>tuned</package>
+      <package>open-lldp</package>
+      <package>libHBAAPI2</package>
+      <package>libpng12-0</package>
+      <package>uuidd</package>
+      <package>libcgroup-tools</package>
+      <package>libopenssl0_9_8</package>
+      <package>saptune</package>
+      <package>bing</package>
+      <package>bonnie</package>
+      <package>cairo</package>
+      <package>graphviz</package>
+      <package>gtk2</package>
+      <package>java-1_7_1-ibm-plugin</package>
+      <package>java-1_7_1-ibm</package>
+      <package>java-1_7_1-ibm-jdbc</package>
+      <package>java-1_7_1-ibm-alsa</package>
+      <package>krb5-client</package>
+      <package>libicu</package>
+      <package>libts-1_0-0</package>
+      <package>sensors</package>
+      <package>sysstat</package>
+      <package>xrdp</package>
+      <package>yast2-ncurses</package>
+      <package>rear118a</package>
+      <package>yast2-rear</package>
+      <!-- Added to further match what R&D has included.
+           As new released from R&D come out a review will
+           be made to see if any new packages need to be
+           added.
+      -->
+      <package>sblim-wbemcli</package>
+      <package>cmpi-bindings-pywbem</package>
+      <package>cmpi-pywbem-base</package>
+      <package>cmpi-pywbem-power-management</package>
+      <package>libiniparser0</package>
+      <package>lcms2</package>
+      <package>timezone-java</package>
+      <package>libgif6</package>
+      <package>java-1_7_0-openjdk</package>
+      <package>java-1_7_0-openjdk-headless</package>
+      <!-- Added for CS900. -->
+      <package>python-libxml2</package>
+      <package>openwsman-server</package>
+      <!-- Added for Serviceguard. -->
+      <package>pidentd</package>
+      <package>sblim-indication_helper</package>
+      <package>sblim-cmpi-base</package>
+      <package>sblim-sfcc</package>
+      <package>quota-nfs</package>
+      <!-- Added for the upgrade program. -->
+      <package>python-curses</package>
+      <!-- Added for module builds. -->
+      <package>gcc</package>
+      <package>kernel-syms</package>
+      <package>kernel-source</package>
+      <!-- Added since it is not getting selected by default
+           if it is not already present.
+      -->
+      <package>ucode-intel</package>
+    </packages>
+    <patterns config:type="list">
+      <pattern>Minimal</pattern>
+      <pattern>base</pattern>
+      <pattern>x11</pattern>
+    </patterns>
+  </software>
+</profile>

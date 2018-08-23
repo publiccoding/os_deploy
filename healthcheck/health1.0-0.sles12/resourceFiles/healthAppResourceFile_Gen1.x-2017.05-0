@@ -1,0 +1,154 @@
+################################################################################
+#healthAppResourceFile_Gen1.x-2017.05-0
+#Directories and files used by the application.
+#This following are hardcoded:
+#    healthBasePath = '/hp/support/health'
+#    healthAppResourceFile = healthBasePath + '/resourceFiles/healthAppResourceFile'
+#Also, it is expected that all files/directories exist off of /hp/support/health.
+#Do not change the names on the left side as they are the key names 
+#(resource names) used by the application.
+#Added support for DL380p Gen8 (2016-12-07)
+################################################################################
+#
+################################################################################
+#This is used to identify the CSUR as being used for generation 1.x HANA
+#systems.  Thus, enabling the ability to distinctly identify the iLO firmware
+#which is different for the DL380p Gen8 vs the other G7 compute nodes.
+################################################################################
+systemGeneration = 'Gen1.x'
+
+################################################################################
+#This is the main health log file.
+################################################################################
+mainApplicationLog = 'healthApplicationLog.log'
+
+################################################################################
+#This is the compute node's resource file.
+################################################################################
+computeNodeResourceFile = 'computeNodeResourceFile'
+
+###############################################################################
+#This is the file that holds the pci ids that will be used to identify
+#the model of NIC cards present on a server.
+###############################################################################
+pciIdsFile = 'pci.ids'
+
+###############################################################################
+#This is a list of RPMs that are no longer needed and will be removed if
+#present.
+###############################################################################
+rpmsToRemove = ''
+
+################################################################################
+#This is the list of supported operating systems that can be updated.
+################################################################################
+supportedDistributionLevels = 'SLES11.4'
+
+###############################################################################
+#This is the list of unsupported operating systems that can be upgraded to
+#supported.
+###############################################################################
+unsupportedUpgradableDistLevels = 'SLES11.3, SLES11.2'
+
+################################################################################
+#This is the list of supported compute nodes that can be updated.
+################################################################################
+supportedComputeNodeModels = 'DL580G7, DL980G7, DL380pGen8, BL680cG7'
+
+################################################################################
+#This is a list of servers for which PMC firmware is not updated.
+#Because there is currently not update and/or we cannot detect the version.
+################################################################################
+noPMCFirmwareUpdateModels = 'DL580G7, DL980G7, BL680cG7'
+
+################################################################################
+#This is the list of the FusionIO software packages that will be removed
+#before the software is updated.
+################################################################################
+fusionIOSoftwareRemovalPackageList = 'fio-snmp-mib-hp, fio-snmp-agentx, fio-snmp-mib, fio-agent, fio-smis, fio-common-mgmt, fio-remote-util, libvsl-doc, libvsl-dev, lib32vsl-dev, libfio-dev, libfio-doc, hp-io-accel-msrv'
+
+################################################################################
+#This is the list of the FusionIO software packages that will be installed.
+#We list them here instead of the resource data file, since we exit the 
+#loop that checks the packages as soon as one is found to be out of date.
+################################################################################
+fusionIOSoftwareInstallPackageList = 'fio-agent-3.9.0.192-1.0.x86_64.rpm, fio-remote-util-3.9.0.192-1.0.x86_64.rpm, fio-snmp-agentx-3.9.0.192-1.0.x86_64.rpm, fio-snmp-mib-hp-3.9.0.192-1.0.x86_64.rpm, fio-common-mgmt-3.9.0.192-1.0.x86_64.rpm, fio-smis-3.9.0.192-1.0.x86_64.rpm, fio-snmp-mib-3.9.0.192-1.0.x86_64.rpm, hp-io-accel-msrv-3.9.0.192-1.0.x86_64.rpm'
+
+################################################################################
+#This is the list of the FusionIO driver packages that will be removed
+#before the driver is updated.
+################################################################################
+fusionIODriverRemovalPackageList = 'iomemory-vsl*, fio-firmware-ioaccelerator, fio-common, fio-sysvinit, fio-util, lib32vsl, libvsl'
+
+################################################################################
+#This is the current list of FusionIO firmware revisions.  These are the 
+#revisions from which an automatic upgrade is supported.
+################################################################################
+fusionIOFirmwareVersionList = 'v7.1.17, v7.1.15, v7.1.13, v7.0.2, v6.0.0'
+
+################################################################################
+#This is the current source RPM for FusionIO driver.
+################################################################################
+fusionIODriverSrcRPM = 'iomemory-vsl-3.2.8.1350-1.0.src.rpm'
+
+################################################################################
+#This is the CSUR bundle version information.
+################################################################################
+releaseNotes = 'HPE Converged Systems for SAP HANA CSUR Bundle|Version: 2017.05-0|Release Date: 2017-05:31|Install Date:'
+
+################################################################################
+##This is the CSUR bundle version information file.
+################################################################################
+versionInformationFile = '/etc/csurBundle-release'
+
+################################################################################
+#This is the OS Patch Update Release file. 
+################################################################################
+osPatchUpdateReleaseFile = /etc/osPatchUpdate-release
+
+################################################################################
+#This is the OS Patch Update Release Version.
+################################################################################
+osPatchUpdateReleaseNotes = 'HPE Converged Systems for SAP HANA Patch Bundle|Version: 2017.04
+
+################################################################################
+#This is the supported level that Serviceguard must be at in order to upgrade.
+################################################################################
+supportedServiceguardLevels = 'A.12.00'
+
+################################################################################
+#This is a list of the Serviceguard RPMs.
+################################################################################
+sgSoftwareList = 'serviceguard, serviceguard-snmp, serviceguard-providers'
+
+################################################################################
+#This is a list of the Serviceguard NFS Toolkit RPMs.
+################################################################################
+sgNFSSoftwareList = 'serviceguard-nfs-toolkit'
+
+################################################################################
+#This is a list of HBA specific drivers.
+################################################################################
+hbaDrivers = 'qla2xxx'
+
+################################################################################
+#This is a list of HBA specific software.
+################################################################################
+hbaSoftware = 'HP-CNA-FC-hpqlgc-Enablement-Kit, fibreutils'
+
+################################################################################
+#This is a list of local storage specific drivers.
+################################################################################
+localStorageDrivers = 'hpsa'
+
+################################################################################
+#This is a list of local storage specific software.
+################################################################################
+localStorageSoftware = 'ssa, ssacli'
+
+################################################################################
+#This is the complete list of nic cards that are referenced when doing a
+#compute node firmware inventory.
+################################################################################
+nicList = 'NC375T|NC375i|NC550SFP|NC552SFP|331FLR|331T|544\+QSFP|560SFP\+|331T|561T|332i|332T|NC553i|NC553m'
+

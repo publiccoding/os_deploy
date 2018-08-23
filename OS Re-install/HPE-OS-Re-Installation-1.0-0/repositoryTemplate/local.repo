@@ -1,0 +1,6 @@
+[local]
+name=Local add on RPMs repository.
+baseurl=file://
+enabled=1
+gpgcheck=0
+protect=1

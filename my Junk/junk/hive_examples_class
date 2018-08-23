@@ -1,0 +1,532 @@
+create database if not exists student;
+
+describe database student;
+	
+create table if not exists student ( name string, id int , year int);
+
+create table if not exists student (id int ,name string, address string)
+row format delimited fields terminated by '\t' lines terminated by '\n' stored as textfile;
+
+set hive.cli.print.current.db=true;
+
+load data local inpath '/home/work/hive_inputs/student.txt' overwrite into table student;
+
+load data inpath '/work/student' overwrite into table student;
+
+load data inpath '/gcp/student.txt' into table emp;
+Collection data types:
+map 
+array
+struct
+union
+
+create table if not exists studentcomment 
+( name string comment 'student name', id int comment 'student id', year int comment 'student year') 
+row format delimited 
+fields terminated by '\t' 
+lines terminated by '\n' 
+stored as textfile;
+
+create external table if not exists studentexternal 
+( name string comment 'student name', id int comment 'student id', year int comment 'student year') 
+row format delimited 
+fields terminated by '\t' 
+lines terminated by '\n' 
+stored as textfile;
+
+
+arun	1	1
+anil	3	1
+rahul	4	2
+venkat	2	2
+kumar	5	1
+
+
+load data local inpath '/home/work/hive_inputs/student.txt' overwrite into table student;
+
+load data local inpath '/home/work/hive_inputs/student.txt' overwrite into table student;
+
+create table if not exists studentcollections 
+(
+name string comment 'student name', 
+marks map<string,int> comment 'student marks', 
+subjects array<string>, 
+address struct<pincode:int comment 'student pincode', year : int comment 'student year'>
+) 
+row format delimited 
+fields terminated by '#' 
+collection items terminated by ','
+map keys terminated by ':'
+lines terminated by '\n' 
+stored as textfile;
+
+sample data:
+arun#math:10,phy:20,chem:50#math,phy,chem#500001,2001
+anil#math:13,phy:30,chem:60#math,phy,chem#500001,2002
+rahul#math:30,phy:22,chem:30#math,phy,chem#500002,2002
+venkat#math:40,phy:23,chem:60#math,phy,chem#500003,2001
+kumar#math:50,phy:20,chem:40#math,phy,chem#500002,2002
+
+
+load data local inpath '/home/work/hive_inputs/studentcollections.txt' overwrite into table studentcollections;
+
+select * from studentcollections;
+
+select name, marks['math'], subjects[0], address.pincode from studentcollections;
+
+
+insert overwrite local directory '/home/work/hive_inputs/studentcollections' select name, marks['math'], subjects[0], address.pincode from studentcollections;
+
+insert overwrite local directory '/home/work/hive_inputs/studentcollections' select * from studentcollections;
+
+Partitions:
+==============
+create table if not exists partiontable(name string, id int ) partitioned by (year int);
+
+create table if not exists partiontable(name string, id int) partitioned by (year int) row format delimited fields terminated by '\t' lines terminated by '\n' stored as textfile;
+
+create table if not exists part_example(id int, name string, group string, year int ) partitioned by (year int) row format delimited fields terminated by ',' lines terminated by '\n' stored as textfile;
+
+load data local inpath '/home/work/hive_inputs/student1.txt' overwrite into table partiontable partition(year='2011');
+
+load data local inpath '/home/work/hive_inputs/student2.txt' overwrite into table partiontable partition(year='2012');
+
+load data inpath '/gcp_test/student1.txt' overwrite into table part_example partition(year int);
+
+
+show partitions partiontable;  
+
+select * from partiontable where year=1;
+
+select * from partiontable where year=2;
+
+create table if not exists partiontabledynamic(name string, id int ) partitioned by (year int) row format delimited fields terminated by '\t' lines terminated by '\n' stored as textfile;
+
+insert overwrite table partiontabledynamic partition(year) 
+select * from student;
+
+hive -e 'select * from student;';
+
+hive -e -S 'select * from student;';
+
+hive -f '/home/work/hive_inputs/parttable.hql';
+
+source /home/work/hive_inputs/parttable.hql;
+
+dfs -ls / ;
+
+Joins:
+==================
+
+create table if not exists products (name string, id
+ int , price int) row format delimited fields terminated by '\t' lines terminated by '\n' stored as textfile;
+
+create table if not exists sales (name string, year int , percentage int) row format delimited fields terminated by '\t' lines terminated by '\n' stored as textfile;
+
+products:
+books	1	10
+java	2	100
+hadoop	3	1000
+python	4	500
+
+sales:
+books	2010	10
+books	2012	20
+java	2013	50
+java	2012	13
+java	2011	20
+hadoop	2010	10
+hadoop	2013	40
+
+load data local inpath '/home/work/hive_inputs/products.txt' overwrite into table products;
+
+load data local inpath '/home/work/hive_inputs/sales.txt' overwrite into table sales;
+
+select * from products;
+
+books	1	10
+java	2	100
+hadoop	3	1000
+python	4	500
+
+select * from sales;
+
+books	2010	10
+books	2012	20
+java	2013	50
+java	2012	13
+java	2011	20
+hadoop	2010	10
+hadoop	2013	40
+
+Inner Join:
+------------------
+create table prod+
+select products.* , sales.* from products join sales on products.name = sales.name;
+
+drop table if exists student.prod_sales;
+create table student.prod_sales
+stored as orc
+as
+select 
+products.* from products join sales s on products.name = s.name;
+
+books	1	10	books	2010	10
+books	1	10	books	2012	20
+hadoop	3	1000	hadoop	2010	10
+hadoop	3	1000	hadoop	2013	40
+java	2	100	java	2013	50
+java	2	100	java	2012	13
+java	2	100	java	2011	20
+
+
+Left Outer Join:
+------------------
+select products.* , sales.* from products left outer join sales on products.name = sales.name;
+
+books	1	10	books	2010	10
+books	1	10	books	2012	20
+hadoop	3	1000	hadoop	2010	10
+hadoop	3	1000	hadoop	2013	40
+java	2	100	java	2013	50
+java	2	100	java	2012	13
+java	2	100	java	2011	20
+python	4	500	NULL	NULL	NULL
+
+
+Right Outer Join:
+------------------
+select products.* , sales.* from products right outer join sales on products.name = sales.name;
+
+books	1	10	books	2010	10
+books	1	10	books	2012	20
+hadoop	3	1000	hadoop	2010	10
+hadoop	3	1000	hadoop	2013	40
+java	2	100	java	2013	50
+java	2	100	java	2012	13
+java	2	100	java	2011	20
+
+
+Full Outer Join:
+------------------
+select products.* , sales.* from products full outer join sales on products.name = sales.name;
+
+books	1	10	books	2010	10
+books	1	10	books	2012	20
+hadoop	3	1000	hadoop	2010	10
+hadoop	3	1000	hadoop	2013	40
+java	2	100	java	2013	50
+java	2	100	java	2012	13
+java	2	100	java	2011	20
+python	4	500	NULL	NULL	NULL
+
+
+Semi Join:
+------------------
+select * from products left semi join sales on products.name = sales.name;
+
+books	1	10
+hadoop	3	1000
+java	2	100
+
+
+Map Join:
+------------------
+select /*+ mapjoin(sales) */ products.* , sales.* from products join sales on products.name = sales.name;
+
+books	1	10	books	2010	10
+books	1	10	books	2012	20
+java	2	100	java	2013	50
+java	2	100	java	2012	13
+java	2	100	java	2011	20
+hadoop	3	1000	hadoop	2010	10
+hadoop	3	1000	hadoop	2013	40
+
+
+select /*+ mapjoin(products) */ products.* , sales.* from products join sales on products.name = sales.name;
+
+books	1	10	books	2010	10
+books	1	10	books	2012	20
+java	2	100	java	2013	50
+java	2	100	java	2012	13
+java	2	100	java	2011	20
+hadoop	3	1000	hadoop	2010	10
+hadoop	3	1000	hadoop	2013	40
+
+
+select /*+ mapjoin(sales) */ products.* , sales.* from products left outer join sales on products.name = sales.name;
+
+books	1	10	books	2010	10
+books	1	10	books	2012	20
+java	2	100	java	2013	50
+java	2	100	java	2012	13
+java	2	100	java	2011	20
+hadoop	3	1000	hadoop	2010	10
+hadoop	3	1000	hadoop	2013	40
+python	4	500	NULL	NULL	NULL
+
+
+Buckets:
+-----------------
+create table users (name string, id int) row format delimited fields terminated by '\t' stored as textfile;
+
+load data local inpath '/home/work/hive_inputs/users.txt' overwrite into table users;
+
+create table bucketed_users (name string, id int) clustered by (id) into 4 buckets;
+
+create table bucketed_sorted_users (name string, id int) clustered by (id) sorted by (id) into 4 buckets;
+
+select * from users;
+
+raj	2
+venkat	3
+appu	4
+sony	1
+lg	5
+nani	6
+
+set hive.enforce.bucketing=true;
+
+insert overwrite table bucketed_users select * from users;
+
+insert overwrite table bucketed_sorted_users select * from users;
+
+select * from bucketed_sorted_users tablesample ( bucket 1 out of 4 on id);
+
+appu	4
+
+select * from bucketed_sorted_users tablesample ( bucket 1 out of 2 on id);
+
+appu	4
+raj	2
+nani	6
+
+
+select * from users tablesample ( bucket 1 out of 4 on rand());
+
+raj	2
+
+
+SerDe:
+============
+
+add jar /home/work/hive-0.10.0/lib/hive-contrib-0.10.0.jar;
+add jar hive/apache-hive-1.2.2-bin/lib/hive-serde-1.2.2.jar;
+add jar hive/apache-hive-1.2.2-bin/lib/hive-common-1.2.2.jar;
+add jar hive/apache-hive-1.2.2-bin/lib/ hive-exec-1.2.2.jar ;
+ 
+ 
+create table if not exists city_bid(name string, id string, bidding_city string, olympic_games string) row format serde 'org.apache.hadoop.hive.contrib.serde2.RegexSerDe' with serdeproperties("input.regex" = "([^t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)") stored as textfile;
+
+create table if not exists city_bid(name string, id string, bidding_city string, olympic_games string, game_str string) row format serde 'org.apache.hadoop.hive.contrib.serde2.RegexSerDe' with serdeproperties("input.regex" = "([^\s].*)\t(\w+)\t(\d+)\s(\w+)\s(\w+)","output.format.string"="%1$s %2$s %3$s %4$s %5$s");
+load data local inpath '/home/work/hive_inputs/olympic_city_bid.tsv' overwrite into table city_bid ;
+load data inpath '/gcp/olympic_city_bid.tsv' overwrite into table city_bid ;
+select * from city_bid;
+
+create table if not exists city_bid_seqfile(name string,id string,bidding_city string,olympic_games string) row format delimited fields terminated by '\t' collection items terminated by '\002' map keys terminated by '\003' stored as sequencefile ;
+
+create table if not exists city_bid_rcfile(name string,id string,bidding_city string,olympic_games string) stored as rcfile ;
+
+from city_bid
+insert overwrite table city_bid_seqfile select *
+insert overwrite table city_bid_rcfile select * ;
+
+select * from city_bid_seqfile limit 2 ;
+
+select * from city_bid_rcfile limit 2 ;
+
+
+Regex Serde for apache log:
+---------------------------------
+CREATE TABLE apache_log (
+request_date STRING,
+remote_ip STRING,
+method STRING,
+request STRING,
+protocol STRING,
+user STRING,
+status STRING,
+size STRING,
+time STRING,
+remote_host STRING,
+ts STRING,
+perf STRING
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.RegexSerDe' 
+WITH SERDEPROPERTIES (
+"input.regex" = "([^ ]*) ([^ ]*) ([^ ]*) (-|\\[[^\\]]*\\]) ([^ \"]*|\"[^\"]*\") (-|[0-9]*) (-|[0-9]*)(?: ([^ \"]*|\"[^\"]*\") ([^ \"]*|\"[^\"]*\"))?",
+"output.format.string" = "%1$s %2$s %3$s %4$s %5$s %6$s %7$s %8$s %9$s"
+) 
+STORED AS TEXTFILE;
+
+
+LOAD DATA LOCAL INPATH '/home/work/hive_inputs/apache_clf.txt' OVERWRITE INTO TABLE apache_log;
+
+
+
+Custom SerDe:
+-------------------
+
+add jar /home/work/hive_inputs/udf.jar ;
+
+create table if not exists columnar_city_bid(name string,id string,bidding_city string,olympic_games string)row format delimited fields terminated by '\t' collection items terminated by ',';
+
+load data local inpath '/home/work/hive_inputs/olympic_city_bid.tsv' overwrite into table columnar_city_bid;
+
+create table city_bid_map(
+name string,
+id string,
+bidding_city string,
+olympic_games string)
+row format serde 'orienit.hadoop.training.hive.SerDe.ColumnarMapSerDe'
+location '/data/columnarmap_serde1/' ;
+
+insert overwrite table city_bid_map select * from columnar_city_bid ;
+
+select * from columnar_city_bid limit 5 ;
+
+
+
+Create UDF:
+--------------
+
+create table if not exists athlete_affiliation(
+name string,
+id string,
+athlete string,
+country string,
+olympics string,
+sport string)
+row format delimited fields terminated by '\t' collection items terminated by ',' ;
+
+load data local inpath '/home/work/hive_inputs/olympic_athlete_affiliation.tsv' overwrite into table athlete_affiliation ;
+
+add jar /home/work/hive_inputs/udf1.jar;
+add jar /home/work/replaceudf.jar;
+
+create temporary function myreplace as 'orienit.hadoop.training.hive.udf.ReplaceUDF' ;
+
+create temporary function md5sum as 'orienit.hadoop.training.hive.udf.MD5SumUDF' ;
+
+create temporary function unixtimetodate as 'orienit.hadoop.training.hive.udf.UnixSystemTimeToDate' ;
+
+add jar /home/work/md5sumudf.jar;
+
+create temporary function md5sum as 'com.orienit.hadoop.kalyan.training.hive.udf.MD5SumUDF' ;
+
+describe function md5sum ;
+
+describe function extended md5sum ;
+
+select athlete, md5sum(athlete) from athlete_affiliation limit 5 ;
+select athlete, id, md5sum(athlete) ,md5sum(id, athlete) from athlete_affiliation limit 5 ;
+
+add jar /home/work/myudfs.jar;
+
+create temporary function md5sumname as 'orienit.hadoop.training.hive.udf.MD5SumNameUDF';
+
+
+select athlete, md5sumname(country,athlete) from athlete_affiliation limit 5 ;
+
+select athlete, md5sumname(name,athlete) from athlete_affiliation limit 5 ;
+
+
+create table myusers like users;
+
+ALTER TABLE myusers ADD COLUMNS (app_name string,session_id int);
+
+ALTER TABLE log_messages
+CHANGE COLUMN hms hours_minutes_seconds INT
+COMMENT 'The hours, minutes, and seconds part of the timestamp'
+AFTER severity;
+
+ALTER TABLE log_messages ADD COLUMNS (
+app_name STRING COMMENT 'Application name',
+session_id LONG COMMENT 'The current session id');
+
+ALTER TABLE log_messages REPLACE COLUMNS (
+	hours_mins_secs INT COMMENT 'hour, minute, seconds from timestamp',
+	severity STRING COMMENT 'The message severity'
+	message STRING COMMENT 'The rest of the message'
+);
+
+
+
+
+FROM staged_employees se
+INSERT OVERWRITE TABLE employees PARTITION (country = 'US', state = 'OR') SELECT * WHERE se.cnty = 'US' AND se.st = 'OR'
+INSERT OVERWRITE TABLE employees PARTITION (country = 'US', state = 'CA') SELECT * WHERE se.cnty = 'US' AND se.st = 'CA'
+INSERT OVERWRITE TABLE employees PARTITION (country = 'US', state = 'IL') SELECT * WHERE se.cnty = 'US' AND se.st = 'IL';
+
+INSERT OVERWRITE TABLE employees
+PARTITION (country, state)
+SELECT ..., se.cnty, se.st
+FROM staged_employees se;
+
+INSERT OVERWRITE TABLE employees
+PARTITION (country = 'US', state)
+SELECT ..., se.cnty, se.st
+FROM staged_employees se
+WHERE se.cnty = 'US';
+
+
+So, for example, our first example using dynamic partitioning for all partitions might
+actually look this, where we set the desired properties just before use:
+
+hive> set hive.exec.dynamic.partition=true;
+hive> set hive.exec.dynamic.partition.mode=nonstrict;
+hive> set hive.exec.max.dynamic.partitions.pernode=1000;
+hive> INSERT OVERWRITE TABLE employees
+    > PARTITION (country, state)
+    > SELECT ..., se.cty, se.st
+    > FROM staged_employees se;
+
+
+
+create table if not exists studentcollectionswithadd 
+( name string comment 'student name', marks map<string,int> comment 'student marks', subjects array<string>, address struct<pincode:int comment 'student pincode', year : int comment 'student year',, place : string comment 'student place'>) 
+row format delimited 
+fields terminated by '#' 
+collection items terminated by ','
+map keys terminated by ':'
+lines terminated by '\n' 
+stored as textfile;
+
+
+create table if not exists partiontable1(name string, id int,year int ) partitioned by (course string) row format delimited fields terminated by '\t' lines terminated by '\n' stored as textfile;
+
+
+
+load data local inpath '/home/work/hive_inputs/student2.txt' overwrite into table partiontable1 partition(course='cs');
+
+create table if not exists partiontable2(name string, id int,year int ,novalue int) partitioned by (course string) row format delimited fields terminated by '\t' lines terminated by '\n' stored as textfile;
+
+load data local inpath '/home/work/hive_inputs/student2.txt' overwrite into table partiontable2 partition(course='cs');
+
+
+create table if not exists partiontabledynamic(name string, id int ) partitioned by (year int) row format delimited fields terminated by '\t' lines terminated by '\n' stored as textfile;
+
+
+insert overwrite table partiontabledynamic partition(year)
+select * from student1;
+
+hive -e 'set hive.cli.print.header=true; use hive; select * from abc;';
+
+hive -S -e 'set hive.cli.print.header=true; use class7to8; select * from student;';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

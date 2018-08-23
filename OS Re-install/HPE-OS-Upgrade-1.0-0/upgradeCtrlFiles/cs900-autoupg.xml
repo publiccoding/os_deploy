@@ -1,0 +1,336 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+  <upgrade>
+    <only_installed_packages config:type="boolean">false</only_installed_packages>
+    <stop_on_solver_conflict config:type="boolean">true</stop_on_solver_conflict>
+  </upgrade>
+  <networking>
+    <keep_install_network config:type="boolean">true</keep_install_network>
+    <start_immediately config:type="boolean">false</start_immediately>
+  </networking>
+  <backup>
+    <sysconfig config:type="boolean">true</sysconfig>
+    <modified config:type="boolean">true</modified>
+    <remove_old config:type="boolean">false</remove_old>
+  </backup>
+  <general>
+    <ask-list config:type="list">
+      <ask>
+        <title>OS LUN: %%bootDisk%%</title>
+        <question>Choose option</question>
+        <selection config:type="list">
+          <entry>
+            <label>Reboot Server</label>
+            <value>reboot</value>
+          </entry>
+          <entry>
+            <label>Halt Server</label>
+            <value>halt</value>
+          </entry>
+          <entry>
+            <label>Continue to overwrite the LUN device.</label>
+            <value>continue</value>
+          </entry>
+        </selection>
+        <stage>initial</stage>
+        <script>
+          <environment config:type="boolean">true</environment>
+          <feedback config:type="boolean">true</feedback>
+          <debug config:type="boolean">false</debug>
+          <rerun_on_error config:type="boolean">true</rerun_on_error>
+          <source>
+<![CDATA[
+#!/bin/bash
+
+case "$VAL" in
+    "reboot")
+        echo b > /proc/sysrq-trigger
+        exit 0
+        ;;
+    "halt")
+        echo o > /proc/sysrq-trigger
+        exit 0
+        ;;
+    "continue")
+        exit 0
+        ;;
+esac
+]]>
+          </source>
+        </script>
+      </ask>
+    </ask-list>'
+    <mode>
+      <confirm config:type="boolean">false</confirm>
+    </mode>
+    <storage>
+      <start_multipath config:type="boolean">true</start_multipath>
+    </storage>
+  </general>
+  <suse_register>
+      <do_registration config:type="boolean">false</do_registration>
+      <install_updates config:type="boolean">false</install_updates>
+  </suse_register>
+  <scripts>
+    <!--*****Begin chroot-scripts*****-->
+    <chroot-scripts config:type="list">
+      <!--
+          This script updates /etc/motd with a custom message
+	  and updates /etc/hpe-release with release information.
+      -->
+      <script>
+        <filename>motd.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+echo "This is SLES for SAP Applications on a HPE CS900 SAP HANA Converged System." > /mnt/etc/motd
+
+echo "HPE SAP HANA CoE CS900 Upgrade Release 1.0-0" > /mnt/etc/hpe-release
+echo "Installed on `date +'%b %d, %Y'` @ `date +'%H:%M:%S'`." >> /mnt/etc/hpe-release
+]]>
+        </source>
+      </script>
+      <!--
+          This script performs some extra OS specific tunings.
+      -->
+      <script>
+        <filename>osTuningConfiguration.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+cat<<EOF > /mnt/etc/sysctl.d/98-sysctl.conf
+######################################################
+# KDUMP feature settings
+######################################################
+kernel.panic_on_io_nmi = 1
+kernel.sysrq = 1
+kernel.panic = 10
+kernel.panic_on_oops = 1
+kernel.unknown_nmi_panic = 1
+kernel.panic_on_unrecovered_nmi = 1
+EOF
+
+######################################################
+# SAP Note changes
+######################################################
+
+# SAP Note: 2205917
+# "SAP HANA DB: Recommended OS settings for SLES 12 / SLES for SAP Applications 12"
+# Version 39 
+#
+
+logindConfDir='/mnt/etc/systemd/logind.conf.d'
+
+if [[ ! -d $logindConfDir ]]; then
+	mkdir -p $logindConfDir
+fi
+
+cat<<EOF > /mnt/etc/systemd/logind.conf.d/sap-hana.conf
+[Login]
+UserTasksMax=infinity
+EOF
+]]>
+        </source>
+      </script>
+    </chroot-scripts>
+    <!--*****End chroot-scripts*****-->
+
+    <!--*****Begin init-scripts*****-->
+    <init-scripts config:type="list">
+      <!--
+          This script sets the tuned profile.
+          Additionaly, the script sets the hostname, since it has been found to change during an upgrade.
+      -->
+      <script>
+        <filename>setTunedProfile.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+saptuneDir='/etc/tuned/saptune'
+saptuneHana=${saptuneDir}/tuned.conf
+saptuneScript=/usr/lib/tuned/saptune/script.sh
+
+if [[ ! -d $saptuneDir ]]; then
+        mkdir $saptuneDir
+fi
+
+cp /usr/lib/tuned/saptune/tuned.conf $saptuneDir
+
+[[ $(egrep -q '^\s*force_latency\s*=.*$' ${saptuneHana})$? -eq 0 ]] && sed -i 's/\s*force_latency\s*=.*$/force_latency=70/' ${saptuneHana} || sed -i '/^\s*\[cpu\]\s*$/a force_latency=70' ${saptuneHana}
+
+[[ $(egrep -q '^\s*script\s*=.*$' ${saptuneHana})$? -eq 0 ]] && sed -i "s|\s*script\s*=.*$|script=${saptuneScript}|" ${saptuneHana} || sed -i "|^\s*\[script\]\s*$|a script=${saptuneScript}" ${saptuneHana}
+
+saptune solution apply HANA
+tuned-adm profile saptune
+
+systemctl restart tuned
+
+hostnamectl set-hostname %%hostname%%
+]]>
+        </source>
+      </script>
+    </init-scripts>
+    <!--*****End init-scripts*****-->
+
+    <!--*****Begin post-scripts*****-->
+    <post-scripts config:type="list">
+<BEGIN LOGROTATE>
+      <!--
+          This script enable the logrotate service for SLES 12.3.
+      -->
+      <script>
+        <filename>enableLogrotate.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+systemctl enable logrotate.timer
+]]>
+        </source>
+      </script>
+<END LOGROTATE>
+      <!--
+          This script restores the network configuration in /etc/sysconifg/network, since
+          upgrades are inconsistent in retaining the network configuration.
+      -->
+      <script>
+        <filename>restoreNetworkCfg.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+sysconfigArchive=$(ls -altF /var/adm/backup/etc.sysconfig*.tar.gz|awk '{print $9}'|head -1)
+
+tar -C / -zxvf $sysconfigArchive etc/sysconfig/network
+
+echo "#Cleared on `date +%d%b%Y` by SAP HANA CoE Upgrade" > /etc/udev/rules.d/70-persistent-net.rules
+]]>
+        </source>
+      </script>
+
+      <!--
+          This script configures journld.service so that it logs to /var/log/journal.
+      -->
+      <script>
+        <filename>configureJournald.sh</filename>
+        <source>
+<![CDATA[
+#!/bin/sh
+
+
+journalResources='[journal]\nStorage=persistent\nCompress=yes\nSystemMaxUse=1G\nMaxRetentionSec=12month\nMaxFileSec=1day\nForwardToConsole=yes\nMaxLevelStore=4\nMaxLevelConsole=3'
+
+journaldConf='/etc/systemd/journald.conf'
+
+dateString=$(date +%d%b%Y)
+
+if [[ -e $journaldConf ]]; then
+        mv $journaldConf ${journaldConf}.${dateString}
+fi
+
+echo -e $journalResources > $journaldConf
+
+if [[ ! -d /var/log/journal ]]; then
+        mkdir -p /var/log/journal
+fi
+
+systemd-tmpfiles --create --prefix /var/log/journal
+]]>
+        </source>
+      </script>
+    </post-scripts>
+    <!--*****End post-scripts*****-->
+  </scripts>
+  <partitioning config:type="list">
+    <drive>
+      <device>%%bootDisk%%</device>
+    </drive>
+  </partitioning>
+  <software>
+    <remove-packages  config:type="list">
+      <package>sapconf</package>
+    </remove-packages>
+    <packages config:type="list">
+      <!-- Added to match what R&D had included to make it easier to match patch bundles. -->
+      <package>cpuset</package>
+      <package>perl-Bootloader-YAML</package>
+      <package>git-core</package>
+      <package>perl-Error</package>
+      <package>unrar</package>
+      <package>tuned</package>
+      <package>open-lldp</package>
+      <package>libHBAAPI2</package>
+      <package>libpng12-0</package>
+      <package>uuidd</package>
+      <package>libcgroup-tools</package>
+      <package>libopenssl0_9_8</package>
+      <package>saptune</package>
+      <package>bing</package>
+      <package>bonnie</package>
+      <package>cairo</package>
+      <package>graphviz</package>
+      <package>gtk2</package>
+      <package>java-1_7_1-ibm-plugin</package>
+      <package>java-1_7_1-ibm</package>
+      <package>java-1_7_1-ibm-jdbc</package>
+      <package>java-1_7_1-ibm-alsa</package>
+      <package>krb5-client</package>
+      <package>libicu</package>
+      <package>libts-1_0-0</package>
+      <package>sensors</package>
+      <package>sysstat</package>
+      <package>xrdp</package>
+      <package>yast2-ncurses</package>
+      <package>rear118a</package>
+      <package>yast2-rear</package>
+      <!-- Added to further match what R&D has included.
+           As new released from R&D come out a review will
+           be made to see if any new packages need to be
+           added.
+      -->
+      <package>sblim-wbemcli</package>
+      <package>cmpi-bindings-pywbem</package>
+      <package>cmpi-pywbem-base</package>
+      <package>cmpi-pywbem-power-management</package>
+      <package>libiniparser0</package>
+      <package>lcms2</package>
+      <package>timezone-java</package>
+      <package>libgif6</package>
+      <package>java-1_7_0-openjdk</package>
+      <package>java-1_7_0-openjdk-headless</package>
+      <!-- Added for CS900. -->
+      <package>python-libxml2</package>
+      <package>openwsman-server</package>
+      <!-- Added for Serviceguard. -->
+      <package>pidentd</package>
+      <package>sblim-indication_helper</package>
+      <package>sblim-cmpi-base</package>
+      <package>sblim-sfcc</package>
+      <package>quota-nfs</package>
+      <!-- Added for the upgrade program. -->
+      <package>python-curses</package>
+      <!-- Added for module builds. -->
+      <package>gcc</package>
+      <package>kernel-syms</package>
+      <package>kernel-source</package>
+      <!-- Added since it is not getting selected by default
+                      if it is not already present.
+      -->
+      <package>ucode-intel</package>
+    </packages>
+    <patterns config:type="list">
+      <pattern>Minimal</pattern>
+      <pattern>base</pattern>
+      <pattern>x11</pattern>
+    </patterns>
+  </software>
+</profile>
